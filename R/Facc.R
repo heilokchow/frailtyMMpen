@@ -16,8 +16,6 @@ Facc <- function(y, X, d, coef, latent, theta) {
     stop("Dimension of coef is incorrect.")
   }
   
-  coef = matrix(coef)
-  
   La = matrix(0, a, b)
   Ypre = matrix(0, a, b)
   Xabs = matrix(0, a, b)
@@ -27,8 +25,8 @@ Facc <- function(y, X, d, coef, latent, theta) {
   U = array(0, c(a, b, p))
   W = matrix(0, a, b)
   
-  for(i in 1:a) {
-    for(j in 1:b) {
+  for (i in 1:a) {
+    for (j in 1:b) {
       La[i, j] = sum((y <= y[i, j]) * latent)   
     }
   }
@@ -44,8 +42,8 @@ Facc <- function(y, X, d, coef, latent, theta) {
   A = 1/theta + D
   C = 1/theta + rowSums(La * exp(Ypre))
   
-  for(i in 1:a) {
-    for(j in 1:b) { 
+  for (i in 1:a) {
+    for (j in 1:b) { 
       for (k in 1:p) {
         temp1 = rowSums((y >= y[i, j]) * X[,, k] * exp(Ypre))
         temp2 = rowSums((y >= y[i, j]) * abs(X[,, k]) * exp(Ypre) * Xabs)

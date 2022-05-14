@@ -24,13 +24,13 @@ MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
   
   while (error > 0.000001) {
     
-    temp1 = Facc(y, X, d, coef, latent, theta)
+    temp1 = FaccAc(y, X, d, coef, latent, theta)
     
     coef1 = temp1$coef
     theta1 = temp1$theta
     u0_be = coef1 - coef
     
-    temp2 = Facc(y, X, d, coef1, latent, theta1)
+    temp2 = FaccAc(y, X, d, coef1, latent, theta1)
     
     coef2 = temp2$coef
     theta2 = temp2$theta

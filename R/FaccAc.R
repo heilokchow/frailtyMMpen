@@ -1,6 +1,6 @@
 
 
-Facc <- function(y, X, d, coef, latent, theta) {
+FaccAc <- function(y, X, d, coef, latent, theta) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -43,20 +43,16 @@ Facc <- function(y, X, d, coef, latent, theta) {
   C = 1/theta + rowSums(La * exp(Ypre))
   YpreExp = exp(Ypre)
   
-  for (i in 1:a) {
-    for (j in 1:b) { 
-      for (k in 1:p) {
-        temp1 = rowSums((y >= y[i, j]) * X[,, k] * exp(Ypre))
-        temp2 = rowSums((y >= y[i, j]) * abs(X[,, k]) * exp(Ypre) * Xabs)
-        Z[i, j, k] = sum(A*temp1/C)
-        U[i, j, k] = sum(A*temp2/C)
-      }
-      temp = rowSums((y >= y[i, j]) * exp(Ypre))
-      W[i, j] = sum(A*temp/C)
-    }
+  for (k in 1:p) {
+    temp1 = X[,, k] * YpreExp
+    temp2 = abs(X[,, k]) * YpreExp * Xabs
+    
+    Z[,,k] = FaccCal(y, temp1, Z[,,k], A, C)
+    U[,,k] = FaccCal(y, temp2, U[,,k], A, C)
   }
   
-  # Update theta for Gamma Frailty 
+  W = FaccCal(y, YpreExp, W, A, C)
+
   Q1 = a*(digamma(1/theta) + log(theta)-1)/(theta^2) + sum(A/C - digamma(A) + log(C))/(theta^2) 
   Q2 = a*(3 - 2*digamma(1/theta) - 2*log(theta))/(theta^3) + 2*sum(digamma(A)-log(C)-A/C)/(theta^3) - a*trigamma(1/theta)/(theta^4)
   

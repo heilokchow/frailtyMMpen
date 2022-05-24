@@ -61,18 +61,16 @@ MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
     D = rowSums(d)
     A = 1/theta + D
     C = 1/theta + rowSums(La * exp(Ypre))
+    YpreExp = exp(Ypre)
     
     # Update Latent Variables
-    for (i in 1:a) {
-      for (j in 1:b) { 
-        w = rowSums((y >= y[i, j]) * exp(Ypre)) 
-        latent[i, j] = d[i, j] / sum(A*w/C)     
-      }
-    }
-    
+    latent1 = latent
+    latent = d / FaccCal(y, YpreExp, latent1, A, C)
+
     mLambda = sum((y <= 1) * latent) 
     
     ell[iter + 1] = GammaLik(y, X, d, coef, latent, theta)
+  
     error = abs(ell[iter + 1] - ell[iter]) / (1 + abs(ell[iter]))
     iter = iter + 1
     cat(error, '\n')

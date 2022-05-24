@@ -1,6 +1,6 @@
 library(survival)
 
-n = 5
+n = 10
 estMM = matrix(0,n,15)
 
 for (r in 1:n) {

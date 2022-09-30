@@ -1,6 +1,6 @@
 
 
-Facc <- function(y, X, d, coef, latent, theta) {
+Facc <- function(y, X, d, coef, lambda, theta) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -8,8 +8,8 @@ Facc <- function(y, X, d, coef, latent, theta) {
   
   coef = matrix(coef)
   
-  if (dim(latent)[1] != a || dim(latent)[2] != b) {
-    stop("Dimension of y, X, d or latent is incorrect.")
+  if (dim(lambda)[1] != a || dim(lambda)[2] != b) {
+    stop("Dimension of y, X, d or lambda is incorrect.")
   }
   
   if (length(coef) != p) {
@@ -27,7 +27,7 @@ Facc <- function(y, X, d, coef, latent, theta) {
   
   for (i in 1:a) {
     for (j in 1:b) {
-      La[i, j] = sum((y <= y[i, j]) * latent)   
+      La[i, j] = sum((y <= y[i, j]) * lambda)   
     }
   }
   
@@ -71,5 +71,5 @@ Facc <- function(y, X, d, coef, latent, theta) {
     coef[k, 1] = coef[k, 1] - temp1 / temp2
   }
  
-  return(list(coef = coef, latent = latent, theta = theta))
+  return(list(coef = coef, lambda = lambda, theta = theta))
 }

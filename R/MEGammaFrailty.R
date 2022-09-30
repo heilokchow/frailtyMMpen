@@ -1,6 +1,6 @@
 
 
-MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
+MEGammaFrailty <- function(y, X, d, coef, lambda, alp, th) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -8,8 +8,8 @@ MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
   
   coef = matrix(coef)
   
-  if (dim(latent)[1] != a || dim(latent)[2] != b) {
-    stop("Dimension of y, X, d or latent is incorrect.")
+  if (dim(lambda)[1] != a || dim(lambda)[2] != b) {
+    stop("Dimension of y, X, d or lambda is incorrect.")
   }
   
   if (length(coef) != p) {
@@ -19,21 +19,23 @@ MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
   
   ell = rep(0, 10000)
   iter = 1
-  ell[iter] = GammaLik(y, X, d, coef, latent, theta)
+  ell[iter] = GammaLik(y, X, d, coef, lambda, alp, th)
   error = 3
   
   while (error > 0.000001) {
     
-    temp1 = FaccAc(y, X, d, coef, latent, theta)
+    temp1 = FaccAc(y, X, d, coef, lambda, alp, th)
     
     coef1 = temp1$coef
-    theta1 = temp1$theta
+    alp1 = temp1$alp
+    th1 = temp1$th
     u0_be = coef1 - coef
     
-    temp2 = FaccAc(y, X, d, coef1, latent, theta1)
+    temp2 = FaccAc(y, X, d, coef1, lambda, alp1, th1)
     
     coef2 = temp2$coef
-    theta2 = temp2$theta
+    alp2 = temp2$alp
+    th2 = temp2$th
     v0_be = coef2 - 2*coef1 +  coef
     
     al0_be = sum(u0_be*v0_be) / sum(v0_be^2)
@@ -43,14 +45,15 @@ MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
     
     # Update Coefficients
     coef = coef - 2*al0_be*u0_be + al0_be^2*v0_be
-    theta = theta2
+    alp = alp2
+    th = th2
     
     Ypre = matrix(0, a, b)
     La = matrix(0, a, b)
     
     for (i in 1:a) {
       for (j in 1:b) {
-        La[i, j] = sum((y <= y[i, j]) * latent)
+        La[i, j] = sum((y <= y[i, j]) * lambda)
       }
     }
     
@@ -59,22 +62,23 @@ MEGammaFrailty <- function(y, X, d, coef, latent, theta) {
     }
     
     D = rowSums(d)
-    A = 1/theta + D
-    C = 1/theta + rowSums(La * exp(Ypre))
+    A = alp + D
+    C = 1/th + rowSums(La * exp(Ypre))
     YpreExp = exp(Ypre)
     
-    # Update Latent Variables
-    latent1 = latent
-    latent = d / FaccCal(y, YpreExp, latent1, A, C)
+    # Update lambda Variables
+    lambda1 = matrix(0, a, b)
+    lambda1 = FaccCal(y, YpreExp, lambda1, A, C)
+    lambda = d / lambda1
 
-    mLambda = sum((y <= 1) * latent) 
+    mLambda = sum((y <= 1) * lambda) 
     
-    ell[iter + 1] = GammaLik(y, X, d, coef, latent, theta)
+    ell[iter + 1] = GammaLik(y, X, d, coef, lambda, alp, th)
   
     error = abs(ell[iter + 1] - ell[iter]) / (1 + abs(ell[iter]))
     iter = iter + 1
     cat(error, '\n')
   }
   
-  return(list(coef = coef, theta = theta, likelihood = ell[iter], iteration = iter, mLambda = mLambda))
+  return(list(coef = coef, alp = alp, th = th, likelihood = ell[iter], iteration = iter, mLambda = mLambda))
 }

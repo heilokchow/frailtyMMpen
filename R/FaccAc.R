@@ -1,6 +1,6 @@
 
 
-FaccAc <- function(y, X, d, coef, latent, theta) {
+FaccAc <- function(y, X, d, coef, lambda, alp, th) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -8,8 +8,8 @@ FaccAc <- function(y, X, d, coef, latent, theta) {
   
   coef = matrix(coef)
   
-  if (dim(latent)[1] != a || dim(latent)[2] != b) {
-    stop("Dimension of y, X, d or latent is incorrect.")
+  if (dim(lambda)[1] != a || dim(lambda)[2] != b) {
+    stop("Dimension of y, X, d or lambda is incorrect.")
   }
   
   if (length(coef) != p) {
@@ -27,7 +27,7 @@ FaccAc <- function(y, X, d, coef, latent, theta) {
   
   for (i in 1:a) {
     for (j in 1:b) {
-      La[i, j] = sum((y <= y[i, j]) * latent)   
+      La[i, j] = sum((y <= y[i, j]) * lambda)   
     }
   }
   
@@ -39,8 +39,8 @@ FaccAc <- function(y, X, d, coef, latent, theta) {
     Xabs[, ] = Xabs[, ] + abs(X[,, k])
   }
   
-  A = 1/theta + D
-  C = 1/theta + rowSums(La * exp(Ypre))
+  A = alp + D
+  C = 1/th + rowSums(La * exp(Ypre))
   YpreExp = exp(Ypre)
   
   for (k in 1:p) {
@@ -53,12 +53,14 @@ FaccAc <- function(y, X, d, coef, latent, theta) {
   
   W = FaccCal(y, YpreExp, W, A, C)
 
-  Q1 = a*(digamma(1/theta) + log(theta)-1)/(theta^2) + sum(A/C - digamma(A) + log(C))/(theta^2) 
-  Q2 = a*(3 - 2*digamma(1/theta) - 2*log(theta))/(theta^3) + 2*sum(digamma(A)-log(C)-A/C)/(theta^3) - a*trigamma(1/theta)/(theta^4)
+  # Update parameters for Gamma Frailty
+  th =  sum(A/C) / (a*alp)
+  Q1 = a*(-log(th) - digamma(alp)) + sum(digamma(A) - log(C)) 
+  Q2 = -a*trigamma(alp)
+  alp1 = alp - Q1/Q2
   
-  theta1 = theta - Q1/Q2
-  if (theta1 > 0) 
-    theta <- theta1
+  if (alp1 > 0) 
+    alp <- alp1
   
   # Updating Coefficients 
   for (k in 1:p) {
@@ -67,5 +69,5 @@ FaccAc <- function(y, X, d, coef, latent, theta) {
     coef[k, 1] = coef[k, 1] - temp1 / temp2
   }
  
-  return(list(coef = coef, latent = latent, theta = theta))
+  return(list(coef = coef, lambda = lambda, alp = alp, th = th))
 }

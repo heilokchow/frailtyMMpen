@@ -1,6 +1,6 @@
 library(survival)
 
-n = 20
+n = 1
 estMM = matrix(0,n,15)
 
 sample <- function(la,alp,th,be1,be2,be3,be4,be5,be6,be7,be8,be9,be10,a,b)
@@ -44,7 +44,7 @@ sample <- function(la,alp,th,be1,be2,be3,be4,be5,be6,be7,be8,be9,be10,a,b)
 
 set.seed(10)
 for (r in 1:n) {
-  yy = sampleGamma(th = 0.5, a = 500, b = 5, cen = 100000, seed = r*1000)
+  yy = sampleGamma(seed = r*1000)
 
   a = dim(yy$X)[1]
   b = dim(yy$X)[2]

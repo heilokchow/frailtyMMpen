@@ -1,11 +1,11 @@
 
 
-sampleGamma <- function(coef = matrix(c(-2,3,-4,5,-6,7,6,5,4,3)), lambda = 5, alp = 0.1, th = 0.1, a = 100, b = 5, cen = 2, seed = 0) {
+sampleGamma <- function(coef = matrix(c(-2,3,-4,5,-6,7,6,5,4,3)), lambda = 5, th = 0.1, a = 100, b = 5, cen = 2, seed = 0) {
   
   p = length(coef)
   
   set.seed(seed)
-  u = rgamma(a, alp, scale = th)
+  u = rgamma(a, 1/th, scale = 1/th)
   X = array(runif(a*b*p, min = 0, max = 0.5), c(a,b,p))
   U = matrix(runif(a*b,0,1),a,b)
   

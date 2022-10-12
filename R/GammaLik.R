@@ -1,6 +1,6 @@
 
 
-GammaLik <- function(y, X, d, coef, lambda, alp, th) {
+GammaLik <- function(y, X, d, coef, lambda, th) {
 
   a = dim(X)[1]
   b = dim(X)[2]
@@ -35,8 +35,8 @@ GammaLik <- function(y, X, d, coef, lambda, alp, th) {
   }
 
   A = rowSums(La * exp(Ypre))
-  l1 = sum(lgamma(D + alp)) - a*(lgamma(alp) + alp * log(th))
-  l2 = sum(d*Ypre) - sum((alp + D)*log(1/th + A))
+  l1 = sum(lgamma(D + 1/th)) - a*(lgamma(1/th) + log(th)/th)
+  l2 = sum(d*Ypre) - sum((1/th + D)*log(1/th + A))
 
   return(l1 + l2 + l3)
   

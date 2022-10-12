@@ -1,6 +1,6 @@
 
 
-FaccAc <- function(y, X, d, coef, lambda, alp, th) {
+FaccAc <- function(y, X, d, coef, lambda, th) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -39,7 +39,7 @@ FaccAc <- function(y, X, d, coef, lambda, alp, th) {
     Xabs[, ] = Xabs[, ] + abs(X[,, k])
   }
   
-  A = alp + D
+  A = 1/th + D
   C = 1/th + rowSums(La * exp(Ypre))
   YpreExp = exp(Ypre)
   
@@ -54,13 +54,12 @@ FaccAc <- function(y, X, d, coef, lambda, alp, th) {
   W = FaccCal(y, YpreExp, W, A, C)
 
   # Update parameters for Gamma Frailty
-  th =  sum(A/C) / (a*alp)
-  Q1 = a*(-log(th) - digamma(alp)) + sum(digamma(A) - log(C)) 
-  Q2 = -a*trigamma(alp)
-  alp1 = alp - Q1/Q2
+  Q1 = a*(digamma(1/th) + log(th)-1)/(th^2) + sum(A/C - digamma(A) + log(C))/(th^2) 
+  Q2 = a*(3 - 2*digamma(1/th) - 2*log(th))/(th^3) + 2*sum(digamma(A)-log(C)-A/C)/(th^3) - a*trigamma(1/th)/(th^4)
   
-  if (alp1 > 0) 
-    alp <- alp1
+  th1 = th - Q1/Q2
+  if (th1 > 0) 
+    th <- th1
   
   # Updating Coefficients 
   for (k in 1:p) {
@@ -69,5 +68,5 @@ FaccAc <- function(y, X, d, coef, lambda, alp, th) {
     coef[k, 1] = coef[k, 1] - temp1 / temp2
   }
  
-  return(list(coef = coef, lambda = lambda, alp = alp, th = th))
+  return(list(coef = coef, lambda = lambda, th = th))
 }

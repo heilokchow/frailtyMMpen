@@ -3,9 +3,9 @@ library(survival)
 n = 1
 estMM = matrix(0,n,15)
 
-sample <- function(la,alp,th,be1,be2,be3,be4,be5,be6,be7,be8,be9,be10,a,b)
+sample <- function(la,th,be1,be2,be3,be4,be5,be6,be7,be8,be9,be10,a,b)
 {
-  u = rgamma(a, alp, scale = th) # HH
+  u = rgamma(a, 1/th, rate=1/th) # HH
   x1 = matrix(0,a,b)
   x2 = matrix(0,a,b)
   x3 = matrix(0,a,b)
@@ -18,7 +18,7 @@ sample <- function(la,alp,th,be1,be2,be3,be4,be5,be6,be7,be8,be9,be10,a,b)
   x10 = matrix(0,a,b)
   
   T = matrix(0,a,b)  
-  cen = 10
+  cen = 2
   for(i in 1:a)
   {
     x1[i,]=runif(b, min = 0, max = 0.5)
@@ -42,29 +42,29 @@ sample <- function(la,alp,th,be1,be2,be3,be4,be5,be6,be7,be8,be9,be10,a,b)
 }
 
 
-set.seed(10)
+set.seed(1)
 for (r in 1:n) {
-  yy = sampleGamma(seed = r*1000)
-
-  a = dim(yy$X)[1]
-  b = dim(yy$X)[2]
-  p = dim(yy$X)[3]
-  lambda = matrix(1, a, b)/(a * b)
+  # yy = sampleGamma(seed = r*1000)
+  # 
+  # a = dim(yy$X)[1]
+  # b = dim(yy$X)[2]
+  # p = dim(yy$X)[3]
+  # lambda = matrix(1, a, b)/(a * b)
+  # y = yy$y
+  # X = yy$X
+  # d = yy$d
   
   start = proc.time()[1]
   
-  # yy = sample(5,0.1,0.5,-2,3,-4,5,-6,7,6,5,4,3,500,5)
-  # y = yy$y 
-  # d = yy$d
-  # X = array(c(yy$x1, yy$x2, yy$x3, yy$x4, yy$x5, yy$x6, yy$x7, yy$x8, yy$x9, yy$x10), dim = c(dim(y), 10))
-  # 
-  # a = 500
-  # b = 5
+  yy = sample(5,10,-2,3,-4,5,-6,7,6,5,4,3,100,5)
   y = yy$y
-  X = yy$X
   d = yy$d
+  X = array(c(yy$x1, yy$x2, yy$x3, yy$x4, yy$x5, yy$x6, yy$x7, yy$x8, yy$x9, yy$x10), dim = c(dim(y), 10))
+   
+  a = 100
+  b = 5
   th = 1
-  coef = rep(1, p)
+  coef = rep(1, 10)
   lambda = matrix(1, a, b)/(a*b)
   ret = CLGammaFrailty(y, X, d, coef, lambda, th)
   
@@ -83,14 +83,77 @@ aveMM
 stdMM
 biasMM
 
-# Dump
-X[,,1] = x1
-X[,,2] = x2
-X[,,3] = x3
-X[,,4] = x4
-X[,,5] = x5
-X[,,6] = x6
-X[,,7] = x7
-X[,,8] = x8
-X[,,9] = x9
-X[,,10] = x10
+# MEGamma
+
+nsam <- function(a1,a2,th,be,n) {
+  u = rgamma(n, 1/th, rate=1/th)
+  
+  q = length(be)
+  
+  x = array( runif(2*n*q, min=0, max=0.5), dim=c(2,n,q) )
+  
+  Be = matrix(rep(be,each=n),n,q)
+  
+  T = matrix(0,2,n)
+  
+  cen = runif(n,0,3)    ## (0,3)/100=10%  
+  
+  
+  U1 = runif(n,0,1)    
+  U2 = runif(n,0,1)
+  
+  T[1,] <- -log(U1)/(a1*u*exp(apply(x[1,,]*Be,1,sum))) 
+  T[2,] <- ( exp( -log(U2)/(u*exp(apply(x[2,,]*Be,1,sum))) )-1 )/a2
+  
+  d = 1*(T<=cen)
+  y=pmin(T,cen)
+  
+  la1 = a1*y[1,]
+  la2 = log(1+a2*y[2,])
+  
+  return(list(y=y,d=d,x=x,la1=la1,la2=la2,w=u))
+}
+
+N = 1
+
+mm.gamma = matrix(0,N,23)
+set.seed(1)
+
+for(j in 1:N){
+  
+  be0 = c(rep(-2,10), rep(3,10))
+  q = length(be0)
+  n = 100
+  
+  yy = nsam(3,5,1,be0,n)
+  y = yy$y 
+  d = yy$d
+  x = yy$x
+
+  la1 = rep(1/n, n)
+  la2 = rep(1/n, n)
+  th = 0.5
+  be = rep(0.5, q)
+  coef = be
+  X = x
+  
+  start = proc.time()[1]
+  rs = MEGammaFrailty(y, x, d, be, la1, la2, th)
+  end = proc.time()[1]
+  
+  mm.gamma[j,] = c(rs$coef, rs$th, end - start, rs$likelihood) 
+}
+
+
+
+Time = apply(mm.gamma,2,mean)[22]
+Time
+
+# MLE 
+apply(mm.gamma,2,mean)[c(1,5,10,15,20,21)]
+
+# BIAS 
+abs(apply(mm.gamma,2,mean)[c(1,5,10,15,20,21)] - c(rep(-2,3), rep(3,2),1))
+
+# SD 
+apply(mm.gamma,2,sd)[c(1,5,10,15,20,21)]

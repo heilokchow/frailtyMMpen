@@ -162,7 +162,7 @@ apply(mm.gamma,2,sd)[c(1,5,10,15,20,21)]
 
 # InvGauss and LogN -------------------------------------------------------
 
-set.seed(1)
+set.seed(2)
 yy = sample()
 y = yy$y 
 d = yy$d
@@ -191,6 +191,49 @@ while(error > 0.000001) {
   coef = rs$coef
   lambda = rs$lambda
   est.tht = rs$est.tht
+  
+  ell[k+1] = logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
+  
+  error = abs(ell[k+1]-ell[k])/(1+abs(ell[k]))
+  cat(error, '\n')
+  k = k+1
+}
+end = proc.time()[1]
+time = end - start
+
+# SQS3
+
+ell=rep(0,1000000)
+k=1
+
+ell[k]= logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
+error = 3
+
+start = proc.time()[1]
+while(error > 0.000001) {
+  
+  rs1 = EMprocess(y, X, d, coef, lambda, est.tht, frailty = "LogN") 
+  coef1 = rs1$coef
+  est.tht = rs1$est.tht
+  lambda = rs1$lambda
+  
+  u_be = coef1 - coef
+  
+  rs2 = EMprocess(y, X, d, coef1, lambda, est.tht, frailty = "LogN") 
+  coef2 = rs2$coef
+  est.tht = rs2$est.tht
+  lambda = rs2$lambda
+  
+  v_be = coef2 - 2*coef1 + coef
+  al_be = sum(u_be*v_be)/sum(v_be^2)
+  if (al_be > -1) {al_be = -1}
+  
+  coef = coef - 2*al_be*u_be + al_be^2*v_be
+  
+  rs = EMprocess(y, X, d, coef, lambda, est.tht, frailty = "LogN") 
+  coef = rs$coef
+  est.tht = rs$est.tht
+  lambda = rs$lambda
   
   ell[k+1] = logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
   

@@ -157,3 +157,46 @@ abs(apply(mm.gamma,2,mean)[c(1,5,10,15,20,21)] - c(rep(-2,3), rep(3,2),1))
 
 # SD 
 apply(mm.gamma,2,sd)[c(1,5,10,15,20,21)]
+
+
+
+# InvGauss and LogN -------------------------------------------------------
+
+set.seed(1)
+yy = sample()
+y = yy$y 
+d = yy$d
+X = yy$X
+
+a = nrow(y)
+b = ncol(y)
+N = a*b
+vy = as.vector(y)
+vd = as.vector(d)
+
+est.tht = 1
+coef = rep(0.5, 10)
+lambda = rep(1/N, N)
+
+ell=rep(0,1000000)
+k=1
+
+ell[k]= logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
+error = 3
+
+start = proc.time()[1]
+while(error > 0.000001) {
+  
+  rs = EMprocess(y, X, d, coef, lambda, est.tht, frailty = "LogN") 
+  coef = rs$coef
+  lambda = rs$lambda
+  est.tht = rs$est.tht
+  
+  ell[k+1] = logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
+  
+  error = abs(ell[k+1]-ell[k])/(1+abs(ell[k]))
+  cat(error, '\n')
+  k = k+1
+}
+end = proc.time()[1]
+time = end - start

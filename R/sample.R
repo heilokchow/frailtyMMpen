@@ -1,13 +1,10 @@
 
-sample <- function(coef = matrix(c(-2,3,-4,5,-6,7,6,5,4,3)), lambda = 5, frailty = "LogN", rho = 0.2, init.var = 10, a = 40, b = 20, cen = 2) {
+sample <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), rep(3,6))), lambda = 5, frailty = "LogN", init.var = 10, a = 50, b = 10, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)
   
-  C_0 = matrix(rho, p, p)
-  Row = matrix(c(1:p), p, p)
-  Col = t(Row)
-  Sigma = C_0^(abs(Row - Col))
+  cen = matrix(runif(a*b, 0.001 * cen, 0.002 * cen), a, b)
   
   if (frailty == "Gamma") {
     th = init.var
@@ -24,11 +21,10 @@ sample <- function(coef = matrix(c(-2,3,-4,5,-6,7,6,5,4,3)), lambda = 5, frailty
     u = rinvGauss(a, mu, mu^2)
   }
   
-  X = array(0, c(a, b, p))
+  X = array(runif(a*b*p, 0, 0.5), c(a, b, p))
   T = matrix(0, a, b)  
   
   for(i in seq_len(a)) {
-    X[i,,] = mvrnorm(b, rep(0, p), Sigma)
     U = runif(b, 0, 1)
     T[i,] <- -log(U)/(lambda*u[i]*exp(X[i,,] %*% coef))    
   }

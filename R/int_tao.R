@@ -1,29 +1,29 @@
-int_tao <- function(w, i, est.tht, A, D, frailty = "LogN", mode = 0) {
+int_tao <- function(x, i, est.tht, A, B, D, tao0 = 0, frailty = "LogN", mode = 0) {
   
   ta = 0
   if (frailty == "LogN") {
     si2 = est.tht
     if (mode == 0) {
-      ta = w^(D[i]-1)*exp(5 - (log(w))^2/(2*si2) - A[i]*w)
+      ta = 1/(x*sqrt(2*pi*si2))*exp(-(log(x))^2/(2*si2))*x^D[i]*B[i]*exp(-A[i]*x)
     }
     if (mode == 1) {
-      ta = w^(D[i]-1)*(log(w))^2*exp(5 - (log(w))^2/(2*si2) - A[i]*w)
+      ta = 1/(x*sqrt(2*pi*si2))*exp(-(log(x))^2/(2*si2))*x^D[i]*B[i]*exp(-A[i]*x)*x/tao0
     }
     if (mode == 2) {
-      ta = w^(D[i])*exp(5 - (log(w))^2/(2*si2) - A[i]*w)
+      ta = (log(x))^2*1/(x*sqrt(2*pi*si2))*exp(-(log(x))^2/(2*si2))*x^D[i]*B[i]*exp(-A[i]*x)/tao0
     }
   }
 
   if (frailty == "InvGauss") {
-    mu = est.tht
+    mth = est.tht
     if (mode == 0) {
-      ta = w^(D[i]-3/2)*exp(-mu^2/(2*w) - w*(1/2 + A[i]))
+      ta = mth/(sqrt(2*pi)*x^(3/2))*exp(-(x-mth)^2/(2*x))*x^D[i]*B[i]*exp(-A[i]*x)
     }
     if (mode == 1) {
-      ta = w^(D[i]-5/2)*exp(-mu^2/(2*w) - w*(1/2 + A[i]))
+      ta = mth/(sqrt(2*pi)*x^(3/2))*exp(-(x-mth)^2/(2*x))*x^D[i]*B[i]*exp(-A[i]*x)*x/tao0
     }
     if (mode == 2) {
-      ta = w^(D[i]-1/2)*exp(-mu^2/(2*w) - w*( 1/2 + A[i]))
+      ta =  (1/(2*x))*mth/(sqrt(2*pi)*x^(3/2))*exp(-(x-mth)^2/(2*x))*x^D[i]*B[i]*exp(-A[i]*x)/tao0
     }
   }
 

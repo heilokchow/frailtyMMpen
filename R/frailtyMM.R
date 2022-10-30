@@ -14,40 +14,41 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
   ell = rep(0,1000000)
   k = 1
   
-  ell[k]= logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
+  ell[k]= logLikihood(y, X, d, coef, lambda, est.tht, frailty = frailty)
   error = 3
 
   while(error > 0.000001) {
-    
-    rs1 = EMprocess(y, X, d, coef, lambda, est.tht, frailty = "LogN") 
+
+    rs1 = MMprocess(y, X, d, coef, lambda, est.tht, frailty = frailty)
     coef1 = rs1$coef
-    est.tht = rs1$est.tht
+    est.tht1 = rs1$est.tht
     lambda = rs1$lambda
-    
+
     u_be = coef1 - coef
-    
-    rs2 = EMprocess(y, X, d, coef1, lambda, est.tht, frailty = "LogN") 
+
+    rs2 = MMprocess(y, X, d, coef1, lambda, est.tht1, frailty = frailty)
     coef2 = rs2$coef
-    est.tht = rs2$est.tht
+    est.tht2 = rs2$est.tht
     lambda = rs2$lambda
-    
+
     v_be = coef2 - 2*coef1 + coef
     al_be = sum(u_be*v_be)/sum(v_be^2)
     if (al_be > -1) {al_be = -1}
-    
+
     coef = coef - 2*al_be*u_be + al_be^2*v_be
+    est.tht = est.tht2
     
-    rs = EMprocess(y, X, d, coef, lambda, est.tht, frailty = "LogN") 
+    rs = MMprocess(y, X, d, coef, lambda, est.tht, frailty = frailty) 
     coef = rs$coef
     est.tht = rs$est.tht
     lambda = rs$lambda
     
-    ell[k+1] = logLikihood(y, X, d, coef, lambda, est.tht, frailty = "LogN")
+    ell[k+1] = logLikihood(y, X, d, coef, lambda, est.tht, frailty = frailty)
     
     error = abs(ell[k+1] - ell[k])/(1 + abs(ell[k]))
-    cat(error, '\n')
+    cat(error, " ", est.tht, '\n')
     k = k + 1
   }
 
-  return(list(coef = coef, est.tht = est.tht, lambda = lambda))
+  return(list(coef = coef, est.tht = est.tht, lambda = lambda, likelihood = ell[k]))
 }

@@ -17,8 +17,8 @@ sample <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), rep
   }
   
   if (frailty == "InvGauss") {
-    mu = sqrt(init.var)
-    u = rinvGauss(a, mu, mu^2)
+    alp = 1/init.var
+    u = rinvGauss(a, 1, alp)
   }
   
   X = array(runif(a*b*p, 0, 0.5), c(a, b, p))

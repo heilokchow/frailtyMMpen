@@ -64,9 +64,16 @@ MMprocess <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
   }
   
   if (frailty == "InvGauss") {
-    q1 = a/est.tht + a - 2*est.tht*sum(int2)
-    q2 = -a/(est.tht^2) - 2*sum(int2)
-    est.tht = est.tht - q1/q2
+    est.tht = sum(int2)/a
+      
+    # q1 = a/est.tht + a - est.tht*sum(int2)
+    # q2 = -a/(est.tht^2) - sum(int2)
+    # est.tht = est.tht - q1/q2
+    
+    # a1 = sum(int1)
+    # b1 = sum(int2)
+    # DETA = a1^2 + 4*a1*b1
+    # est.tht = (a1 + sqrt(DETA))/(2*sum(b1))
   }
   
   if (est.tht < 0) {

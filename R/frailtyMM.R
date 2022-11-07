@@ -9,7 +9,7 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
   
   coef = rep(0.5, p)
   est.tht = 1
-  lambda = rep(1/N, N)
+  lambda = rep(1/N/10, N)
   
   ell = rep(0,1000000)
   k = 1
@@ -37,7 +37,7 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
 
     coef = coef - 2*al_be*u_be + al_be^2*v_be
     est.tht = est.tht2
-    
+
     rs = MMprocess(y, X, d, coef, lambda, est.tht, frailty = frailty) 
     coef = rs$coef
     est.tht = rs$est.tht

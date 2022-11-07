@@ -267,9 +267,21 @@ for (i in 1:m) {
 
 
 
-set.seed(1)
-yy = sample(init.var = 0.25, cen = 4, frailty = "InvGauss")
+set.seed(4)
+yy = sample(init.var = 0.1, cen = 5, frailty = "InvGauss")
 
+y = yy$y 
+d = yy$d
+X = yy$X
+
+start = proc.time()[1]
+rs1 = frailtyMM(y, X, d, frailty = "InvGauss")
+end = proc.time()[1]
+
+end - start
+
+set.seed(2)
+yy = sample(cen = 4, init.var = 2)
 y = yy$y 
 d = yy$d
 X = yy$X
@@ -279,15 +291,6 @@ rs1 = frailtyMM(y, X, d)
 end = proc.time()[1]
 
 end - start
-
-set.seed(2)
-yy = sample(coef = c(1,1,1,-1,-1,-1,2,2,2,3), init.var = 0.25, frailty = "InvGauss")
-y = yy$y 
-d = yy$d
-X = yy$X
-
-rs1 = frailtyMM(y, X, d, "InvGauss")
-
 rs1$coef
 rs1$est.tht
 rs1$likelihood

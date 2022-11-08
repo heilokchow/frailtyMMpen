@@ -77,3 +77,35 @@ aa = coxph(Surv(times,status) ~ x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+frailty(id,dist='
 aa = coxph(Surv(times,status) ~ x1, data)
 summary(aa)
 aa$coefficients
+
+
+# Real Data ---------------------------------------------------------------
+
+library(frailtyEM)
+
+y = matrix(rats$time, nrow = 100, ncol = 3, byrow = TRUE)
+d = matrix(rats$status, nrow = 100, ncol = 3, byrow = TRUE)
+x1 = matrix(rats$rx, nrow = 100, ncol = 3, byrow = TRUE)
+x2 = matrix(rats$sex, nrow = 100, ncol = 3, byrow = TRUE)
+x3 = matrix(0, 100, 3)
+for (i in 1:100) {
+  for (j in 1:3) {
+    if (x2[i, j] == "f") {
+      x3[i, j] = 0
+    } else {
+      x3[i, j] = 1
+    }
+  }
+}
+
+
+X = array(0, c(100, 3, 2))
+X[,,1] = x1
+X[,,2] = x3
+
+
+start = proc.time()[1]
+rs1 = frailtyMM(y, X, d, frailty = "LogN")
+end = proc.time()[1]
+end - start
+

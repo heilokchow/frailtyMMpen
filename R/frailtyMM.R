@@ -11,6 +11,11 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
   est.tht = 1
   lambda = rep(1/N/10, N)
   
+  if (frailty == "Gamma") {
+    lambda = matrix(lambda, a, b)
+    return(CLGammaFrailty(y, X, d, coef, lambda, est.tht))
+  }
+  
   ell = rep(0,1000000)
   k = 1
   

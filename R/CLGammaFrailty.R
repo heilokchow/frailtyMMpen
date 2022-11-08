@@ -77,5 +77,5 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th) {
     cat(error, '\n')
   }
   
-  return(list(coef = coef, th = th, likelihood = ell[iter], iteration = iter, mLambda = mLambda))
+  return(list(coef = coef, est.tht = th, lambda = c(lambda), likelihood = ell[k]))
 }

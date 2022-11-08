@@ -4,6 +4,23 @@
 library("survival")
 library("SuppDists")
 
+# Gamma
+
+yy = sampleF(init.var = 1, cen = 5, frailty = "Gamma")
+
+y = yy$y 
+d = yy$d
+X = yy$X
+
+start = proc.time()[1]
+rs1 = frailtyMM(y, X, d, frailty = "Gamma")
+end = proc.time()[1]
+end - start
+
+rs1$coef
+rs1$est.tht
+rs1$likelihood
+
 
 # InvGauss
 

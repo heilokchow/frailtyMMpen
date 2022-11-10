@@ -1,4 +1,4 @@
-frailtyMM <- function(y, X, d, frailty = "LogN") {
+frailtyMM_CL <- function(y, X, d, frailty = "LogN") {
   
   p = dim(X)[3]
   a = nrow(y)
@@ -7,12 +7,13 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
   vy = as.vector(y)
   vd = as.vector(d)
   
-  coef = rep(0.5, p)
-  est.tht = 1
-  lambda = rep(1/N/10, N)
-  
+  # Initialize Parameters
+  init = init_para(y, X, d, frailty = frailty)
+  coef = init$coef
+  est.tht = init$est.tht
+  lambda = init$lambda
+
   if (frailty == "Gamma") {
-    lambda = matrix(lambda, a, b)
     return(CLGammaFrailty(y, X, d, coef, lambda, est.tht))
   }
   
@@ -24,14 +25,14 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
 
   while(error > 0.000001) {
 
-    rs1 = MMprocess(y, X, d, coef, lambda, est.tht, frailty = frailty)
+    rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty)
     coef1 = rs1$coef
     est.tht1 = rs1$est.tht
     lambda = rs1$lambda
 
     u_be = coef1 - coef
 
-    rs2 = MMprocess(y, X, d, coef1, lambda, est.tht1, frailty = frailty)
+    rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht1, frailty = frailty)
     coef2 = rs2$coef
     est.tht2 = rs2$est.tht
     lambda = rs2$lambda
@@ -43,7 +44,7 @@ frailtyMM <- function(y, X, d, frailty = "LogN") {
     coef = coef - 2*al_be*u_be + al_be^2*v_be
     est.tht = est.tht2
 
-    rs = MMprocess(y, X, d, coef, lambda, est.tht, frailty = frailty) 
+    rs = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty) 
     coef = rs$coef
     est.tht = rs$est.tht
     lambda = rs$lambda

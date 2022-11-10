@@ -1,4 +1,4 @@
-MMprocess <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
+MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
   
   p = length(coef)
   coef = as.matrix(coef)

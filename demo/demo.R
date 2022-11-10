@@ -6,7 +6,7 @@ library("SuppDists")
 
 # Gamma
 
-yy = sampleF(init.var = 1, cen = 5, frailty = "Gamma")
+yy = sample_CL(init.var = 1, cen = 5, frailty = "Gamma")
 
 y = yy$y 
 d = yy$d
@@ -24,7 +24,7 @@ rs1$likelihood
 
 # InvGauss
 
-yy = sampleF(init.var = 1, cen = 5, frailty = "InvGauss")
+yy = sample_CL(init.var = 1, cen = 5, frailty = "InvGauss")
 
 y = yy$y 
 d = yy$d
@@ -41,7 +41,7 @@ rs1$likelihood
 
 # LogN
 
-yy = sampleF(init.var = 1, cen = 4)
+yy = sample_CL(coef = rep(0.2, 100), init.var = 1, cen = 4)
 y = yy$y 
 d = yy$d
 X = yy$X
@@ -59,7 +59,17 @@ rs1$likelihood
 # coxph -------------------------------------------------------------------
 
 library(survival)
-newX = matrix(0, nrow = 0, ncol = p)
+
+yy = sample_CL(init.var = 1, cen = 5, frailty = "Gamma")
+
+y = yy$y 
+d = yy$d
+X = yy$X
+
+a = nrow(y)
+b = ncol(y)
+
+newX = matrix(0, nrow = 0, ncol = 30)
 id = c()
 for (i in 1:a) {
   newX = rbind(newX, X[i,,])
@@ -71,13 +81,41 @@ vy = as.vector(t(y))
 vd = as.vector(t(d))
 
 data = data.frame(id=id,x1=newX[,1],x2=newX[,2],x3=newX[,3],x4=newX[,4],x5=newX[,5],
-                  x6=newX[,6],x7=newX[,7],x8=newX[,8],x9=newX[,9],x10=newX[,10],times=vy,status=vd)
+                  x6=newX[,6],x7=newX[,7],x8=newX[,8],x9=newX[,9],x10=newX[,10],
+                  x11=newX[,11],x12=newX[,12],x13=newX[,13],x14=newX[,14],x15=newX[,15],
+                  x16=newX[,16],x17=newX[,17],x18=newX[,18],x19=newX[,19],x20=newX[,20],
+                  x21=newX[,21],x22=newX[,22],x23=newX[,23],x24=newX[,24],x25=newX[,25],
+                  x26=newX[,26],x27=newX[,27],x28=newX[,28],x29=newX[,29],x30=newX[,30],times=vy,status=vd)
 
-aa = coxph(Surv(times,status) ~ x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+frailty(id,dist='gauss'), data)
+aa = coxph(Surv(times,status) ~ x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+
+             x11+x12+x13+x14+x15+x16+x17+x18+x19+x20+x21+x22+x23+x24+x25+x26+x27+x28+x29+x30+frailty(id,dist='gamma'), data)
 aa = coxph(Surv(times,status) ~ x1, data)
 summary(aa)
 aa$coefficients
 
+start = proc.time()[1]
+bb = emfrail(Surv(times,status) ~ x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+
+               x11+x12+x13+x14+x15+x16+x17+x18+x19+x20+x21+x22+x23+x24+x25+x26+x27+x28+x29+x30 + cluster(id), data = data)
+end = proc.time()[1]
+end - start
+
+X1 <- model.matrix(Surv(times,status) ~ x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+
+                     x11+x12+x13+x14+x15+x16+x17+x18+x19+x20+x21+x22+x23+x24+x25+x26+x27+x28+x29+x30 + cluster(id), data)
+
+pos_cluster_X1 <- grep("cluster", colnames(X1))
+pos_terminal_X1 <- grep("terminal", colnames(X1))
+pos_strata_X1 <- grep("strata", colnames(X1))
+
+X2 <- X1[,-c(1, pos_cluster_X1, pos_terminal_X1, pos_strata_X1), drop=FALSE]
+
+Y <- Surv(rep(0, length(vy)), vy, vd)
+mcox <- survival::agreg.fit(x = X2, y = Y, strata = NULL, offset = NULL, init = NULL,
+                            control = survival::coxph.control(),
+                            weights = NULL, method = "breslow", rownames = NULL)  
+
+summary(mcox)
+mcox$coefficients
+mcox$
 
 # Real Data ---------------------------------------------------------------
 

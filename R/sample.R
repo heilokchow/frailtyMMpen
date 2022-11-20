@@ -1,5 +1,5 @@
 
-sample_CL <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), rep(3,6))), lambda = 5, frailty = "LogN", init.var = 10, a = 50, b = 10, cen = 2) {
+sample_CL <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), rep(3,6))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -19,6 +19,10 @@ sample_CL <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), 
   if (frailty == "InvGauss") {
     alp = 1/init.var
     u = SuppDists::rinvGauss(a, 1, alp)
+  }
+  
+  if (frailty == "PVF") {
+    u = rtweedie(a, mu = 1, phi = init.var, power = power)
   }
   
   X = array(runif(a*b*p, 0, 0.5), c(a, b, p))

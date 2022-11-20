@@ -1,4 +1,4 @@
-frailtyMM_CL <- function(y, X, d, frailty = "LogN") {
+frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL) {
   
   p = dim(X)[3]
   a = nrow(y)
@@ -20,19 +20,19 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN") {
   ell = rep(0,1000000)
   k = 1
   
-  ell[k]= logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty)
+  ell[k]= logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
   error = 3
 
   while(error > 0.000001) {
 
-    rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty)
+    rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
     coef1 = rs1$coef
     est.tht1 = rs1$est.tht
     lambda = rs1$lambda
 
     u_be = coef1 - coef
 
-    rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht1, frailty = frailty)
+    rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht1, frailty = frailty, power = power)
     coef2 = rs2$coef
     est.tht2 = rs2$est.tht
     lambda = rs2$lambda
@@ -44,12 +44,12 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN") {
     coef = coef - 2*al_be*u_be + al_be^2*v_be
     est.tht = est.tht2
 
-    rs = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty) 
+    rs = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power) 
     coef = rs$coef
     est.tht = rs$est.tht
     lambda = rs$lambda
     
-    ell[k+1] = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty)
+    ell[k+1] = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
     
     error = abs(ell[k+1] - ell[k])/(1 + abs(ell[k]))
     cat(error, " ", est.tht, '\n')

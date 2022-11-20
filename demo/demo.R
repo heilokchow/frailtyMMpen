@@ -41,13 +41,20 @@ rs1$likelihood
 
 # LogN
 
-yy = sample_CL(coef = rep(0.2, 100), init.var = 1, cen = 4)
+yy = sample_CL(coef = c(1, 2, 3), a = 30, b = 15, init.var = 1, frailty = "PVF", power = 2.5, cen = 500)
 y = yy$y 
 d = yy$d
 X = yy$X
 
 start = proc.time()[1]
 rs1 = frailtyMM_CL(y, X, d)
+end = proc.time()[1]
+end - start
+
+
+
+start = proc.time()[1]
+rs1 = frailtyMM_CL(y, X, d, frailty = "PVF", power = 2.5)
 end = proc.time()[1]
 end - start
 

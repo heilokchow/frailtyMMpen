@@ -1,4 +1,4 @@
-int_tao <- function(x, i, est.tht, A, B, D, tao0 = 0, frailty = "LogN", mode = 0) {
+int_tao <- function(x, i, est.tht, A, B, D, tao0 = 0, frailty = "LogN", power = NULL, mode = 0) {
   
   ta = 0
   
@@ -25,6 +25,15 @@ int_tao <- function(x, i, est.tht, A, B, D, tao0 = 0, frailty = "LogN", mode = 0
     }
     if (mode == 2) {
       ta = ((x-1)^2/x)/(sqrt(2*pi*alp)*x^(3/2))*exp(-(x-1)^2/(2*x*alp))*x^D[i]*B[i]*exp(-A[i]*x)/tao0
+    }
+  }
+  
+  if (frailty == "PVF") {
+    if (mode == 0) {
+      ta = dtweedie(x, mu = 1, phi = est.tht, power = power)*x^D[i]*B[i]*exp(-A[i]*x)
+    }
+    if (mode == 1) {
+      ta = dtweedie(x, mu = 1, phi = est.tht, power = power)*x^D[i]*B[i]*exp(-A[i]*x)*x/tao0
     }
   }
 

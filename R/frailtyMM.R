@@ -1,4 +1,4 @@
-frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL) {
+frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL) {
   
   p = dim(X)[3]
   a = nrow(y)
@@ -14,25 +14,26 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL) {
   lambda = init$lambda
 
   if (frailty == "Gamma") {
-    return(CLGammaFrailty(y, X, d, coef, lambda, est.tht))
+    return(CLGammaFrailty(y, X, d, coef, lambda, est.tht, penalty = penalty, tune = tune))
   }
   
-  ell = rep(0,1000000)
-  k = 1
-  
-  ell[k]= logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
+  l0 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
   error = 3
 
   while(error > 0.000001) {
-
-    rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
+    
+    coef0 = coef
+    est.tht0 = est.tht
+    lambda0 = lambda
+    
+    rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
     coef1 = rs1$coef
     est.tht1 = rs1$est.tht
     lambda = rs1$lambda
 
     u_be = coef1 - coef
 
-    rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht1, frailty = frailty, power = power)
+    rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht1, frailty = frailty, power = power, penalty = penalty, tune = tune)
     coef2 = rs2$coef
     est.tht2 = rs2$est.tht
     lambda = rs2$lambda
@@ -44,23 +45,28 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL) {
     coef = coef - 2*al_be*u_be + al_be^2*v_be
     est.tht = est.tht2
 
-    rs = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power) 
+    rs = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune) 
     coef = rs$coef
     est.tht = rs$est.tht
     lambda = rs$lambda
     
-    ell[k+1] = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
+    l1 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
     
-    error = abs(ell[k+1] - ell[k])/(1 + abs(ell[k]))
-    cat(error, " ", est.tht, '\n')
-    k = k + 1
+    if (is.null(penalty)) {
+      error = abs(l1 - l0)/(1 + abs(l0))
+      l0 = l1
+    } else {
+      error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda - lambda0))
+    }
+    
+    cat(error, " ", est.tht, " ", al_be, '\n')
   }
 
-  return(list(coef = coef, est.tht = est.tht, lambda = lambda, likelihood = ell[k]))
+  return(list(coef = coef, est.tht = est.tht, lambda = lambda, likelihood = l1))
 }
 
 
-frailtyMM_ME <- function(y, X, d, frailty = "LogN") {
+frailtyMM_ME <- function(y, X, d, frailty = "LogN", penalty = NULL, tune = NULL) {
   
   p = dim(X)[3]
   n = ncol(y)
@@ -71,15 +77,17 @@ frailtyMM_ME <- function(y, X, d, frailty = "LogN") {
   lambda1 = rep(1/n, n)
   lambda2 = rep(1/n, n)
   
-  ell = rep(0,1000000)
-  k = 1
-  
-  ell[k]= logLikihood_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
+  l0 = logLikihood_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
   error = 3
   
   while(error > 0.000001) {
     
-    rs1 = MMprocess_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
+    coef0 = coef
+    est.tht0 = est.tht
+    lambda01 = lambda1
+    lambda02 = lambda2
+    
+    rs1 = MMprocess_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty, penalty = penalty, tune = tune)
     coef1 = rs1$coef
     est.tht1 = rs1$est.tht
     lambda1 = rs1$lambda1
@@ -87,7 +95,7 @@ frailtyMM_ME <- function(y, X, d, frailty = "LogN") {
     
     u_be = coef1 - coef
     
-    rs2 = MMprocess_ME(y, X, d, coef1, lambda1, lambda2, est.tht1, frailty = frailty)
+    rs2 = MMprocess_ME(y, X, d, coef1, lambda1, lambda2, est.tht1, frailty = frailty, penalty = penalty, tune = tune)
     coef2 = rs2$coef
     est.tht2 = rs2$est.tht
     lambda1 = rs2$lambda1
@@ -97,21 +105,25 @@ frailtyMM_ME <- function(y, X, d, frailty = "LogN") {
     al_be = sum(u_be*v_be)/sum(v_be^2)
     if (al_be > -1) {al_be = -1}
     
-    coef = coef - 2*al_be*u_be + al_be^2*v_be
+    coef = coef - (2*al_be*u_be - al_be^2*v_be)
     est.tht = est.tht2
-    
-    rs = MMprocess_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty) 
+    rs = MMprocess_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty, penalty = penalty, tune = tune) 
     coef = rs$coef
     est.tht = rs$est.tht
     lambda1 = rs$lambda1
     lambda2 = rs$lambda2
+
+    l1 = logLikihood_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
     
-    ell[k+1] = logLikihood_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
+    if (is.null(penalty)) {
+      error = abs(l1 - l0)/(1 + abs(l0))
+      l0 = l1
+    } else {
+      error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda1 - lambda01)) + sum(abs(lambda2 - lambda02))
+    }
     
-    error = abs(ell[k+1] - ell[k])/(1 + abs(ell[k]))
-    cat(error, " ", est.tht, '\n')
-    k = k + 1
+    cat(error, " ", est.tht, " ", al_be,'\n')
   }
   
-  return(list(coef = coef, est.tht = est.tht, lambda1 = lambda1, lambda2 = lambda2, likelihood = ell[k]))
+  return(list(coef = coef, est.tht = est.tht, lambda1 = lambda1, lambda2 = lambda2, likelihood = l1))
 }

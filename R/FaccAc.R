@@ -1,10 +1,11 @@
 
 
-FaccAc <- function(y, X, d, coef, lambda, th) {
+FaccAc <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NULL) {
   
   a = dim(X)[1]
   b = dim(X)[2]
   p = dim(X)[3]
+  N = a*b
   
   coef = matrix(coef)
   
@@ -65,6 +66,22 @@ FaccAc <- function(y, X, d, coef, lambda, th) {
   for (k in 1:p) {
     temp1 = sum(d*X[,, k]) - sum(d*Z[,, k]/W)
     temp2 = -sum(d*U[,, k]/W)
+    
+    if (!is.null(penalty)) {
+      if (penalty == "LASSO") {
+        temp1 = temp1 - N*sign(coef[k])*tune
+        temp2 = temp2 - N*tune/abs(coef[k])
+      }
+      if (penalty == "MCP") {
+        temp1 = temp1 - N*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
+        temp2 = temp2 - N*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
+      }
+      if (penalty == "SCAD") {
+        temp1 = temp1 - N*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
+        temp2 = temp2 - N*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
+      }
+    }
+    
     coef[k, 1] = coef[k, 1] - temp1 / temp2
   }
  

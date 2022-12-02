@@ -13,18 +13,18 @@ d = yy$d
 X = yy$X
 
 start = proc.time()[1]
-rs1 = frailtyMM_CL(y, X, d, frailty = "Gamma")
+rs1 = frailtyMM_CL(y, X, d, frailty = "Gamma", penalty = "MCP", tune = 0.002)
 end = proc.time()[1]
 end - start
 
-rs1$coef
+round(rs1$coef, 2)
 rs1$est.tht
 rs1$likelihood
 
 
 # InvGauss
 
-yy = sample_CL(init.var = 1, cen = 5, frailty = "InvGauss")
+yy = sample_CL(init.var = 1, cen = 50, frailty = "InvGauss")
 
 y = yy$y 
 d = yy$d
@@ -35,7 +35,12 @@ rs1 = frailtyMM_CL(y, X, d, frailty = "InvGauss")
 end = proc.time()[1]
 end - start
 
-rs1$coef
+start = proc.time()[1]
+rs1 = frailtyMM_CL(y, X, d, frailty = "InvGauss", penalty = "LASSO", tune = 0.005)
+end = proc.time()[1]
+end - start
+
+round(rs1$coef, 2)
 rs1$est.tht
 rs1$likelihood
 
@@ -69,7 +74,7 @@ rs1$likelihood
 
 # LogN
 
-yy = sample_ME(init.var = 1, cen = 4)
+yy = sample_ME(init.var = 1, cen = 3)
 y = yy$y 
 d = yy$d
 X = yy$X
@@ -79,7 +84,13 @@ rs1 = frailtyMM_ME(y, X, d)
 end = proc.time()[1]
 end - start
 
-rs1$coef
+
+start = proc.time()[1]
+rs1 = frailtyMM_ME(y, X, d, penalty = "LASSO", tune = 0.05)
+end = proc.time()[1]
+end - start
+
+round(rs1$coef, 2)
 rs1$est.tht
 rs1$likelihood
 

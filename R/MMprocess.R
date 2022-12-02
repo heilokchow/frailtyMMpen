@@ -1,4 +1,4 @@
-MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power = NULL) {
+MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -52,6 +52,22 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
     
     DE_1 = sum(d*X[,,k]) - sum(vd*SUM_1/SUM_0) 
     DE_2 = -sum(vd*SUM_2/SUM_0) 
+    
+    if (!is.null(penalty)) {
+      if (penalty == "LASSO") {
+        DE_1 = DE_1 - N*sign(coef[k])*tune
+        DE_2 = DE_2 - N*tune/abs(coef[k])
+      }
+      if (penalty == "MCP") {
+        DE_1 = DE_1 - N*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
+        DE_2 = DE_2 - N*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
+      }
+      if (penalty == "SCAD") {
+        DE_1 = DE_1 - N*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
+        DE_2 = DE_2 - N*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
+      }
+    }
+    
     coef[k] = coef[k] - DE_1/DE_2
   }
   
@@ -135,7 +151,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
 }
 
 
-MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "LogN") {
+MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "LogN", penalty = NULL, tune = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -212,6 +228,21 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     
     if (frailty == "Gamma") {
       DE_2 = -2*sum((D+2/est.tht)*E2/C) 
+    }
+    
+    if (!is.null(penalty)) {
+      if (penalty == "LASSO") {
+        DE_1 = DE_1 - n*sign(coef[k])*tune
+        DE_2 = DE_2 - n*tune/abs(coef[k])
+      }
+      if (penalty == "MCP") {
+        DE_1 = DE_1 - n*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
+        DE_2 = DE_2 - n*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
+      }
+      if (penalty == "SCAD") {
+        DE_1 = DE_1 - n*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
+        DE_2 = DE_2 - n*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
+      }
     }
     
     coef[k] = coef[k] - DE_1/DE_2

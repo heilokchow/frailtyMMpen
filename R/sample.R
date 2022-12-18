@@ -1,5 +1,5 @@
 
-sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 46))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
+sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 6))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -40,7 +40,7 @@ sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 46))), lambda = 5, frai
 
 
 
-sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 46))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 300, cen = 2) {
+sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 6))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 300, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)

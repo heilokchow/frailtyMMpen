@@ -1,4 +1,4 @@
-frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL) {
+frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL) {
   
   p = dim(X)[3]
   a = nrow(y)
@@ -8,11 +8,33 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL, penalty = NULL
   vd = as.vector(d)
   
   # Initialize Parameters
-  init = init_para(y, X, d, frailty = frailty)
-  coef = init$coef
-  est.tht = init$est.tht
-  lambda = init$lambda
-
+  
+  if (!is.null(lambda.ini) && !is.null(coef.ini) && !is.null(est.tht.ini)) {
+    
+    coef = coef.ini
+    est.tht = est.tht.ini
+    lambda = lambda.ini
+    
+  } else {
+    
+    init = init_para(y, X, d, frailty = frailty)
+    coef = init$coef
+    est.tht = init$est.tht
+    lambda = init$lambda
+    
+    if (!is.null(lambda.ini)) {
+      lambda = lambda.ini
+    }
+    
+    if (!is.null(coef.ini)) {
+      coef = coef.ini
+    }
+    
+    if (!is.null(est.tht.ini)) {
+      est.tht = est.tht.ini
+    }
+  }
+  
   if (frailty == "Gamma") {
     return(CLGammaFrailty(y, X, d, coef, lambda, est.tht, penalty = penalty, tune = tune))
   }
@@ -20,7 +42,8 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL, penalty = NULL
   l0 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
   error = 3
 
-  while(error > 0.000001) {
+  num = 0
+  while(error > 0.000001 && num < 1000) {
     
     coef0 = coef
     est.tht0 = est.tht
@@ -59,6 +82,7 @@ frailtyMM_CL <- function(y, X, d, frailty = "LogN", power = NULL, penalty = NULL
       error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda - lambda0))
     }
     
+    num = num + 1
     cat(error, " ", est.tht, " ", al_be, '\n')
   }
 

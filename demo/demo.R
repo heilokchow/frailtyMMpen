@@ -13,7 +13,7 @@ d = yy$d
 X = yy$X
 
 start = proc.time()[1]
-rs1 = frailtyMM_CL(y, X, d, frailty = "Gamma", penalty = "MCP", tune = 0.002)
+rs1 = frailtyMM_CL(y, X, d, frailty = "Gamma", penalty = "MCP", tune = 0.2)
 end = proc.time()[1]
 end - start
 
@@ -36,9 +36,24 @@ end = proc.time()[1]
 end - start
 
 start = proc.time()[1]
-rs1 = frailtyMM_CL(y, X, d, frailty = "InvGauss", penalty = "LASSO", tune = 0.005)
+rs1 = frailtyMM_CL(y, X, d, coef.ini = rs1$coef, est.tht.ini = rs1$est.tht, lambda.ini = rs1$lambda, frailty = "InvGauss",
+                   penalty = "LASSO", tune = 0.07)
 end = proc.time()[1]
 end - start
+
+
+start = proc.time()[1]
+rs2 = frailtyMMpen(y, X, d, frailty = "InvGauss")
+end = proc.time()[1]
+end - start
+
+plot.fpen(rs2)
+
+start = proc.time()[1]
+rs1 = frailtyMM_CL(y, X, d, frailty = "InvGauss", penalty = "LASSO", tune = 0.007)
+end = proc.time()[1]
+end - start
+
 
 round(rs1$coef, 2)
 rs1$est.tht
@@ -86,7 +101,7 @@ end - start
 
 
 start = proc.time()[1]
-rs1 = frailtyMM_ME(y, X, d, penalty = "LASSO", tune = 0.05)
+rs1 = frailtyMM_ME(y, X, d, penalty = "LASSO", tune = 0.02)
 end = proc.time()[1]
 end - start
 
@@ -103,7 +118,7 @@ d = yy$d
 X = yy$X
 
 start = proc.time()[1]
-rs1 = frailtyMM_ME(y, X, d, frailty = "InvGauss")
+rs1 = frailtyMM_ME(y, X, d, frailty = "InvGauss", penalty = "LASSO", tune = 0.1)
 end = proc.time()[1]
 end - start
 
@@ -113,14 +128,14 @@ rs1$likelihood
 
 # Gamma
 
-yy = sample_ME(init.var = 10, cen = 4, frailty = "Gamma")
+yy = sample_ME(init.var = 1, cen = 4, frailty = "Gamma")
 
 y = yy$y 
 d = yy$d
 X = yy$X
 
 start = proc.time()[1]
-rs1 = frailtyMM_ME(y, X, d, frailty = "Gamma")
+rs1 = frailtyMM_ME(y, X, d, frailty = "Gamma", penalty = "SCAD", tune = 0.1)
 end = proc.time()[1]
 end - start
 

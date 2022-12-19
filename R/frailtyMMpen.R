@@ -1,12 +1,13 @@
 frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NULL, penalty = "LASSO", tune = NULL) {
-  
-  p = dim(X)[3]
-  a = nrow(y)
-  b = ncol(y)
-  N = a*b
-  
+
   tuneseq = exp(seq(-6, -1, 0.25))
   if (type == "Cluster") {
+    
+    p = dim(X)[3]
+    a = nrow(y)
+    b = ncol(y)
+    N = a*b
+    
     ini = frailtyMM_CL(y, X, d, frailty = frailty, power = power, penalty = NULL)
     coef0 = ini$coef
     est.tht0 = ini$est.tht
@@ -57,6 +58,68 @@ frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NU
                   tune = tuneseq[seq_len(z)],
                   tune.min = tuneseq[which.min(BIC_all)])
   }
+  
+  if (type == "Multiple") {
+    # NO PVF for ME
+    
+    p = dim(X)[3]
+    n = ncol(y)
+    
+    ini = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL)
+    coef0 = ini$coef
+    est.tht0 = ini$est.tht
+    lambda01 = ini$lambda1
+    lambda02 = ini$lambda2
+    likelihood0 = ini$likelihood
+    
+    coef_all = list()
+    est.tht_all = list()
+    lambda1_all = list()
+    lambda2_all = list()
+    likelihood_all = list()
+    BIC_all = list()
+    
+    for (z in seq_len(length(tuneseq))) {
+      cur = frailtyMM_ME(y, X, d, 
+                         coef.ini = coef0, est.tht.ini = est.tht0, lambda1.ini = lambda01, lambda2.ini = lambda02,
+                         frailty = frailty, penalty = penalty, tune = tuneseq[z])
+      
+      coef0 = cur$coef
+      est.tht0 = cur$est.tht
+      lambda01 = cur$lambda1
+      lambda02 = cur$lambda2
+      likelihood0 = cur$likelihood
+      
+      coef_all[[z]] = coef0
+      est.tht_all[[z]] = est.tht0
+      lambda1_all[[z]] = lambda01
+      lambda2_all[[z]] = lambda02
+      likelihood_all[[z]] = likelihood0
+      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(n)
+      
+      if (sum(abs(coef0)) < 1e-6) {
+        cat(sum(abs(coef0)), "????\n")
+        break
+      }
+      
+      cat(z, "---------\n")
+    }
+    
+    
+    coef_all = data.frame(matrix(unlist(coef_all), nrow = length(coef0)))
+    est.tht_all = unlist(coef_all)
+    likelihood_all = unlist(likelihood_all)
+    BIC_all = unlist(BIC_all)
+    
+    output = list(coef = coef_all,
+                  est.tht = est.tht_all,
+                  lambda1 = lambda1_all,
+                  lambda2 = lambda2_all,
+                  likelihood = likelihood_all,
+                  BIC = BIC_all,
+                  tune = tuneseq[seq_len(z)],
+                  tune.min = tuneseq[which.min(BIC_all)])
+  } 
   
   class(output) = "fpen"
   output

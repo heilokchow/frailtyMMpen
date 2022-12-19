@@ -90,7 +90,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 }
 
 
-frailtyMM_ME <- function(y, X, d, frailty = "LogN", penalty = NULL, tune = NULL) {
+frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.ini = NULL, lambda2.ini = NULL, frailty = "LogN", penalty = NULL, tune = NULL) {
   
   p = dim(X)[3]
   n = ncol(y)
@@ -100,6 +100,22 @@ frailtyMM_ME <- function(y, X, d, frailty = "LogN", penalty = NULL, tune = NULL)
   est.tht = 1
   lambda1 = rep(1/n, n)
   lambda2 = rep(1/n, n)
+  
+  if (!is.null(lambda1.ini)) {
+    lambda1 = lambda1.ini
+  }
+  
+  if (!is.null(lambda2.ini)) {
+    lambda2 = lambda2.ini
+  }
+  
+  if (!is.null(coef.ini)) {
+    coef = coef.ini
+  }
+  
+  if (!is.null(est.tht.ini)) {
+    est.tht = est.tht.ini
+  }
   
   l0 = logLikihood_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
   error = 3

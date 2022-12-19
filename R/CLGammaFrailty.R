@@ -18,8 +18,9 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NUL
   
   l0 = GammaLik(y, X, d, coef, lambda, th)
   error = 3
+  num = 0
   
-  while (error > 0.000001) {
+  while (error > 0.000001 && num < 1000) {
     
     coef0 = coef
     th0 = th
@@ -79,8 +80,9 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NUL
       error = sum(abs(coef - coef0)) + sum(abs(th - th0)) + sum(abs(lambda - lambda0))
     }
     
+    num = num + 1
     cat(error, '\n')
   }
   
-  return(list(coef = coef, est.tht = th, lambda = c(lambda), likelihood = l1))
+  return(list(coef = coef, est.tht = th, lambda = lambda, likelihood = l1))
 }

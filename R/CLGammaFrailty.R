@@ -1,6 +1,6 @@
 
 
-CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NULL) {
+CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NULL, maxit = 1000, threshold = 1e-6) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -20,7 +20,7 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NUL
   error = 3
   num = 0
   
-  while (error > 0.000001 && num < 1000) {
+  while (error > threshold && num < maxit) {
     
     coef0 = coef
     th0 = th
@@ -29,13 +29,18 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NUL
     temp1 = FaccAc(y, X, d, coef, lambda, th, penalty, tune)
     
     coef1 = temp1$coef
-    th1 = temp1$th
+    th = temp1$th
     u0_be = coef1 - coef
     
-    temp2 = FaccAc(y, X, d, coef1, lambda, th1, penalty, tune)
+    num = 0
+    if (sum(abs(coef1)) < threshold) {
+      break
+    }
+    
+    temp2 = FaccAc(y, X, d, coef1, lambda, th, penalty, tune)
     
     coef2 = temp2$coef
-    th2 = temp2$th
+    th = temp2$th
     v0_be = coef2 - 2*coef1 +  coef
     
     al0_be = sum(u0_be*v0_be) / sum(v0_be^2)
@@ -45,7 +50,6 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NUL
     
     # Update Coefficients
     coef = coef - 2*al0_be*u0_be + al0_be^2*v0_be
-    th = th2
     
     Ypre = matrix(0, a, b)
     La = matrix(0, a, b)

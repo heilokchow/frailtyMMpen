@@ -1,6 +1,6 @@
-frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NULL, penalty = "LASSO", tune = NULL) {
+frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NULL, penalty = "LASSO", tune = NULL, maxit = 1000, threshold = 1e-6) {
 
-  tuneseq = exp(seq(-6, -1, 0.25))
+  tuneseq = exp(seq(-5.5, 1, 0.25))
   if (type == "Cluster") {
     
     p = dim(X)[3]
@@ -8,7 +8,7 @@ frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NU
     b = ncol(y)
     N = a*b
     
-    ini = frailtyMM_CL(y, X, d, frailty = frailty, power = power, penalty = NULL)
+    ini = frailtyMM_CL(y, X, d, frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = threshold)
     coef0 = ini$coef
     est.tht0 = ini$est.tht
     lambda0 = ini$lambda
@@ -23,7 +23,7 @@ frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NU
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMM_CL(y, X, d, 
                          coef.ini = coef0, est.tht.ini = est.tht0, lambda.ini = lambda0,
-                         frailty = frailty, power = power, penalty = penalty, tune = tuneseq[z])
+                         frailty = frailty, power = power, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = threshold)
       
       coef0 = cur$coef
       est.tht0 = cur$est.tht
@@ -34,9 +34,9 @@ frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NU
       est.tht_all[[z]] = est.tht0
       lambda_all[[z]] = lambda0
       likelihood_all[[z]] = likelihood0
-      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(N)
+      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > threshold) + 1)*log(N)
       
-      if (sum(abs(coef0)) < 1e-6) {
+      if (sum(abs(coef0)) < threshold) {
         cat(sum(abs(coef0)), "????\n")
         break
       }

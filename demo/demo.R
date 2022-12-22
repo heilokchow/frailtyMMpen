@@ -24,7 +24,7 @@ rs1$likelihood
 
 # InvGauss
 
-yy = sample_CL(init.var = 1, cen = 20, frailty = "LogN")
+yy = sample_CL(init.var = 2, cen = 20, frailty = "LogN")
 
 y = yy$y 
 d = yy$d
@@ -37,20 +37,23 @@ end - start
 
 start = proc.time()[1]
 rs1 = frailtyMM_CL(y, X, d, coef.ini = rs1$coef, est.tht.ini = rs1$est.tht, lambda.ini = rs1$lambda, frailty = "LogN",
-                   penalty = "SCAD", tune = 0.001)
+                   penalty = "SCAD", tune = 2)
 end = proc.time()[1]
 end - start
 
 
 start = proc.time()[1]
-rs2 = frailtyMMpen(y, X, d, type = "Cluster", frailty = "LogN", penalty = "SCAD")
+rs2 = frailtyMMpen(y, X, d, type = "Cluster", frailty = "LogN", penalty = "LASSO")
 end = proc.time()[1]
 end - start
+
+round(rs1$coef, 2)
+rs2$tune.min
 
 plot.fpen(rs2)
 
 start = proc.time()[1]
-rs1 = frailtyMM_CL(y, X, d, frailty = "InvGauss",  = "LASSO", tune = 0.007)
+rs1 = frailtyMM_CL(y, X, d, frailty = "InvGauss", penalty = "MCP", tune = 3)
 end = proc.time()[1]
 end - start
 

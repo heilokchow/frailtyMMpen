@@ -1,5 +1,5 @@
 
-sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 6))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
+sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)

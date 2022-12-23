@@ -65,7 +65,7 @@ frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NU
     p = dim(X)[3]
     n = ncol(y)
     
-    ini = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL)
+    ini = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = threshold)
     coef0 = ini$coef
     est.tht0 = ini$est.tht
     lambda01 = ini$lambda1
@@ -82,7 +82,7 @@ frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NU
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMM_ME(y, X, d, 
                          coef.ini = coef0, est.tht.ini = est.tht0, lambda1.ini = lambda01, lambda2.ini = lambda02,
-                         frailty = frailty, penalty = penalty, tune = tuneseq[z])
+                         frailty = frailty, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = threshold)
       
       coef0 = cur$coef
       est.tht0 = cur$est.tht

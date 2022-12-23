@@ -189,6 +189,10 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, mode = 0)$value
     }
     
+    if (any(int0 == 0)) {
+      return(list(coef = rep(1/p, p), est.tht = est.tht, lambda1 = rep(1/n, n), lambda2 = rep(1/n, n)))
+    }
+    
     for (i in 1:n) {  
       int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, mode = 1)$value

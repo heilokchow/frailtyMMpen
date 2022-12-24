@@ -43,7 +43,7 @@ end - start
 
 
 start = proc.time()[1]
-rs2 = frailtyMMpen(y, X, d, type = "Cluster", frailty = "LogN", penalty = "LASSO")
+rs2 = frailtyMMpen(y, X, d, type = "Cluster", frailty = "Gamma", penalty = "SCAD")
 end = proc.time()[1]
 end - start
 
@@ -213,7 +213,6 @@ mcox <- survival::agreg.fit(x = X2, y = Y, strata = NULL, offset = NULL, init = 
 
 summary(mcox)
 mcox$coefficients
-mcox$
 
 # Real Data ---------------------------------------------------------------
 
@@ -241,7 +240,7 @@ X[,,2] = x3
 
 
 start = proc.time()[1]
-rs1 = frailtyMM(y, X, d, frailty = "LogN")
+rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "LogN")
 end = proc.time()[1]
 end - start
 

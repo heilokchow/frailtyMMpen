@@ -1,4 +1,4 @@
-frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NULL, penalty = "LASSO", tune = NULL, maxit = 1000, threshold = 1e-6) {
+frailtyMMpen <- function(y, X, d, frailty = "LogN", type = "Cluster", power = NULL, penalty = "LASSO", tune = NULL, maxit = 200, threshold = 1e-6) {
 
   tuneseq = exp(seq(-5.5, 1, 0.25))
   if (type == "Cluster") {

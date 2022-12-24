@@ -1,4 +1,4 @@
-frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL, maxit = 1000, threshold = 1e-6) {
+frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-6) {
   
   p = dim(X)[3]
   a = nrow(y)
@@ -40,6 +40,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
   }
   
   l0 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
+  l1 = l0
   error = 3
 
   num = 0
@@ -48,7 +49,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     coef0 = coef
     est.tht0 = est.tht
     lambda0 = lambda
-    
+
     rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
     coef1 = rs1$coef
     est.tht = rs1$est.tht
@@ -99,7 +100,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 }
 
 
-frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.ini = NULL, lambda2.ini = NULL, frailty = "LogN", penalty = NULL, tune = NULL, maxit = 1000, threshold = 1e-6) {
+frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.ini = NULL, lambda2.ini = NULL, frailty = "LogN", penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-6) {
   
   p = dim(X)[3]
   n = ncol(y)
@@ -127,6 +128,7 @@ frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.i
   }
   
   l0 = logLikihood_ME(y, X, d, coef, lambda1, lambda2, est.tht, frailty = frailty)
+  l1 = l0
   error = 3
   
   num = 0

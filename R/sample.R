@@ -40,7 +40,7 @@ sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
 
 
 
-sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 6))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 200, cen = 2) {
+sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 200, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)

@@ -92,25 +92,25 @@ rs1$likelihood
 
 # LogN
 
-yy = sample_ME(init.var = 1, cen = 3)
+yy = sample_ME(init.var = 1, cen = 0.1, frailty = "InvGauss")
 y = yy$y 
 d = yy$d
 X = yy$X
 
 start = proc.time()[1]
-rs1 = frailtyMM_ME(y, X, d)
+rs1 = frailtyMM_ME(y, X, d, frailty = "InvGauss")
 end = proc.time()[1]
 end - start
 
 
 start = proc.time()[1]
-rs1 = frailtyMM_ME(y, X, d, penalty = "LASSO", tune = 0.02)
+rs1 = frailtyMM_ME(y, X, d, frailty = "InvGauss", penalty = "MCP", tune = 2)
 end = proc.time()[1]
 end - start
 
 
 start = proc.time()[1]
-rs2 = frailtyMMpen(y, X, d, type = "Multiple", frailty = "LogN")
+rs2 = frailtyMMpen(y, X, d, type = "Multiple", frailty = "InvGauss", penalty = "MCP")
 end = proc.time()[1]
 end - start
 

@@ -1,5 +1,5 @@
 
-sample_CL <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), rep(3,6))), lambda = 5, frailty = "LogN", init.var = 10, a = 50, b = 10, cen = 2) {
+sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -21,6 +21,10 @@ sample_CL <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), 
     u = SuppDists::rinvGauss(a, 1, alp)
   }
   
+  if (frailty == "PVF") {
+    u = rtweedie(a, mu = 1, phi = init.var, power = power)
+  }
+  
   X = array(runif(a*b*p, 0, 0.5), c(a, b, p))
   T = matrix(0, a, b)  
   
@@ -36,7 +40,7 @@ sample_CL <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), 
 
 
 
-sample_ME <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), rep(3,6))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 300, cen = 2) {
+sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 200, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -58,10 +62,10 @@ sample_ME <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), 
   
   X = array(runif(2*n*p, 0, 0.5), c(2, n, p))
   T = matrix(0, 2, n)  
-  cen = matrix(0, 2, n)  
+  cen1 = matrix(0, 2, n)  
   
-  cen[1,] = runif(n, 0, 1)
-  cen[2,] = runif(n, 0, 1)
+  cen1[1,] = runif(n, 0, cen)
+  cen1[2,] = runif(n, 0, cen)
   
   U1 = runif(n, 0, 1)
   U2 = runif(n, 0, 1)
@@ -69,7 +73,7 @@ sample_ME <- function(coef = matrix(c(rep(-2,6), rep(-1,6), rep(1,6), rep(2,6), 
   T[1,] <- -log(U1)/(lambda1*u*exp(X[1,,] %*% coef)) 
   T[2,] <- (exp(-log(U2)/(u*exp(X[2,,] %*% coef))) - 1)/lambda2
   
-  d = 1*(T <= cen)
-  y = pmin(T, cen)
+  d = 1*(T <= cen1)
+  y = pmin(T, cen1)
   return(list(y = y, X = X, d = d))
 }

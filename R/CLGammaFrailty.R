@@ -1,6 +1,6 @@
 
 
-CLGammaFrailty <- function(y, X, d, coef, lambda, th) {
+CLGammaFrailty <- function(y, X, d, coef, lambda, th, penalty = NULL, tune = NULL, maxit = 1000, threshold = 1e-6) {
   
   a = dim(X)[1]
   b = dim(X)[2]
@@ -16,24 +16,31 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th) {
     stop("Dimension of coef is incorrect.")
   }
   
-  
-  ell = rep(0, 10000)
-  iter = 1
-  ell[iter] = GammaLik(y, X, d, coef, lambda, th)
+  l0 = GammaLik(y, X, d, coef, lambda, th)
   error = 3
+  num = 0
   
-  while (error > 0.000001) {
+  while (error > threshold && num < maxit) {
     
-    temp1 = FaccAc(y, X, d, coef, lambda, th)
+    coef0 = coef
+    th0 = th
+    lambda0 = lambda
+    
+    temp1 = FaccAc(y, X, d, coef, lambda, th, penalty, tune)
     
     coef1 = temp1$coef
-    th1 = temp1$th
+    th = temp1$th
     u0_be = coef1 - coef
     
-    temp2 = FaccAc(y, X, d, coef1, lambda, th1)
+    num = 0
+    if (sum(abs(coef1)) < threshold) {
+      break
+    }
+    
+    temp2 = FaccAc(y, X, d, coef1, lambda, th, penalty, tune)
     
     coef2 = temp2$coef
-    th2 = temp2$th
+    th = temp2$th
     v0_be = coef2 - 2*coef1 +  coef
     
     al0_be = sum(u0_be*v0_be) / sum(v0_be^2)
@@ -43,7 +50,6 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th) {
     
     # Update Coefficients
     coef = coef - 2*al0_be*u0_be + al0_be^2*v0_be
-    th = th2
     
     Ypre = matrix(0, a, b)
     La = matrix(0, a, b)
@@ -70,12 +76,17 @@ CLGammaFrailty <- function(y, X, d, coef, lambda, th) {
 
     mLambda = sum((y <= 1) * lambda) 
     
-    ell[iter + 1] = GammaLik(y, X, d, coef, lambda, th)
-  
-    error = abs(ell[iter + 1] - ell[iter]) / (1 + abs(ell[iter]))
-    iter = iter + 1
+    l1 = GammaLik(y, X, d, coef, lambda, th)
+    if (is.null(penalty)) {
+      error = abs(l1 - l0)/(1 + abs(l0))
+      l0 = l1
+    } else {
+      error = sum(abs(coef - coef0)) + sum(abs(th - th0)) + sum(abs(lambda - lambda0))
+    }
+    
+    num = num + 1
     cat(error, '\n')
   }
   
-  return(list(coef = coef, est.tht = th, lambda = c(lambda), likelihood = ell[iter]))
+  return(list(coef = coef, est.tht = th, lambda = lambda, likelihood = l1))
 }

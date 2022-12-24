@@ -1,5 +1,5 @@
 
-logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
+logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -20,7 +20,7 @@ logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
   int0 <- vector("numeric", length = a)
   for (i in 1:a) {  
     int0[i] = integrate(int_tao, lower = 0, upper = Inf,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, mode = 0)$value
+                        i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
 
   return(sum(log(int0)))

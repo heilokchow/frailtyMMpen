@@ -286,3 +286,160 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
   
   return(list(coef = coef, est.tht = est.tht, lambda1 = lambda1, lambda2 = lambda2))
 }
+
+
+
+MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penalty = NULL, tune = NULL) {
+  
+  p = length(coef)
+  coef = as.matrix(coef)
+  n = length(y)
+  
+  vy = unlist(y)
+  yend = unlist(lapply(y, max))
+  vd = unlist(d)
+  vl = unlist(lambda)
+  
+  # Possible C Code
+  tall = sort(vy)
+  ntime = length(tall)
+  Xmat = array(0, c(n, p, ntime))
+  
+  for (i in 1:n) {
+    for (j in 1:p) {
+      cont = 1
+      for (z in 1:ntime) {
+        it = length(y[[i]])
+        Xmat[i, j, z] = X[[i]][cont, j]
+        if (cont < it && y[[i]][cont] < tall[z] && y[[i]][cont + 1] >= tall[z]) {
+          cont = cont + 1
+        }
+      }
+    }
+  }
+  
+  La = lambda
+  for (i in 1:n) {
+    it = length(y[[i]])
+    for (j in 1:it) {
+      La[[i]][j] =  sum(vl*(vy <= y[[i]][j]))
+    }
+  }
+  
+  Yexp = lapply(X, function(mx, mcoef) {c(exp(mx %*% mcoef))}, mcoef = coef)
+  
+  AA = rep(0, n)
+  for (i in 1:n) {
+    it = length(y[[i]])
+    L0 = 0
+    for (j in 1:it) {
+      AA[i] = AA[i] + (La[[i]][j] - L0) * Yexp[[i]][j]
+      L0 = La[[i]][j]
+    }
+  }
+  
+  DD = unlist(lapply(d, sum))
+  
+  int0 <- vector("numeric", length = n)
+  int1 <- vector("numeric", length = n)
+  
+  if (frailty == "LogN" || frailty == "InvGauss") {
+    
+    BB = unlist(pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
+    
+    for (i in 1:n) {  
+      int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, mode = 0)$value
+    }
+    
+    if (any(int0 == 0)) {
+      return(list(coef = rep(1/p, p), est.tht = est.tht, lambda = lapply(lambda, function(x) {x^0*1/n})))
+    }
+    
+    for (i in 1:n) {  
+      int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, mode = 1)$value
+    }
+  }
+  
+  if (frailty == "Gamma") {
+    C = 1/est.tht + AA
+    A = 1/est.tht + D
+    int1 = A/C
+  }
+  
+  # Update lambda Variables
+  
+  for (i in 1:n) {
+    it = length(y[[i]])
+    for (j in 1:it) {
+      th = which(tall == y[[i]][j])
+      lambda[[i]][j] = d[[i]][j] / sum((yend >= y[[i]][j]) * int1 * exp(Xmat[,,th] %*% coef))
+    }
+  }
+  
+  # Update coefficients
+  AVE_X = apply(abs(X), c(1,2), sum)
+  for(k in 1:p)
+  {
+    E1 = La1*X[1,,k]*YpreExp[1,] + La2*X[2,,k]*YpreExp[2,]
+    DE_1 = sum(d*X[,,k]) - sum(int1*E1)   
+    
+    E2 = La1*abs(X[1,,k])*AVE_X[1,]*YpreExp[1,] + La2*abs(X[2,,k])*AVE_X[2,]*YpreExp[2,]
+    
+    if (frailty == "LogN" || frailty == "InvGauss") {
+      DE_2 = -2*sum(int1*E2)  
+    }
+    
+    if (frailty == "Gamma") {
+      DE_2 = -2*sum((D+2/est.tht)*E2/C) 
+    }
+    
+    if (!is.null(penalty)) {
+      if (penalty == "LASSO") {
+        DE_1 = DE_1 - n*sign(coef[k])*tune
+        DE_2 = DE_2 - n*tune/abs(coef[k])
+      }
+      if (penalty == "MCP") {
+        DE_1 = DE_1 - n*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
+        DE_2 = DE_2 - n*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
+      }
+      if (penalty == "SCAD") {
+        DE_1 = DE_1 - n*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
+        DE_2 = DE_2 - n*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
+      }
+    }
+    
+    coef[k] = coef[k] - DE_1/DE_2
+  }     
+  
+  # Update frailty parameters
+  if (frailty == "LogN" || frailty == "InvGauss") {
+    int2 <- vector("numeric", length = n) 
+    
+    for (i in 1:n) {  
+      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, mode = 2)$value
+    }
+    
+    est.tht = sum(int2)/n
+    if (est.tht < 0) {
+      est.tht = 1
+    }
+  }
+  
+  if (frailty == "Gamma") {
+    Q01 = n*(digamma(1/est.tht)+log(est.tht)-2)/(est.tht^2) + 
+      sum(log(C)+D/C-digamma(A)+2/(C*est.tht))/(est.tht^2) + sum(CC/C)/(est.tht^2)
+    Q02 = n*(4-2*digamma(1/est.tht)-trigamma(1/est.tht)/est.tht-log(est.tht))/(est.tht^3)+
+      2*sum(trigamma(A)/(2*est.tht)+digamma(A)-log(C)-D/C-3/(C*est.tht))/(est.tht^3) -
+      5*sum(CC/C)/(est.tht^3)
+    
+    est.tht1 = est.tht - Q01/Q02
+    if(est.tht1 > 0) {
+      est.tht = est.tht1 
+    }
+  }
+  
+  return(list(coef = coef, est.tht = est.tht, lambda1 = lambda1, lambda2 = lambda2))
+}

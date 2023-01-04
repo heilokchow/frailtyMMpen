@@ -345,7 +345,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
   
   if (frailty == "LogN" || frailty == "InvGauss") {
     
-    BB = unlist(pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
+    BB = unlist(purrr::pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
     
     for (i in 1:n) {  
       int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
@@ -364,36 +364,43 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
   
   if (frailty == "Gamma") {
     C = 1/est.tht + AA
-    A = 1/est.tht + D
+    A = 1/est.tht + DD
     int1 = A/C
   }
   
   # Update lambda Variables
   
+  Xmatexp = apply(Xmat, 3, function(x, coef) {exp(x %*% coef)}, coef = coef)
+  SUM_0 = lambda
+  
   for (i in 1:n) {
     it = length(y[[i]])
     for (j in 1:it) {
       th = which(tall == y[[i]][j])
-      lambda[[i]][j] = d[[i]][j] / sum((yend >= y[[i]][j]) * int1 * exp(Xmat[,,th] %*% coef))
+      SUM_0[[i]][j] = sum((yend >= y[[i]][j]) * int1 * Xmatexp[,th])
     }
   }
   
+  lambda = purrr::pmap(list(d, SUM_0), function(x, y) {x/y})
+  
   # Update coefficients
-  AVE_X = apply(abs(X), c(1,2), sum)
-  for(k in 1:p)
-  {
-    E1 = La1*X[1,,k]*YpreExp[1,] + La2*X[2,,k]*YpreExp[2,]
-    DE_1 = sum(d*X[,,k]) - sum(int1*E1)   
+  AVE_X = apply(abs(Xmat), c(1,3), sum)
+  for(k in 1:p) {
     
-    E2 = La1*abs(X[1,,k])*AVE_X[1,]*YpreExp[1,] + La2*abs(X[2,,k])*AVE_X[2,]*YpreExp[2,]
+    SUM_1 = lambda
+    SUM_2 = lambda
     
-    if (frailty == "LogN" || frailty == "InvGauss") {
-      DE_2 = -2*sum(int1*E2)  
+    for (i in 1:n) {
+      it = length(y[[i]])
+      for (j in 1:it) {
+        th = which(tall == y[[i]][j])
+        SUM_1[[i]][j] = sum((yend >= y[[i]][j]) * int1 * Xmatexp[,th] * Xmat[,k,th]) 
+        SUM_2[[i]][j] = sum((yend >= y[[i]][j]) * int1 * Xmatexp[,th] * abs(Xmat[,k,th]) / AVE_X[,th]) 
+      }
     }
     
-    if (frailty == "Gamma") {
-      DE_2 = -2*sum((D+2/est.tht)*E2/C) 
-    }
+    DE_1 = sum(unlist(purrr::pmap(list(d, X, SUM_0, SUM_1), function(a, b, c, d) {a*b - a*d/c})))   
+    DE_2 = sum(unlist(purrr::pmap(list(d, SUM_0, SUM_2), function(a, c, f) {- a*f/c})))   
     
     if (!is.null(penalty)) {
       if (penalty == "LASSO") {
@@ -441,5 +448,5 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
     }
   }
   
-  return(list(coef = coef, est.tht = est.tht, lambda1 = lambda1, lambda2 = lambda2))
+  return(list(coef = coef, est.tht = est.tht, lambda = lambda))
 }

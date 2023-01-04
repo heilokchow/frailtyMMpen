@@ -154,6 +154,34 @@ rs1$coef
 rs1$est.tht
 rs1$likelihood
 
+
+# frailty RE --------------------------------------------------------------
+
+
+yy = sample_CL(coef = c(1, 2), init.var = 1, a = 50, b = 1, cen = 50, frailty = "LogN")
+
+y1 = yy$y 
+d1 = yy$d
+X1 = yy$X
+
+y = list()
+X = list()
+d = list()
+
+for (i in 1:length(y1)) {
+  y[[i]] = y1[i]  
+  X[[i]] = t(matrix(X1[i,,]))  
+  d[[i]] = d1[i, ]  
+}
+
+rs = frailtyMM_RE(y, X, d, frailty = "LogN", penalty = "LASSO", tune = 0.002)
+rs1 = frailtyMM_CL(y1, X1, d1, coef.ini = c(0.5, 0.5), est.tht.ini = 1, lambda.ini = rep(1/50, 50), frailty = "LogN")
+rs$coef
+rs1$coef
+rs1$est.tht
+rs$est.tht
+
+
 # coxph -------------------------------------------------------------------
 
 library(survival)

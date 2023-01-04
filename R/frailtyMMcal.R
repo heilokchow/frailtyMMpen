@@ -93,7 +93,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     }
     
     num = num + 1
-    cat(error, " ", est.tht, " ", k1, " ", al_be, " ", num, '\n')
+    cat(error, " ", est.tht, " ", l1, " ", al_be, " ", num, '\n')
   }
 
   return(list(coef = coef, est.tht = est.tht, lambda = lambda, likelihood = l1))
@@ -269,7 +269,7 @@ frailtyMM_RE <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
       error = abs(l1 - l0)/(1 + abs(l0))
       l0 = l1
     } else {
-      error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda - lambda0))
+      error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(unlist(lambda) - unlist(lambda0)))
     }
     
     num = num + 1

@@ -25,7 +25,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   int1 <- vector("numeric", length = a)
   
   for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
   
@@ -34,7 +34,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   }
   
   for (i in 1:a) {  
-    int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+    int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
   }
   
@@ -110,7 +110,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   if (frailty == "LogN" || frailty == "InvGauss") {
     int2 <- vector("numeric", length = a)
     for (i in 1:a) {  
-      int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
     }
     est.tht = sum(int2)/a
@@ -135,12 +135,12 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   int1 <- vector("numeric", length = a)
   
   for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
   
   for (i in 1:a) {  
-    int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+    int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
   }
   
@@ -395,11 +395,11 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
       for (j in 1:it) {
         th = which(tall == y[[i]][j])
         SUM_1[[i]][j] = sum((yend >= y[[i]][j]) * int1 * Xmatexp[,th] * Xmat[,k,th]) 
-        SUM_2[[i]][j] = sum((yend >= y[[i]][j]) * int1 * Xmatexp[,th] * abs(Xmat[,k,th]) / AVE_X[,th]) 
+        SUM_2[[i]][j] = sum((yend >= y[[i]][j]) * int1 * Xmatexp[,th] * abs(Xmat[,k,th]) * AVE_X[,th]) 
       }
     }
     
-    DE_1 = sum(unlist(purrr::pmap(list(d, X, SUM_0, SUM_1), function(a, b, c, d) {a*b - a*d/c})))   
+    DE_1 = sum(unlist(purrr::pmap(list(d, X, SUM_0, SUM_1), function(a, b, c, d) {a*b[,k] - a*d/c})))   
     DE_2 = sum(unlist(purrr::pmap(list(d, SUM_0, SUM_2), function(a, c, f) {- a*f/c})))   
     
     if (!is.null(penalty)) {

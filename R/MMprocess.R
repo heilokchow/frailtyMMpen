@@ -25,7 +25,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   int1 <- vector("numeric", length = a)
   
   for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
   
@@ -34,7 +34,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   }
   
   for (i in 1:a) {  
-    int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+    int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
   }
   
@@ -110,7 +110,7 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   if (frailty == "LogN" || frailty == "InvGauss") {
     int2 <- vector("numeric", length = a)
     for (i in 1:a) {  
-      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
     }
     est.tht = sum(int2)/a
@@ -135,12 +135,12 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   int1 <- vector("numeric", length = a)
   
   for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
   
   for (i in 1:a) {  
-    int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+    int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
   }
   
@@ -185,7 +185,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     
     
     for (i in 1:n) {  
-      int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, mode = 0)$value
     }
     
@@ -194,7 +194,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     }
     
     for (i in 1:n) {  
-      int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, mode = 1)$value
     }
   }
@@ -261,7 +261,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     int2 <- vector("numeric", length = n) 
     
     for (i in 1:n) {  
-      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
     }
     
@@ -348,7 +348,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
     BB = unlist(purrr::pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
     
     for (i in 1:n) {  
-      int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, mode = 0)$value
     }
     
@@ -357,7 +357,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
     }
     
     for (i in 1:n) {  
-      int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, mode = 1)$value
     }
   }
@@ -425,7 +425,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
     int2 <- vector("numeric", length = n) 
     
     for (i in 1:n) {  
-      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+      int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, mode = 2)$value
     }
     

@@ -19,7 +19,7 @@ logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", pow
 
   int0 <- vector("numeric", length = a)
   for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = Inf,
+    int0[i] = integrate(int_tao, lower = 0, upper = 20,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
 
@@ -66,7 +66,7 @@ logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "
   int0 <- vector("numeric", length = n)
   
   for (i in 1:n) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, mode = 0)$value
   }
   
@@ -125,9 +125,6 @@ logLikihood_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
   
   DD = unlist(lapply(d, sum))
   
-  int0 <- vector("numeric", length = n)
-  int1 <- vector("numeric", length = n)
-  
   if (frailty == "Gamma") {
     C = 1/est.tht + AA
     A = 1/est.tht + DD
@@ -142,10 +139,11 @@ logLikihood_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
   }
   
   int0 <- vector("numeric", length = n)
+  
   BB = unlist(purrr::pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
   
   for (i in 1:n) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, mode = 0)$value
   }
   

@@ -158,7 +158,7 @@ rs1$likelihood
 # frailty RE --------------------------------------------------------------
 
 
-yy = sample_CL(coef = c(1, 2), init.var = 1, a = 50, b = 1, cen = 50, frailty = "LogN")
+yy = sample_CL(coef = c(1, 2), init.var = 1, a = 50, b = 10, cen = 50, frailty = "LogN")
 
 y1 = yy$y 
 d1 = yy$d
@@ -174,13 +174,30 @@ for (i in 1:length(y1)) {
   d[[i]] = d1[i, ]  
 }
 
-rs = frailtyMM_RE(y, X, d, frailty = "LogN", penalty = "LASSO", tune = 0.002)
+rs = frailtyMM_RE(y, X, d, frailty = "LogN")
 rs1 = frailtyMM_CL(y1, X1, d1, coef.ini = c(0.5, 0.5), est.tht.ini = 1, lambda.ini = rep(1/50, 50), frailty = "LogN")
+rs1 = frailtyMM_CL(y1, X1, d1, frailty = "LogN")
 rs$coef
 rs1$coef
 rs1$est.tht
 rs$est.tht
 
+
+coef_test = c(0,0)
+
+for (i in 1:100) {
+  yy = sample_RE(coef = c(1, 2), init.var = 1, a = 50, b = 5, cen = 400, frailty = "LogN")
+  
+  y = yy$y 
+  d = yy$d
+  X = yy$X
+  
+  start = proc.time()[1]
+  rs1 = frailtyMM_RE(y, X, d, frailty = "LogN")
+  end = proc.time()[1]
+  end - start
+  coef_test = coef_test + rs1$coef
+}
 
 # coxph -------------------------------------------------------------------
 

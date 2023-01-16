@@ -186,18 +186,32 @@ rs$est.tht
 coef_test = c(0,0)
 
 for (i in 1:100) {
-  yy = sample_RE(coef = c(1, 2), init.var = 1, a = 50, b = 5, cen = 400, frailty = "LogN")
+  yy = sample_RE(coef = c(1, 2), init.var = 1, n = 50, cen = 200, frailty = "Gamma")
   
   y = yy$y 
   d = yy$d
   X = yy$X
   
   start = proc.time()[1]
-  rs1 = frailtyMM_RE(y, X, d, frailty = "LogN")
+  rs1 = frailtyMM_RE(y, X, d, frailty = "Gamma")
   end = proc.time()[1]
   end - start
   coef_test = coef_test + rs1$coef
+  
+  cat(i, "--------\n")
 }
+
+yy = sample_RE(init.var = 1, n = 50, cen = 100, frailty = "InvGauss")
+
+y = yy$y 
+d = yy$d
+X = yy$X
+
+start = proc.time()[1]
+rs2 = frailtyMMpen(y, X, d, type = "Recurrent", frailty = "InvGauss", penalty = "LASSO")
+end = proc.time()[1]
+
+plot.fpen(rs2)
 
 # coxph -------------------------------------------------------------------
 
@@ -289,3 +303,12 @@ rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "LogN"
 end = proc.time()[1]
 end - start
 
+start = proc.time()[1]
+rs1 = frailtyMM(Surv(tstart, tstop, status) ~ . + cluster(id), cgd, frailty = "LogN")
+end = proc.time()[1]
+end - start
+
+rs1$coef
+
+gam <- emfrail(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), data = cgd)
+summary(gam)

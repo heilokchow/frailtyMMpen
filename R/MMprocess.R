@@ -437,10 +437,10 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
   
   if (frailty == "Gamma") {
     Q01 = n*(digamma(1/est.tht)+log(est.tht)-2)/(est.tht^2) + 
-      sum(log(C)+D/C-digamma(A)+2/(C*est.tht))/(est.tht^2) + sum(CC/C)/(est.tht^2)
+      sum(log(C)+DD/C-digamma(A)+2/(C*est.tht))/(est.tht^2) + sum(AA/C)/(est.tht^2)
     Q02 = n*(4-2*digamma(1/est.tht)-trigamma(1/est.tht)/est.tht-log(est.tht))/(est.tht^3)+
-      2*sum(trigamma(A)/(2*est.tht)+digamma(A)-log(C)-D/C-3/(C*est.tht))/(est.tht^3) -
-      5*sum(CC/C)/(est.tht^3)
+      2*sum(trigamma(A)/(2*est.tht)+digamma(A)-log(C)-DD/C-3/(C*est.tht))/(est.tht^3) -
+      5*sum(AA/C)/(est.tht^3)
     
     est.tht1 = est.tht - Q01/Q02
     if(est.tht1 > 0) {

@@ -247,18 +247,15 @@ frailtyMM_RE <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     al_be = sum(u_be*v_be)/sum(v_be^2)
     if (al_be > -1) {al_be = -1}
     
-    dc = (2*al_be*u_be - al_be^2*v_be)
-    coef = coef - dc
-    rs = MMprocess_RE(y, X, d, coef, lambda, est.tht, frailty = frailty, penalty = penalty, tune = tune) 
-    # for (k1 in 0:4) {
-    #   dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
-    #   coef.temp = coef - dc
-    #   rs = MMprocess_RE(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, penalty = penalty, tune = tune) 
-    #   if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
-    #     break
-    #   } 
-    # }
-    # 
+    for (k1 in 0:4) {
+      dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
+      coef.temp = coef - dc
+      rs = MMprocess_RE(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, penalty = penalty, tune = tune)
+      if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
+        break
+      }
+    }
+
     coef = rs$coef
     est.tht = rs$est.tht
     lambda = rs$lambda

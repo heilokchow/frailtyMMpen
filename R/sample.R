@@ -40,7 +40,7 @@ sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
 
 
 
-sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lambda2 = 5, frailty = "LogN", init.var = 10, n = 200, cen = 2) {
+sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lambda2 = 5, frailty = "LogN", power = NULL, init.var = 10, n = 200, cen = 2) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -58,6 +58,10 @@ sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lam
   if (frailty == "InvGauss") {
     alp = 1/init.var
     u = SuppDists::rinvGauss(n, 1, alp)
+  }
+  
+  if (frailty == "PVF") {
+    u = rtweedie(a, mu = 1, phi = init.var, power = power)
   }
   
   X = array(runif(2*n*p, 0, 0.5), c(2, n, p))
@@ -79,7 +83,7 @@ sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lam
 }
 
 
-sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, n = 50, cen = 400) {
+sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frailty = "LogN", power = NULL, init.var = 1, n = 50, cen = 400) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -106,8 +110,10 @@ sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
   }
   
   y = list()
+  y1 = list()
   X = list()
   d = list()
+  id = list()
   
   for(i in seq_len(n)) {
     temps = 0
@@ -127,12 +133,26 @@ sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
     y[[i]][li] = cen[i,]
     d[[i]][li] = 0
     
+    y1[[i]] = y[[i]][1:(li-1)]
     y[[i]] = y[[i]][2:li]
     d[[i]] = d[[i]][2:li]
     X[[i]] = X[[i]][2:li,, drop = FALSE]
+    id[[i]] = rep(i, li-1)
   }
   
-  return(list(y = y, X = X, d = d))
+  out = unlist(y)
+  N = length(out)
+  outX = matrix(0, nrow = 0, ncol = p)
+  for (i in seq_len(n)) {
+    outX = rbind(outX, X[[i]])
+  }
+  outX = as.data.frame(outX)
+  outX$start = unlist(y1)
+  outX$end = unlist(y)
+  outX$status = unlist(d)
+  outX$id = unlist(id)
+  
+  return(outX)
 }
 
 

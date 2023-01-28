@@ -1,3 +1,19 @@
+#' Fitting frailty models with clustered, multi-event and recurrent data using MM algorithm
+#' 
+#' @importFrom purrr pmap
+#' @param formula Formula where the left hand side is an object of the type \code{Surv}
+#' and the right hand side contains the variables and additional specifications. 
+#' \code{+cluster()} function specify the group id for clustered data or individual id for recurrent data.
+#' \code{+event()} function specify the event id for multi-event data (only two events are allowed).
+#' @param data The \code{data.frame} where the formula argument can be evaluated.
+#' @param frailty The frailty used for model fitting. The default is "LogN", other choices are
+#' "InvGauss", "Gamma" and "PVF". (Note that the computation time for PVF family will be slow 
+#' due to the non-explicit expression of likelihood function)
+#' @param power The power used if PVF frailty is applied.
+#' @param tol The tolerance level for convergence.
+#' @param maixt Maximum iterations for MM algorithm.
+#' @export
+
 frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6, maxit = 200, ...) {
   
   Call <- match.call()
@@ -93,7 +109,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
     d1 = m[[1]][nord, 3]
     
     dfX = as.data.frame(cbind(mxid, mx1))
-    X = split(dfX, f = df$mxid)
+    X = split(dfX, f = dfX$mxid)
     X = lapply(X, function(x) {x = as.matrix(x[, -1])})
     
     y = split(y1, f = mxid)

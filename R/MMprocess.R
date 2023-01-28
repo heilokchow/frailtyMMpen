@@ -24,24 +24,35 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   int0 <- vector("numeric", length = a)
   int1 <- vector("numeric", length = a)
   
-  for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
+  if (frailty == "LogN" || frailty == "InvGauss" || frailty == "PVF") {
+    for (i in 1:a) {  
+      int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
+    }
+    
+    if (any(int0 == 0)) {
+      return(list(coef = rep(1/p, p), est.tht = est.tht, lambda = rep(1/N, N)))
+    }
+    
+    for (i in 1:a) {  
+      int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
+    }
   }
   
-  if (any(int0 == 0)) {
-    return(list(coef = rep(1/p, p), est.tht = est.tht, lambda = rep(1/N, N)))
+  if (frailty == "Gamma") {
+    C2 = 1/est.tht + A
+    A2 = 1/est.tht + D
+    int1 = A2/C2
   }
   
-  for (i in 1:a) {  
-    int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
-  }
-  
+  # Update lambda Variables
   ME = matrix(int1, a, b)
   E_0 = as.vector(ME*YpreExp)
   SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])
   SUM_0 = (SUM_0[seq(N,1,-1)])[rank(vy)] 
+  
+  lambda = vd/SUM_0
   
   # Update coefficients
   AVE_X = apply(abs(X), c(1,2), sum)
@@ -76,7 +87,6 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   }
   
   # Update frailty parameters
-  
   if (frailty == "PVF") {
     gn = function(target, est.tht, power, A, B, D, int0) {
       int_f = function(x, i, target, est.tht, A, B, D, tao0) {
@@ -87,12 +97,8 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
       
       s = 0
       for (i in seq_len(length(A))) {
-        temp = tryCatch(integrate(int_f, lower = 0, upper = Inf, stop.on.error = FALSE,
-                                  i = i, target = target, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i])$value,
-                        error = function(e){
-                          integrate(int_f, lower = 0, upper = 20, stop.on.error = FALSE,
-                                    i = i, target = target, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i])$value
-                        })
+        temp = integrate(int_f, lower = 0, upper = 20, stop.on.error = FALSE,
+                         i = i, target = target, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i])$value
         s = s + temp
       }
       return(s)
@@ -115,47 +121,26 @@ MMprocess_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
     }
     est.tht = sum(int2)/a
   }
-  
+
   if (est.tht < 0) {
     est.tht = 1
   } 
   
-  # Update lambda Variables (Use Updated coef and est.tht)
-  
-  YpreExp = matrix(0, a, b)
-  for (i in 1:a) {
-    YpreExp[i,] = exp(X[i,,] %*% coef)
+  if (frailty == "Gamma") {
+    Q01 = a*(digamma(1/est.tht)+log(est.tht)-1)/(est.tht^2) + sum(A2/C2-digamma(A2)+log(C2))/(est.tht^2) 
+    Q02 = a*(3-2*digamma(1/est.tht)-2*log(est.tht))/(est.tht^3)+2*sum(digamma(A2)-log(C2)-A2/C2)/(est.tht^3) - a*trigamma(1/est.tht)/(est.tht^4)
+    
+    est.tht1 = est.tht - Q01/Q02
+    if(est.tht1 > 0) {
+      est.tht = est.tht1 
+    }
   }
-  
-  A = rowSums(La*YpreExp)
-  B = apply((lambda*YpreExp)^d, 1, prod)
-  D = rowSums(d) 
-  
-  int0 <- vector("numeric", length = a)
-  int1 <- vector("numeric", length = a)
-  
-  for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
-  }
-  
-  for (i in 1:a) {  
-    int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
-  }
-  
-  ME = matrix(int1, a, b)
-  E_0 = as.vector(ME*YpreExp)
-  SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])
-  SUM_0 = (SUM_0[seq(N,1,-1)])[rank(vy)] 
-  
-  lambda = vd/SUM_0
-  
+
   return(list(coef = coef, est.tht = est.tht, lambda = lambda))
 }
 
 
-MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "LogN", penalty = NULL, tune = NULL) {
+MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -180,13 +165,12 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
   int0 <- vector("numeric", length = n)
   int1 <- vector("numeric", length = n)
 
-  if (frailty == "LogN" || frailty == "InvGauss") {
+  if (frailty == "LogN" || frailty == "InvGauss" || frailty == "PVF") {
     AA = (lambda1*YpreExp[1,])^(d1)*(lambda2*YpreExp[2,])^(d2)
-    
     
     for (i in 1:n) {  
       int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, mode = 0)$value
+                          i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, power = power, mode = 0)$value
     }
     
     if (any(int0 == 0)) {
@@ -195,7 +179,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     
     for (i in 1:n) {  
       int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, mode = 1)$value
+                          i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
     }
   }
   
@@ -257,12 +241,38 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
   }     
   
   # Update frailty parameters
+  if (frailty == "PVF") {
+    gn = function(target, est.tht, power, A, B, D, int0) {
+      int_f = function(x, i, target, est.tht, A, B, D, tao0) {
+        temp0 = dtweedie.dldphi(y = x, mu = 1, phi = target, power = power)*
+          dtweedie(x, mu = 1, phi = est.tht, power = power)*x^D[i]*B[i]*exp(-A[i]*x)/tao0
+        return(temp0)
+      }
+      
+      s = 0
+      for (i in seq_len(length(A))) {
+        temp = integrate(int_f, lower = 0, upper = 20, stop.on.error = FALSE,
+                         i = i, target = target, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i])$value
+        s = s + temp
+      }
+      return(s)
+    }
+    
+    if (gn(max(0.2, est.tht - 3), est.tht, power, CC, AA, D, int0) > 0) {
+      est.tht = max(0.2, est.tht - 3)
+    } else if (gn(min(est.tht + 3, 20), est.tht, power, CC, AA, D, int0) < 0) {
+      est.tht = min(est.tht + 3, 20)
+    } else {
+      est.tht = uniroot(gn, c(max(0.2, est.tht - 3), min(est.tht + 3, 20)), est.tht = est.tht, power = power, A = CC, B = AA, D = D, int0 = int0, tol = 1e-3)$root
+    }
+  }
+  
   if (frailty == "LogN" || frailty == "InvGauss") {
     int2 <- vector("numeric", length = n) 
     
     for (i in 1:n) {  
       int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
+                          i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 2)$value
     }
     
     est.tht = sum(int2)/n
@@ -289,7 +299,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
 
 
 
-MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penalty = NULL, tune = NULL) {
+MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -343,13 +353,13 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
   int0 <- vector("numeric", length = n)
   int1 <- vector("numeric", length = n)
   
-  if (frailty == "LogN" || frailty == "InvGauss") {
+  if (frailty == "LogN" || frailty == "InvGauss" || frailty == "PVF") {
     
     BB = unlist(purrr::pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
     
     for (i in 1:n) {  
       int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, mode = 0)$value
+                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, power = power, mode = 0)$value
     }
     
     if (any(int0 == 0)) {
@@ -358,7 +368,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
     
     for (i in 1:n) {  
       int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, mode = 1)$value
+                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
     }
   }
   
@@ -369,7 +379,6 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
   }
   
   # Update lambda Variables
-  
   Xmatexp = apply(Xmat, 3, function(x, coef) {exp(x %*% coef)}, coef = coef)
   SUM_0 = lambda
   
@@ -421,12 +430,38 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", penal
   }     
   
   # Update frailty parameters
+  if (frailty == "PVF") {
+    gn = function(target, est.tht, power, A, B, D, int0) {
+      int_f = function(x, i, target, est.tht, A, B, D, tao0) {
+        temp0 = dtweedie.dldphi(y = x, mu = 1, phi = target, power = power)*
+          dtweedie(x, mu = 1, phi = est.tht, power = power)*x^D[i]*B[i]*exp(-A[i]*x)/tao0
+        return(temp0)
+      }
+      
+      s = 0
+      for (i in seq_len(length(A))) {
+        temp = integrate(int_f, lower = 0, upper = 20, stop.on.error = FALSE,
+                         i = i, target = target, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i])$value
+        s = s + temp
+      }
+      return(s)
+    }
+    
+    if (gn(max(0.2, est.tht - 3), est.tht, power, AA, BB, DD, int0) > 0) {
+      est.tht = max(0.2, est.tht - 3)
+    } else if (gn(min(est.tht + 3, 20), est.tht, power, AA, BB, DD, int0) < 0) {
+      est.tht = min(est.tht + 3, 20)
+    } else {
+      est.tht = uniroot(gn, c(max(0.2, est.tht - 3), min(est.tht + 3, 20)), est.tht = est.tht, power = power, A = AA, B = BB, D = DD, int0 = int0, tol = 1e-3)$root
+    }
+  }
+  
   if (frailty == "LogN" || frailty == "InvGauss") {
     int2 <- vector("numeric", length = n) 
     
     for (i in 1:n) {  
       int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, mode = 2)$value
+                          i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, power = power, mode = 2)$value
     }
     
     est.tht = sum(int2)/n

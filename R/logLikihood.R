@@ -17,6 +17,18 @@ logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", pow
   B = apply((lambda*exp(apply(X*BE, c(1,2), sum)))^d, 1, prod)
   D = rowSums(d)
 
+  if (frailty == "Gamma") {
+    C2 = 1/est.tht + A
+    A2 = 1/est.tht + D
+    AC = A2/C2
+    
+    l1 = sum(lgamma(A2)) - a*(lgamma(1/est.tht)+log(est.tht)/est.tht) - sum(A2*log(C2)) 
+    l2 = sum(log(lambda[lambda > 0]))
+    l3 = sum(d*apply(X*BE, c(1,2), sum))
+    
+    return(l1+l2+l3) 
+  }
+  
   int0 <- vector("numeric", length = a)
   for (i in 1:a) {  
     int0[i] = integrate(int_tao, lower = 0, upper = 20,
@@ -27,7 +39,7 @@ logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", pow
 }
 
 
-logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "LogN") {
+logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "LogN", power = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -67,14 +79,14 @@ logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "
   
   for (i in 1:n) {  
     int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, mode = 0)$value
+                        i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, power = power, mode = 0)$value
   }
   
   return(sum(log(int0)))
 }
 
 
-logLikihood_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
+logLikihood_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power = NULL) {
   
   p = length(coef)
   coef = as.matrix(coef)
@@ -144,7 +156,7 @@ logLikihood_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN") {
   
   for (i in 1:n) {  
     int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, mode = 0)$value
+                        i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, power = power, mode = 0)$value
   }
   
   return(sum(log(int0)))

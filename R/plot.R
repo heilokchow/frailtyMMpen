@@ -1,3 +1,5 @@
+#' @export
+#' 
 plot.fpen <- function(x, ...) {
   xaxis = log(x$tune)
   yaxis = t(x$coef)

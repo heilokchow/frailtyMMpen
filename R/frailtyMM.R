@@ -57,6 +57,18 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
       d = matrix(m[[1]][nord, 2], c(a, b), byrow = TRUE)
       
       output = frailtyMM_CL(y, X, d, frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol)
+      ret = list(coef = output$coef,
+                 est.tht = output$est.tht,
+                 lambda = output$lambda,
+                 lambda2 = NULL,
+                 likelihood = output$likelihood,
+                 input = output$input,
+                 frailty = frailty,
+                 power = power,
+                 iter = output$iter,
+                 convergence = output$convergence,
+                 formula = formula,
+                 datatype = "Cluster")
     }
     
     event_id <- grep("event", names(m))
@@ -85,6 +97,18 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
       d = matrix(m[[1]][nord, 2], c(2, n), byrow = TRUE)
       
       output = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = tol)
+      ret = list(coef = output$coef,
+                 est.tht = output$est.tht,
+                 lambda = output$lambda1,
+                 lambda2 = output$lambda2,
+                 likelihood = output$likelihood,
+                 input = output$input,
+                 frailty = frailty,
+                 power = power,
+                 iter = output$iter,
+                 convergence = output$convergence,
+                 formula = formula,
+                 datatype = "Multi-event")
     }
   }
   
@@ -116,7 +140,20 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
     d = split(d1, f = mxid)
     
     output = frailtyMM_RE(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = tol)
+    ret = list(coef = output$coef,
+               est.tht = output$est.tht,
+               lambda = output$lambda,
+               lambda2 = NULL,
+               likelihood = output$likelihood,
+               input = output$input,
+               frailty = frailty,
+               power = power,
+               iter = output$iter,
+               convergence = output$convergence,
+               formula = formula,
+               datatype = "Recurrent")
   }
   
-  return(output)
+  class(ret) <- "fmm"
+  return(ret)
 }

@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.3.0), survival, SuppDists, purrr, numDeriv
+Depends: R (>= 3.3.0), survival, SuppDists, purrr, numDeriv, tweedie
 Imports: Rcpp (>= 1.0.8)
 LinkingTo: Rcpp
 RoxygenNote: 7.1.2

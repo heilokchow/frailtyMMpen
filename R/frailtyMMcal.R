@@ -8,7 +8,6 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
   vd = as.vector(d)
   
   # Initialize Parameters
-  
   if (!is.null(lambda.ini) && !is.null(coef.ini) && !is.null(est.tht.ini)) {
     
     coef = coef.ini
@@ -35,14 +34,11 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     }
   }
   
-  # if (frailty == "Gamma") {
-  #   return(CLGammaFrailty(y, X, d, coef, lambda, est.tht, penalty = penalty, tune = tune, maxit = maxit, threshold = threshold))
-  # }
-  
   l0 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
   l1 = l0
   error = 3
 
+  ## MM iteration
   num = 0
   while(error > threshold && num < maxit) {
     
@@ -95,8 +91,16 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     num = num + 1
     cat(error, " ", est.tht, " ", l1, " ", al_be, " ", num, '\n')
   }
-
-  return(list(coef = coef, est.tht = est.tht, lambda = lambda, likelihood = l1))
+  
+  output = list(coef = coef,
+                est.tht = est.tht,
+                lambda = lambda,
+                likelihood = l1,
+                input = list(y = y, X = X, d = d),
+                iter = num,
+                convergence = error)
+  
+  return(output)
 }
 
 
@@ -132,6 +136,7 @@ frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.i
   error = 3
   
   num = 0
+  # MM iteration
   while(error > threshold && num < maxit) {
     
     coef0 = coef
@@ -188,7 +193,16 @@ frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.i
     cat(error, " ", est.tht, " ", k1, " ", al_be, " ", num, '\n')
   }
   
-  return(list(coef = coef, est.tht = est.tht, lambda1 = lambda1, lambda2 = lambda2, likelihood = l1))
+  output = list(coef = coef,
+                est.tht = est.tht,
+                lambda1 = lambda1,
+                lambda2 = lambda2,
+                likelihood = l1,
+                input = list(y = y, X = X, d = d),
+                iter = num,
+                convergence = error)
+  
+  return(output)
 }
 
 
@@ -221,6 +235,7 @@ frailtyMM_RE <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
   error = 3
   
   num = 0
+  # MM iteration
   while(error > threshold && num < maxit) {
     
     coef0 = coef
@@ -273,5 +288,13 @@ frailtyMM_RE <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     cat(error, " ", est.tht, " ", l1, " ", num, '\n')
   }
   
-  return(list(coef = coef, est.tht = est.tht, lambda = lambda, likelihood = l1))
+  output = list(coef = coef,
+                est.tht = est.tht,
+                lambda = lambda,
+                likelihood = l1,
+                input = list(y = y, X = X, d = d),
+                iter = num,
+                convergence = error)
+  
+  return(output)
 }

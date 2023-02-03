@@ -1,3 +1,10 @@
+#' Plot the regularization path
+#' 
+#' @description Plot the whole regularization path run by frailtyMMpen
+#' @usage
+#' ##S3 method for class "fpen"
+#' @param x Object with class "fpen"
+#' @param ... Further arguments pass to or from other methods
 #' @export
 #' 
 plot.fpen <- function(x, ...) {

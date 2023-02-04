@@ -294,6 +294,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   tune.min = tuneseq[which.min(BIC_all)])
   } 
   
+  attr(output, "call") <-  Call
   class(output) = "fpen"
   output
 }

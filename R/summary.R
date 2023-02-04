@@ -10,6 +10,7 @@
 #' The standard error and p-value of estimated parameters are based on Fisher Information martix.
 
 #' @export
+
 summary.fmm <- function(model, ...) {
   
   Fisher = -numDeriv::hessian(loglik,
@@ -30,8 +31,8 @@ summary.fmm <- function(model, ...) {
   zth = model$est.tht / th_sd
   zcoef = model$coef / coef_sd
   
-  pval_th = 1 - pnorm(zth)
-  pval_coef = 1 - pnorm(zcoef)
+  pval_th = 2 - 2*pnorm(abs(zth))
+  pval_coef = 2 - 2*pnorm(abs(zcoef))
   
   ret = list(est.tht = model$est.tht,
              coef = model$coef,
@@ -45,8 +46,11 @@ summary.fmm <- function(model, ...) {
              power = model$power,
              datatype = model$datatype,
              iter = model$iter,
-             convergence = model$convergence)
+             coefname = model$coefname,
+             convergence = model$convergence,
+             likelihood = model$likelihood)
   
   class(ret) = "fmm_summary"
+  attr(ret, "call") = attr(model, "call")
   return(ret)
 }

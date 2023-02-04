@@ -40,6 +40,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
       remove_cluster_id <- grep(clsname, names(m))
       mx1 = mx[, -c(1, remove_cluster_id)]
       mxid = mx[, cluster_id]
+      coef_name = colnames(mx1)
       
       mxid_info = table(mxid)
       a = length(mxid_info)
@@ -68,6 +69,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
                  iter = output$iter,
                  convergence = output$convergence,
                  formula = formula,
+                 coefname = coef_name,
                  datatype = "Cluster")
     }
     
@@ -80,6 +82,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
       remove_event_id <- grep(evsname, names(m))
       mx1 = mx[, -c(1, remove_event_id)]
       mxid = mx[, event_id]
+      coef_name = colnames(mx1)
       
       mxid_info = table(mxid)
       n = length(mxid_info)
@@ -108,6 +111,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
                  iter = output$iter,
                  convergence = output$convergence,
                  formula = formula,
+                 coefname = coef_name,
                  datatype = "Multi-event")
     }
   }
@@ -121,6 +125,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
     remove_cluster_id <- grep(clsname, names(m))
     mx1 = mx[, -c(1, remove_cluster_id)]
     mxid = mx[, cluster_id]
+    coef_name = colnames(mx1)
     
     mxid_info = table(mxid)
     n = length(mxid_info)
@@ -151,9 +156,11 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6,
                iter = output$iter,
                convergence = output$convergence,
                formula = formula,
+               coefname = coef_name,
                datatype = "Recurrent")
   }
   
+  attr(ret, "call") <-  Call
   class(ret) <- "fmm"
   return(ret)
 }

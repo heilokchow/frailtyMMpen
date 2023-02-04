@@ -338,10 +338,10 @@ plot(rs2)
 # Rat
 head(rats)
 
-rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "Gamma")
+rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "LogN")
 rs1$coef
 rs1$est.tht
-
+summary(rs1)
 
 mm_gam = emfrail(Surv(time, status) ~ rx + sex + cluster(litter), data = rats, distribution = emfrail_dist(dist = 'gamma'))
 summary(mm_gam)
@@ -351,3 +351,13 @@ summary(f_pack)
 
 rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(litter), rats, frailty = "LogN")
 
+# Glmnet
+
+library(glmnet)
+data(QuickStartExample)
+x <- QuickStartExample$x
+y <- QuickStartExample$y
+fit <- glmnet(x, y)
+plot(fit)
+fit
+summary(fit)

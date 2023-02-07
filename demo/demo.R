@@ -377,12 +377,34 @@ b = 10
 N = a*b
 p = 30
 coef = rep(0.5, p)
-lambda = c(rep(0, N/2), rep(1/N/4, N/2))
-
+lambda = c(rep(1/N/8, N/2), rep(1/N/4, N/2))
+est.tht = 1
 
 p1 = proc.time()[1]
-test = MMCL_TEST(y, X, d, coef, lambda, 1, 0, 0, 0.1, a, b, p)
+test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, a, b, p)
 p2 = proc.time()[1]
 p2-p1
 La = (cumsum(lambda[order(vy)]))[rank(vy)]
+La = matrix(La, a, b)
 
+YpreExp = matrix(0, a, b)
+for (i in 1:a) {
+  YpreExp[i,] = exp(X[i,,] %*% coef)
+}
+A = rowSums(La*YpreExp)
+B = apply((lambda*YpreExp)^d, 1, prod)
+D = rowSums(d)
+
+
+int0 <- vector("numeric", length = a)
+int1 <- vector("numeric", length = a)
+p3 = proc.time()[1]
+for (i in 1:a) {  
+  int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                      i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
+  int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+                      i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
+}
+p4 = proc.time()[1]
+
+  

@@ -361,3 +361,28 @@ fit <- glmnet(x, y)
 plot(fit)
 fit
 summary(fit)
+
+
+# Transfer to GSL ---------------------------------------------------------
+
+yy = sample_CL(init.var = 1, cen = 5, frailty = "Gamma")
+
+y = yy$y 
+d = yy$d
+X = yy$X
+vy = as.vector(y)
+
+a = 50
+b = 10
+N = a*b
+p = 30
+coef = rep(0.5, p)
+lambda = c(rep(0, N/2), rep(1/N/4, N/2))
+
+
+p1 = proc.time()[1]
+test = MMCL_TEST(y, X, d, coef, lambda, 1, 0, 0, 0.1, a, b, p)
+p2 = proc.time()[1]
+p2-p1
+La = (cumsum(lambda[order(vy)]))[rank(vy)]
+

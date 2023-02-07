@@ -15,7 +15,8 @@
 #' @param tol The tolerance level for convergence.
 #' @param maixt Maximum iterations for MM algorithm.
 #' @export
-#' 
+#' @importFrom Rcpp evalCpp
+#' @useDynLib frailtyMMpen, .registration = TRUE
 #' 
 frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", tune = NULL, tol = 1e-6, maxit = 200) {
   

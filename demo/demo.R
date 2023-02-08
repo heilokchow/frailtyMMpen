@@ -38,9 +38,9 @@ y = yy$y
 d = yy$d
 X = yy$X
 
-start = proc.time()[1]
 rs1 = frailtyMM_CL(y, X, d, frailty = "Gamma")
 rs1 = frailtyMM_CL(y, X, d, coef.ini = rs1$coef, est.tht.ini = rs1$est.tht, lambda.ini = rs1$lambda, frailty = "LogN")
+start = proc.time()[1]
 rs1 = frailtyMM_CL(y, X, d, frailty = "LogN")
 end = proc.time()[1]
 end - start
@@ -321,7 +321,7 @@ kidney <- kidney[c("time", "status", "id", "age", "sex" )]
 kidney$sex <- ifelse(kidney$sex == 1, "male", "female")
 head(kidney)
 
-rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "Gamma")
+rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
 rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
 rs1$coef
 rs1$est.tht
@@ -365,12 +365,13 @@ summary(fit)
 
 # Transfer to GSL ---------------------------------------------------------
 
-yy = sample_CL(init.var = 1, cen = 5, frailty = "Gamma")
+yy = sample_CL(init.var = 1, cen = 5, frailty = "Gamma", a = 50, b = 10)
 
 y = yy$y 
 d = yy$d
 X = yy$X
 vy = as.vector(y)
+vd = as.vector(d)
 
 a = 50
 b = 10
@@ -379,32 +380,91 @@ p = 30
 coef = rep(0.5, p)
 lambda = c(rep(1/N/8, N/2), rep(1/N/4, N/2))
 est.tht = 1
+frailty = "LogN"
+power = NULL
+penalty = NULL
 
 p1 = proc.time()[1]
-test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, a, b, p)
+f1 <- function() {
+  test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, a, b, p)
+}
+
 p2 = proc.time()[1]
 p2-p1
-La = (cumsum(lambda[order(vy)]))[rank(vy)]
-La = matrix(La, a, b)
 
-YpreExp = matrix(0, a, b)
-for (i in 1:a) {
-  YpreExp[i,] = exp(X[i,,] %*% coef)
-}
-A = rowSums(La*YpreExp)
-B = apply((lambda*YpreExp)^d, 1, prod)
-D = rowSums(d)
-
-
-int0 <- vector("numeric", length = a)
-int1 <- vector("numeric", length = a)
-p3 = proc.time()[1]
-for (i in 1:a) {  
-  int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
-                      i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
-  int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-                      i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
-}
-p4 = proc.time()[1]
-
+f2 <- function(){
+  La = (cumsum(lambda[order(vy)]))[rank(vy)]
+  La = matrix(La, a, b)
   
+  YpreExp = matrix(0, a, b)
+  for (i in 1:a) {
+    YpreExp[i,] = exp(X[i,,] %*% coef)
+  }
+  A = rowSums(La*YpreExp)
+  B = apply((lambda*YpreExp)^d, 1, prod)
+  D = rowSums(d)
+  
+  
+  int0 <- vector("numeric", length = a)
+  int1 <- vector("numeric", length = a)
+  for (i in 1:a) {  
+    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                        i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
+    int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                        i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
+  }
+  
+  ME = matrix(int1, a, b)
+  E_0 = as.vector(ME*YpreExp)
+  SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])
+  SUM_0 = (SUM_0[seq(N,1,-1)])[rank(vy)] 
+  
+  SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])[rank(-vy)] 
+  
+  AVE_X = apply(abs(X), c(1,2), sum)
+  for(k in 1:p) {
+    E_1 = as.vector(ME*X[,,k]*YpreExp)
+    E_2 = as.vector(ME*AVE_X*abs(X[,,k])*YpreExp)
+    
+    SUM_1 = cumsum((E_1[order(vy)])[seq(N, 1, -1)])
+    SUM_1 = (SUM_1[seq(N, 1, -1)])[rank(vy)]
+    SUM_2 = cumsum((E_2[order(vy)])[seq(N, 1, -1)])
+    SUM_2 = (SUM_2[seq(N, 1, -1)])[rank(vy)]
+    
+    DE_1 = sum(d*X[,,k]) - sum(vd*SUM_1/SUM_0)
+    DE_2 = -sum(vd*SUM_2/SUM_0)
+    
+    if (!is.null(penalty)) {
+      if (penalty == "LASSO") {
+        DE_1 = DE_1 - N*sign(coef[k])*tune
+        DE_2 = DE_2 - N*tune/abs(coef[k])
+      }
+      if (penalty == "MCP") {
+        DE_1 = DE_1 - N*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
+        DE_2 = DE_2 - N*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
+      }
+      if (penalty == "SCAD") {
+        DE_1 = DE_1 - N*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
+        DE_2 = DE_2 - N*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
+      }
+    }
+    
+    coef[k] = coef[k] - DE_1/DE_2
+  }
+  
+  if (frailty == "LogN" || frailty == "InvGauss") {
+    int2 <- vector("numeric", length = a)
+    for (i in 1:a) {
+      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
+    }
+    est.tht = sum(int2)/a
+  }
+}
+
+microbenchmark(f1(), f2())
+
+p1 = proc.time()[1]
+f1()
+p2 = proc.time()[1]
+p2-p1

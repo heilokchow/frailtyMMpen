@@ -8,39 +8,118 @@
 using namespace Rcpp;
 
 struct Reorder {
+  
   double a;
   double b;
   int id;
+  
 };
 
 struct intParams {
+  
   double a;
   double b;
   double d;
   double s;
   double por;
+  
 };
 
 double logN1int(double x, void * params) {
+  
   intParams k = *(intParams *) params;
   double ret = 1/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x);
   return ret;
+  
 }
 
 double logN2int(double x, void * params) {
+  
   intParams k = *(intParams *) params;
   double ret = 1/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)*x/k.por;
   return ret;
+  
+}
+
+double logN3int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = std::pow(std::log(x), 2.0)/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
+  return ret;
+  
+}
+
+double InvG1int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = 1/(std::sqrt(2*M_PI*k.s)*std::pow(x, 1.5))*std::exp(-std::pow(x-1, 2.0)/(2*x*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x);
+  return ret;
+  
+}
+
+double InvG2int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = 1/(std::sqrt(2*M_PI*k.s)*std::pow(x, 1.5))*std::exp(-std::pow(x-1, 2.0)/(2*x*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)*x/k.por;
+  return ret;
+  
+}
+
+double InvG3int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = std::pow(x-1, 2.0)/x/(std::sqrt(2*M_PI*k.s)*std::pow(x, 1.5))*std::exp(-std::pow(x-1, 2.0)/(2*x*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
+  return ret;
+  
+}
+
+template <typename T> int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
+void computeLAM(NumericVector& LAM, const NumericVector& lambda, const NumericVector& y, const int& N, int mode) {
+  
+  std::vector<Reorder> LaR(N);
+  std::vector<double> cumLam(N);
+  
+  for (int i = 0; i < N; i++) {
+    LaR[i].a = lambda[i];
+    LaR[i].b = y[i];
+    LaR[i].id = i;
+  }
+  
+  if (mode == 0) {
+    std::sort(LaR.begin(), LaR.end(), [](const Reorder& z1, const Reorder& z2){return(z1.b < z2.b);});
+  }
+  
+  if (mode == 1) {
+    std::sort(LaR.begin(), LaR.end(), [](const Reorder& z1, const Reorder& z2){return(z1.b > z2.b);});
+  }
+  
+  for (int i = 0; i < N; i++) {
+    cumLam[i] = LaR[i].a;
+  }
+  
+  std::partial_sum(cumLam.begin(), cumLam.end(), cumLam.begin(), std::plus<double>());
+  
+  for (int i = 0; i < N; i++) {
+    LAM[LaR[i].id] = cumLam[i];
+  }
+  
 }
 
 // [[Rcpp::export]]
-List MMCL(NumericVector y, NumericVector X, NumericVector d, NumericVector coef, NumericVector lambda,
-         double tht, int frailty, int penalty, double tune, int a, int b, int p) {
+List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
+         const double& tht0, int frailty, int penalty, double tune, int a, int b, int p) {
 
   int N = a*b;
-  std::vector<Reorder> LaR(N);
-  std::vector<double> cumLam(N);
+
+  NumericVector coef = clone(coef0);
+  NumericVector lambda = clone(lambda0);
+  double tht = tht0;
+  
   NumericVector La(N);
+  
   NumericVector YpreExp(N, 0.0);
   intParams kint;
   
@@ -53,24 +132,23 @@ List MMCL(NumericVector y, NumericVector X, NumericVector d, NumericVector coef,
   
   NumericVector int1(a, 0.0);
   NumericVector int2(a, 0.0);
+  NumericVector int3(a, 0.0);
 
-  for (int i = 0; i < N; i++) {
-    LaR[i].a = lambda[i];
-    LaR[i].b = y[i];
-    LaR[i].id = i;
-  }
-
-  std::sort(LaR.begin(), LaR.end(), [](const Reorder& z1, const Reorder& z2){return(z1.b < z2.b);});
-
-  for (int i = 0; i < N; i++) {
-    cumLam[i] = LaR[i].a;
-  }
+  NumericVector ME(N, 0.0);
+  NumericVector E0(N, 0.0);
+  NumericVector SUM0(N, 0.0);
   
-  std::partial_sum(cumLam.begin(), cumLam.end(), cumLam.begin(), std::plus<double>());
+  NumericVector AVEX(N, 0.0);
+  NumericVector E1(N, 0.0);
+  NumericVector D11(N, 0.0);
+  NumericVector SUM1(N, 0.0);
+  NumericVector E2(N, 0.0);
+  NumericVector SUM2(N, 0.0);
+  NumericVector D22(N, 0.0);
   
-  for (int i = 0; i < N; i++) {
-    La[LaR[i].id] = cumLam[i];
-  }
+  double D1(0.0), D2(0.0);
+  
+  computeLAM(La, lambda, y, N, 0);
   
   for (int i = 0; i < p; i++) {
     YpreExp += X[Range(i*N, (i+1)*N-1)] * coef[i];
@@ -91,16 +169,27 @@ List MMCL(NumericVector y, NumericVector X, NumericVector d, NumericVector coef,
     }
   }
   
-  if (frailty == 1) {
+  if (frailty == 1 || frailty == 2) {
     
     gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
-    gsl_function F1, F2;
+    gsl_function F1, F2, F3;
     double result(0.0), error;
     
-    F1.function = &logN1int;
-    F2.function = &logN2int;
+    if (frailty == 1) {
+      F1.function = &logN1int;
+      F2.function = &logN2int;
+      F3.function = &logN3int;
+    }
+    
+    if (frailty == 2) {
+      F1.function = &InvG1int;
+      F2.function = &InvG2int;
+      F3.function = &InvG3int;
+    }
+    
     F1.params = &kint;
     F2.params = &kint;
+    F3.params = &kint;
     kint.s = tht;
     
     for (int i = 0; i < a; i++) {
@@ -116,99 +205,71 @@ List MMCL(NumericVector y, NumericVector X, NumericVector d, NumericVector coef,
       gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       int2[i] = result;
+      
+      gsl_integration_qagiu (&F3, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      int3[i] = result;
     }
     
     gsl_integration_workspace_free (w);
+    
+    tht = std::accumulate(int3.begin(), int3.end(), 0.0) / a;
+    
   }
-//     int0 <- vector("numeric", length = a)
-//     int1 <- vector("numeric", length = a)
-//     
-//     if (frailty == "LogN" || frailty == "InvGauss" || frailty == "PVF") {
-//       for (i in 1:a) {  
-//         int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-//                             i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
-//       }
-//       
-//       if (any(int0 == 0)) {
-//         return(list(coef = rep(1/p, p), est.tht = est.tht, lambda = rep(1/N, N)))
-//       }
-//       
-//       for (i in 1:a) {  
-//         int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-//                             i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
-//       }
-//     }
-//     
-//     if (frailty == "Gamma") {
-//       C2 = 1/est.tht + A
-//       A2 = 1/est.tht + D
-//       int1 = A2/C2
-//     }
-//     
-// # Update lambda Variables
-//     ME = matrix(int1, a, b)
-//       E_0 = as.vector(ME*YpreExp)
-//       SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])
-//       SUM_0 = (SUM_0[seq(N,1,-1)])[rank(vy)] 
-//     
-//     lambda = vd/SUM_0
-//     
-// # Update coefficients
-//     AVE_X = apply(abs(X), c(1,2), sum)
-//       for(k in 1:p) {
-//         E_1 = as.vector(ME*X[,,k]*YpreExp)
-//         E_2 = as.vector(ME*AVE_X*abs(X[,,k])*YpreExp)
-//         
-//         SUM_1 = cumsum((E_1[order(vy)])[seq(N, 1, -1)])
-//         SUM_1 = (SUM_1[seq(N, 1, -1)])[rank(vy)] 
-//         SUM_2 = cumsum((E_2[order(vy)])[seq(N, 1, -1)])
-//         SUM_2 = (SUM_2[seq(N, 1, -1)])[rank(vy)] 
-//         
-//         DE_1 = sum(d*X[,,k]) - sum(vd*SUM_1/SUM_0) 
-//         DE_2 = -sum(vd*SUM_2/SUM_0) 
-//         
-//         if (!is.null(penalty)) {
-//           if (penalty == "LASSO") {
-//             DE_1 = DE_1 - N*sign(coef[k])*tune
-//             DE_2 = DE_2 - N*tune/abs(coef[k])
-//           }
-//           if (penalty == "MCP") {
-//             DE_1 = DE_1 - N*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
-//             DE_2 = DE_2 - N*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
-//           }
-//           if (penalty == "SCAD") {
-//             DE_1 = DE_1 - N*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
-//             DE_2 = DE_2 - N*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
-//           }
-//         }
-//         
-//         coef[k] = coef[k] - DE_1/DE_2
-//       }
-//       
-// if (frailty == "LogN" || frailty == "InvGauss") {
-//   int2 <- vector("numeric", length = a)
-//   for (i in 1:a) {  
-//     int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
-//                         i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
-//   }
-//   est.tht = sum(int2)/a
-// }
-// 
-// if (est.tht < 0) {
-//   est.tht = 1
-// } 
-// 
-// if (frailty == "Gamma") {
-//   Q01 = a*(digamma(1/est.tht)+log(est.tht)-1)/(est.tht^2) + sum(A2/C2-digamma(A2)+log(C2))/(est.tht^2) 
-//   Q02 = a*(3-2*digamma(1/est.tht)-2*log(est.tht))/(est.tht^3)+2*sum(digamma(A2)-log(C2)-A2/C2)/(est.tht^3) - a*trigamma(1/est.tht)/(est.tht^4)
-//   
-//   est.tht1 = est.tht - Q01/Q02
-//   if(est.tht1 > 0) {
-//     est.tht = est.tht1 
-//   }
-// }
 
-  List ret = List::create(La, int1, int2, AA, BB, A, B, D);
+  // Update lambda Variables
+  
+  for (int i = 0; i < b; i++) {
+    ME[Range(i*a, (i+1)*a-1)] = int2;
+  }
+  
+  E0 = ME * YpreExp;
+  computeLAM(SUM0, E0, y, N, 1);
+  lambda = d / SUM0;
+  
+  // Update coefficients
+  
+  for (int i = 0; i < p; i++) {
+    AVEX += abs(X[Range(i*N, (i+1)*N-1)]);
+  } 
+  
+  for (int i = 0; i < p; i++) {
+    
+    E1 = ME * X[Range(i*N, (i+1)*N-1)] * YpreExp;
+    E2 = ME * AVEX *X[Range(i*N, (i+1)*N-1)] * YpreExp;
+    
+    computeLAM(SUM1, E1, y, N, 1);
+    computeLAM(SUM2, E2, y, N, 1);
+    
+    D11 = d * X[Range(i*N, (i+1)*N-1)] - d * SUM1 / SUM0;
+    D22 = - d * SUM2 / SUM0;
+    
+    D1 = std::accumulate(D11.begin(), D11.end(), 0.0);
+    D2 = std::accumulate(D22.begin(), D22.end(), 0.0);
+    
+    if (penalty != 0) {
+      
+      if (penalty == 1) {
+        D1 -= N*sgn(coef[i])*tune;
+        D2 -= N*tune/std::abs(coef[i]);
+      }
+      
+      if (penalty == 2) {
+        D1 -= N*sgn(coef[i])*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune);
+        D2 -= N*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune)/std::abs(coef[i]);
+      }
+      
+      if (penalty == 3) {
+        D1 -= N*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7);
+        D2 -= N*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7)/std::abs(coef[i]);
+      }
+    }
+    
+    coef[i] -= D1/D2;
+    
+  }
+
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, AVEX, SUM1, D2, ME, SUM0, int1, int2);
   return ret;
 }
 

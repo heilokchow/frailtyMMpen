@@ -7,6 +7,35 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
   vy = as.vector(y)
   vd = as.vector(d)
   
+  if (frailty == "LogN") {
+    frailtyc = 1
+  }
+  
+  if (frailty == "InvGauss") {
+    frailtyc = 2
+  }
+  
+  if (is.null(penalty)) {
+    penaltyc = 1
+    tune = 0
+  }
+  
+  if (!is.null(penalty)) {
+    
+    if (penalty == "LASSO") {
+      penaltyc = 1
+    }
+    
+    if (penalty == "MCP") {
+      penaltyc = 2
+    }
+    
+    if (penalty == "SCAD") {
+      penaltyc = 3
+    }
+    
+  }
+  
   # Initialize Parameters
   if (!is.null(lambda.ini) && !is.null(coef.ini) && !is.null(est.tht.ini)) {
     
@@ -46,7 +75,8 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     est.tht0 = est.tht
     lambda0 = lambda
 
-    rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
+    # rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
+    rs1 = MMCL_TEST(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
     coef1 = rs1$coef
     est.tht = rs1$est.tht
     lambda = rs1$lambda
@@ -57,7 +87,8 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 
     u_be = coef1 - coef
 
-    rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
+    # rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
+    rs2 = MMCL_TEST(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
     coef2 = rs2$coef
     est.tht = rs2$est.tht
     lambda = rs2$lambda
@@ -69,7 +100,8 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     for (k1 in 0:4) {
       dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
       coef.temp = coef - dc
-      rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune) 
+      # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune) 
+      rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p) 
       if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
         break
       } 

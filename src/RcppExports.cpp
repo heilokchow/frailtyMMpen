@@ -12,24 +12,24 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // MMCL
-List MMCL(NumericVector y, NumericVector X, NumericVector d, NumericVector coef, NumericVector lambda, double tht, int frailty, int penalty, double tune, int a, int b, int p);
-RcppExport SEXP _frailtyMMpen_MMCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coefSEXP, SEXP lambdaSEXP, SEXP thtSEXP, SEXP frailtySEXP, SEXP penaltySEXP, SEXP tuneSEXP, SEXP aSEXP, SEXP bSEXP, SEXP pSEXP) {
+List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, int penalty, double tune, int a, int b, int p);
+RcppExport SEXP _frailtyMMpen_MMCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP penaltySEXP, SEXP tuneSEXP, SEXP aSEXP, SEXP bSEXP, SEXP pSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type X(XSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type d(dSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type coef(coefSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< double >::type tht(thtSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type coef0(coef0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lambda0(lambda0SEXP);
+    Rcpp::traits::input_parameter< const double& >::type tht0(tht0SEXP);
     Rcpp::traits::input_parameter< int >::type frailty(frailtySEXP);
     Rcpp::traits::input_parameter< int >::type penalty(penaltySEXP);
     Rcpp::traits::input_parameter< double >::type tune(tuneSEXP);
     Rcpp::traits::input_parameter< int >::type a(aSEXP);
     Rcpp::traits::input_parameter< int >::type b(bSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    rcpp_result_gen = Rcpp::wrap(MMCL(y, X, d, coef, lambda, tht, frailty, penalty, tune, a, b, p));
+    rcpp_result_gen = Rcpp::wrap(MMCL(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, a, b, p));
     return rcpp_result_gen;
 END_RCPP
 }

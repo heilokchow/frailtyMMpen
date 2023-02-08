@@ -322,23 +322,25 @@ kidney$sex <- ifelse(kidney$sex == 1, "male", "female")
 head(kidney)
 
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
-rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
+rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN", penalty = "SCAD")
 rs1$coef
 rs1$est.tht
 summary(rs1)
+plot(rs2)
 
 m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney, distribution = emfrail_dist(dist = 'gamma'))
 summary(m_gam)
 
 f_pack <- frailtyPenal(Surv(time, status) ~ age + sex + cluster(id), data = kidney, n.knots = 14, kappa = 10000)
 summary(f_pack)
-plot(rs2)
 
 
 # Rat
 head(rats)
 
-rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "LogN")
+p1 = proc.time()[1]
+rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "Gamma")
+p2 = proc.time()[1]
 rs1$coef
 rs1$est.tht
 summary(rs1)

@@ -7,6 +7,10 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
   vy = as.vector(y)
   vd = as.vector(d)
   
+  if (frailty == "Gamma") {
+    frailtyc = 0
+  }
+  
   if (frailty == "LogN") {
     frailtyc = 1
   }
@@ -69,14 +73,18 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 
   ## MM iteration
   num = 0
+  p0 = 0
   while(error > threshold && num < maxit) {
     
     coef0 = coef
     est.tht0 = est.tht
     lambda0 = lambda
 
+    p1 = proc.time()[1]
     # rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
     rs1 = MMCL_TEST(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+    p2 = proc.time()[1]
+    
     coef1 = rs1$coef
     est.tht = rs1$est.tht
     lambda = rs1$lambda
@@ -87,8 +95,11 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 
     u_be = coef1 - coef
 
+    p3 = proc.time()[1]
     # rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
     rs2 = MMCL_TEST(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+    p4 = proc.time()[1]
+    
     coef2 = rs2$coef
     est.tht = rs2$est.tht
     lambda = rs2$lambda
@@ -100,8 +111,12 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     for (k1 in 0:4) {
       dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
       coef.temp = coef - dc
-      # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune) 
-      rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p) 
+      
+      p5 = proc.time()[1]
+      # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
+      rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+      p6 = proc.time()[1]
+      
       if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
         break
       } 
@@ -122,6 +137,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     
     num = num + 1
     cat(error, " ", est.tht, " ", l1, " ", al_be, " ", num, '\n')
+    p0 = p0 + (p2 - p1) + (p4 - p3) + (p6 - p5)
   }
   
   output = list(coef = coef,
@@ -132,6 +148,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
                 iter = num,
                 convergence = error)
   
+  cat("->", p0)
   return(output)
 }
 

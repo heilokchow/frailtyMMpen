@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf.h>
 #include <string>
 #include <algorithm>
 
@@ -130,6 +131,9 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   NumericVector B(a, 1.0);
   NumericVector D(a, 0.0);
   
+  NumericVector AT(a, 0.0);
+  NumericVector DT(a, 0.0);
+  
   NumericVector int1(a, 0.0);
   NumericVector int2(a, 0.0);
   NumericVector int3(a, 0.0);
@@ -214,6 +218,35 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     gsl_integration_workspace_free (w);
     
     tht = std::accumulate(int3.begin(), int3.end(), 0.0) / a;
+    
+  }
+  
+  if (frailty == 0) {
+    
+    AT = 1/tht + A;
+    DT = 1/tht + D;
+    int2 = DT/AT;
+    
+    double tht1(0.0), Q1(0.0), Q21(0.0), Q22(0.0);
+    
+    Q1 += a*(gsl_sf_psi(1/tht) + std::log(tht) - 1);
+    for (int i = 0; i < a; i++) {
+      Q1 += int2[i] + std::log(AT[i]) - gsl_sf_psi(DT[i]);
+    }
+    Q1 /= std::pow(tht, 2);
+    
+    Q21 += a*(3 - 2*gsl_sf_psi(1/tht) - 2*std::log(tht));
+    for (int i = 0; i < a; i++) {
+      Q21 += 2*(gsl_sf_psi(DT[i]) - int2[i] - std::log(AT[i]));
+    }
+    Q21 /= std::pow(tht, 3);
+    
+    Q22 = - a*gsl_sf_psi_1(1/tht) / std::pow(tht, 4);
+    
+    tht1 = tht - Q1 / (Q21 + Q22);
+    if(tht1 > 0) {
+      tht = tht1 ;
+    }
     
   }
 

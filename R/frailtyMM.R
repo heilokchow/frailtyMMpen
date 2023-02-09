@@ -14,7 +14,7 @@
 #' @param maixt Maximum iterations for MM algorithm.
 #' @export
 
-frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-6, maxit = 200, ...) {
+frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5, maxit = 200, ...) {
   
   Call <- match.call()
   

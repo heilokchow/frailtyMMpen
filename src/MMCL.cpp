@@ -3,6 +3,7 @@
 #include <math.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf.h>
+#include <gsl/gsl_errno.h>
 #include <string>
 #include <algorithm>
 
@@ -23,6 +24,10 @@ struct intParams {
   double d;
   double s;
   double por;
+  
+  void print() {
+    Rcout << "A: "<< a << "B: " << b << "D: "<< d << "T: "<< s << "I: " << por << "\n";
+  }
   
 };
 
@@ -175,6 +180,9 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   
   if (frailty == 1 || frailty == 2) {
     
+    gsl_set_error_handler_off();
+    int status;
+    
     gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
     gsl_function F1, F2, F3;
     double result(0.0), error;
@@ -201,16 +209,33 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       kint.b = B[i];
       kint.d = D[i];
       
-      gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        
+        status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
+        Rcout << "F1: Approximated by Interval\n";
+;
+      }
       
       kint.por = result;
       int1[i] = result;
       
-      gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
+      status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        Rcout << "F2: 0\n";
+        return(List::create(_["error"] = 1));
+      }
       
       int2[i] = result;
       
-      gsl_integration_qagiu (&F3, 0, 0, 1e-7, 1000, w, &result, &error);
+      status = gsl_integration_qagiu (&F3, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        Rcout << "F3: 0\n";
+        stop("F3 failed");
+      }
       
       int3[i] = result;
     }
@@ -302,7 +327,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     
   }
 
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, AVEX, SUM1, D2, ME, SUM0, int1, int2);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, AVEX, SUM1, D2, ME, SUM0, int1, int2);
   return ret;
 }
 

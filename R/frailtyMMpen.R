@@ -18,7 +18,7 @@
 #' @importFrom Rcpp evalCpp
 #' @useDynLib frailtyMMpen, .registration = TRUE
 #' 
-frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", tune = NULL, tol = 1e-6, maxit = 200) {
+frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", tune = NULL, tol = 1e-5, maxit = 200) {
   
   Call <- match.call()
   
@@ -117,7 +117,13 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
   }
   
   threshold = tol
-  tuneseq = exp(seq(-5.5, 1, 0.25))
+  
+  if (is.null(tune)) {
+    tuneseq = exp(seq(-5.5, 1, 0.25))
+  } else {
+    tuneseq = tune
+  }
+  
   if (type == "Cluster") {
     
     p = dim(X)[3]
@@ -173,7 +179,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   likelihood = likelihood_all,
                   BIC = BIC_all,
                   tune = tuneseq[seq_len(z)],
-                  tune.min = tuneseq[which.min(BIC_all)])
+                  tune.min = tuneseq[which.min(BIC_all)],
+                  y = y,
+                  X = X,
+                  d = d)
   }
   
   if (type == "Recurrent") {
@@ -230,7 +239,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   likelihood = likelihood_all,
                   BIC = BIC_all,
                   tune = tuneseq[seq_len(z)],
-                  tune.min = tuneseq[which.min(BIC_all)])
+                  tune.min = tuneseq[which.min(BIC_all)],
+                  y = y,
+                  X = X,
+                  d = d)
   } 
   
   if (type == "Multiple") {
@@ -292,7 +304,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   likelihood = likelihood_all,
                   BIC = BIC_all,
                   tune = tuneseq[seq_len(z)],
-                  tune.min = tuneseq[which.min(BIC_all)])
+                  tune.min = tuneseq[which.min(BIC_all)],
+                  y = y,
+                  X = X,
+                  d = d)
   } 
   
   attr(output, "call") <-  Call

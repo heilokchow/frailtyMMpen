@@ -42,7 +42,7 @@ logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", pow
   
   int0 <- vector("numeric", length = a)
   for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = 20,
+    int0[i] = integrate(int_tao, lower = 0.001, upper = 20,
                         i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
   }
 

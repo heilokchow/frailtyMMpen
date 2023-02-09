@@ -1,4 +1,4 @@
-frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-6) {
+frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-5) {
   
   p = dim(X)[3]
   a = nrow(y)
@@ -73,7 +73,9 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 
   ## MM iteration
   num = 0
+  SQS1 = 1
   p0 = 0
+  threshold = threshold * (p+1)
   while(error > threshold && num < maxit) {
     
     coef0 = coef
@@ -104,41 +106,67 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     est.tht = rs2$est.tht
     lambda = rs2$lambda
 
-    v_be = coef2 - 2*coef1 + coef
-    al_be = sum(u_be*v_be)/sum(v_be^2)
-    if (al_be > -1) {al_be = -1}
-
-    for (k1 in 0:4) {
-      dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
-      coef.temp = coef - dc
-      
-      p5 = proc.time()[1]
-      # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-      rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
-      p6 = proc.time()[1]
-      
-      if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
-        break
-      } 
+    if (!SQS1) {
+      coef = coef2
     }
-    
-    coef = rs$coef
-    est.tht = rs$est.tht
-    lambda = rs$lambda
+  
+    if (SQS1) {
       
-    l1 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
-    
-    if (is.null(penalty)) {
-      error = abs(l1 - l0)/(1 + abs(l0))
-      l0 = l1
-    } else {
-      error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda - lambda0))
+      v_be = coef2 - 2*coef1 + coef
+      al_be = sum(u_be*v_be)/sum(v_be^2)
+      if (al_be > -1) {al_be = -1}
+      
+      for (k1 in 0:7) {
+        dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
+  
+        if (sum(abs(dc)) > p) {
+          next
+        }
+  
+        coef.temp = coef - dc
+  
+        p5 = proc.time()[1]
+        # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
+        rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+        p6 = proc.time()[1]
+  
+        if (rs$error) {
+          coef = init$coef
+          est.tht = init$est.tht
+          lambda = init$lambda
+          SQS1 = 0
+          num = 0
+          break
+        }
+        
+        if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
+          break
+        }
+      }
+      
+      if (!rs$error) {
+        coef = rs$coef
+        est.tht = rs$est.tht
+        lambda = rs$lambda
+      }
     }
+ 
+    # l1 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
+    error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0))
+    # 
+    # if (is.null(penalty)) {
+    #   error = abs(l1 - l0)/(1 + abs(l0))
+    #   l0 = l1
+    # } else {
+    #   error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda - lambda0))
+    # }
     
     num = num + 1
-    cat(error, " ", est.tht, " ", l1, " ", al_be, " ", num, '\n')
+    cat(error, " ", est.tht, " ", " ", al_be, " ", num, '\n')
     p0 = p0 + (p2 - p1) + (p4 - p3) + (p6 - p5)
   }
+  
+  l1 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
   
   output = list(coef = coef,
                 est.tht = est.tht,

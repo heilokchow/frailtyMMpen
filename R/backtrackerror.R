@@ -21,7 +21,7 @@ backtrackerror <- function(model, coef, est.tht, lambda, lambda2 = NULL) {
     c3 = max(abs((sum(lambdan1) - sum(lambda)) / sum(lambda)), abs((sum(lambdan2) - sum(lambda2)) / sum(lambda2)))
   }
 
-  if (c1 > 10 || c2 > 5 || c3 > 10) {
+  if (c1 > length(coef)*2 || c2 > 3 || c3 > 10) {
     return(1)
   }
   return(0)

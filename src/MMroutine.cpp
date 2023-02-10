@@ -6,112 +6,51 @@
 #include <gsl/gsl_errno.h>
 #include <string>
 #include <algorithm>
+#include "intdist.h"
 
 using namespace Rcpp;
 
 struct Reorder {
-  
+
   double a;
   double b;
   int id;
-  
+
 };
-
-struct intParams {
-  
-  double a;
-  double b;
-  double d;
-  double s;
-  double por;
-  
-  void print() {
-    Rcout << "A: "<< a << "B: " << b << "D: "<< d << "T: "<< s << "I: " << por << "\n";
-  }
-  
-};
-
-double logN1int(double x, void * params) {
-  
-  intParams k = *(intParams *) params;
-  double ret = 1/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x);
-  return ret;
-  
-}
-
-double logN2int(double x, void * params) {
-  
-  intParams k = *(intParams *) params;
-  double ret = 1/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)*x/k.por;
-  return ret;
-  
-}
-
-double logN3int(double x, void * params) {
-  
-  intParams k = *(intParams *) params;
-  double ret = std::pow(std::log(x), 2.0)/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
-  return ret;
-  
-}
-
-double InvG1int(double x, void * params) {
-  
-  intParams k = *(intParams *) params;
-  double ret = 1/(std::sqrt(2*M_PI*k.s)*std::pow(x, 1.5))*std::exp(-std::pow(x-1, 2.0)/(2*x*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x);
-  return ret;
-  
-}
-
-double InvG2int(double x, void * params) {
-  
-  intParams k = *(intParams *) params;
-  double ret = 1/(std::sqrt(2*M_PI*k.s)*std::pow(x, 1.5))*std::exp(-std::pow(x-1, 2.0)/(2*x*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)*x/k.por;
-  return ret;
-  
-}
-
-double InvG3int(double x, void * params) {
-  
-  intParams k = *(intParams *) params;
-  double ret = std::pow(x-1, 2.0)/x/(std::sqrt(2*M_PI*k.s)*std::pow(x, 1.5))*std::exp(-std::pow(x-1, 2.0)/(2*x*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
-  return ret;
-  
-}
-
-template <typename T> int sgn(T val) {
-  return (T(0) < val) - (val < T(0));
-}
 
 void computeLAM(NumericVector& LAM, const NumericVector& lambda, const NumericVector& y, const int& N, int mode) {
-  
+
   std::vector<Reorder> LaR(N);
   std::vector<double> cumLam(N);
-  
+
   for (int i = 0; i < N; i++) {
     LaR[i].a = lambda[i];
     LaR[i].b = y[i];
     LaR[i].id = i;
   }
-  
+
   if (mode == 0) {
     std::sort(LaR.begin(), LaR.end(), [](const Reorder& z1, const Reorder& z2){return(z1.b < z2.b);});
   }
-  
+
   if (mode == 1) {
     std::sort(LaR.begin(), LaR.end(), [](const Reorder& z1, const Reorder& z2){return(z1.b > z2.b);});
   }
-  
+
   for (int i = 0; i < N; i++) {
     cumLam[i] = LaR[i].a;
   }
-  
+
   std::partial_sum(cumLam.begin(), cumLam.end(), cumLam.begin(), std::plus<double>());
-  
+
   for (int i = 0; i < N; i++) {
     LAM[LaR[i].id] = cumLam[i];
   }
-  
+
+}
+
+template <typename T> int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
 }
 
 // [[Rcpp::export]]
@@ -215,7 +154,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
         Rcout << "F1: Approximated by Interval\n";
-;
+
       }
       
       kint.por = result;
@@ -326,8 +265,129 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     coef[i] -= D1/D2;
     
   }
+  
+  // TEST CODE
+  Environment twd = Environment::namespace_env("tweedie");
+  Function ft1 = twd["dtweedie.dldphi"];
+  
+  double tst = *REAL(ft1(1, 1, 1, 2));
 
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, AVEX, SUM1, D2, ME, SUM0, int1, int2);
+  List ret = List::create(tst, _["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, AVEX, SUM1, D2, ME, SUM0, int1, int2);
   return ret;
+}
+
+
+
+// [[Rcpp::export]]
+double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
+                const double& tht0, int frailty, int a, int b, int p) {
+  
+  int N = a*b;
+  
+  NumericVector coef = clone(coef0);
+  NumericVector lambda = clone(lambda0);
+  double tht = tht0;
+  
+  NumericVector La(N);
+  
+  NumericVector Ypre(N, 0.0);
+  NumericVector YpreExp(N, 0.0);
+  intParams kint;
+  
+  NumericVector AA(N);
+  NumericVector BB(N);
+  
+  NumericVector A(a, 0.0);
+  NumericVector B(a, 1.0);
+  NumericVector D(a, 0.0);
+  
+  NumericVector AT(a, 0.0);
+  NumericVector DT(a, 0.0);
+  
+  NumericVector int1(a, 0.0);
+  
+  computeLAM(La, lambda, y, N, 0);
+  
+  for (int i = 0; i < p; i++) {
+    Ypre += X[Range(i*N, (i+1)*N-1)] * coef[i];
+  }
+  
+  YpreExp = exp(Ypre);
+  
+  AA = La * YpreExp;
+  BB = lambda * YpreExp;
+  
+  for (int j = 0; j < b; j++) {
+    for (int i = 0; i < a; i++) {
+      A[i] += AA[j*a + i];
+      if (d[j*a + i] == 1) {
+        B[i] *= BB[j*a + i];
+        D[i]++;
+      }
+    }
+  }
+  
+  if (frailty == 1 || frailty == 2) {
+    
+    gsl_set_error_handler_off();
+    int status;
+    
+    gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+    gsl_function F1;
+    double result(0.0), error;
+    
+    if (frailty == 1) {
+      F1.function = &logN1int;
+    }
+    
+    if (frailty == 2) {
+      F1.function = &InvG1int;
+    }
+    
+    F1.params = &kint;
+    kint.s = tht;
+    
+    for (int i = 0; i < a; i++) {
+      kint.a = A[i];
+      kint.b = B[i];
+      kint.d = D[i];
+      
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        
+        status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
+        Rcout << "F1: Approximated by Interval\n";
+        
+      }
+      
+      kint.por = result;
+      int1[i] = result;
+      
+    }
+    
+    return(sum(log(int1)));
+  }
+  
+  if (frailty == 0) {
+    AT = 1/tht + A;
+    DT = 1/tht + D;
+    
+    double l(0.0);
+    l -= a*(lgamma(1/tht) + std::log(tht)/tht);
+    l += sum(lgamma(DT)) - sum(DT*log(AT));
+    l += sum(d * Ypre);
+    
+    for (int i = 0; i < N; i++) {
+      if (lambda[i] > 0) {
+        l += std::log(lambda[i]);
+      }
+    }
+    
+    return l;
+    
+  } 
+  
+  return 0.0;
 }
 

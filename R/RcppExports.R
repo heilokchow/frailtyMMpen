@@ -5,3 +5,7 @@ MMCL <- function(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, a, b, p)
     .Call(`_frailtyMMpen_MMCL`, y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, a, b, p)
 }
 
+LogLikCL <- function(y, X, d, coef0, lambda0, tht0, frailty, a, b, p) {
+    .Call(`_frailtyMMpen_LogLikCL`, y, X, d, coef0, lambda0, tht0, frailty, a, b, p)
+}
+

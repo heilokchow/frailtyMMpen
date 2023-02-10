@@ -67,8 +67,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     }
   }
   
-  l0 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
-  l1 = l0
+  l0 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p)
   error = 3
 
   ## MM iteration
@@ -151,22 +150,14 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
       }
     }
  
-    # l1 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
     error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0))
-    # 
-    # if (is.null(penalty)) {
-    #   error = abs(l1 - l0)/(1 + abs(l0))
-    #   l0 = l1
-    # } else {
-    #   error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(lambda - lambda0))
-    # }
     
     num = num + 1
     cat(error, " ", est.tht, " ", " ", al_be, " ", num, '\n')
     p0 = p0 + (p2 - p1) + (p4 - p3) + (p6 - p5)
   }
   
-  l1 = logLikihood_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
+  l1 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p)
   
   output = list(coef = coef,
                 est.tht = est.tht,

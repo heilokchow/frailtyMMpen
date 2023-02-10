@@ -41,7 +41,8 @@ X = yy$X
 rs1 = frailtyMM_CL(y, X, d, frailty = "Gamma")
 rs1 = frailtyMM_CL(y, X, d, coef.ini = rs1$coef, est.tht.ini = rs1$est.tht, lambda.ini = rs1$lambda, frailty = "LogN")
 start = proc.time()[1]
-rs1 = frailtyMM_CL(y, X, d, frailty = "LogN", penalty = "SCAD", tune = 1)
+rs1 = frailtyMM_CL(y, X, d, frailty = "LogN")
+# rs1 = frailtyMM_CL(y, X, d, frailty = "LogN", penalty = "SCAD", tune = 1)
 end = proc.time()[1]
 end - start
 
@@ -324,7 +325,7 @@ head(kidney)
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss")
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "Gamma")
-rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss", penalty = "LASSO")
+rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN", penalty = "LASSO")
 rs1$coef
 rs1$est.tht
 summary(rs1)
@@ -338,13 +339,39 @@ d = rs2$d
 
 res = frailtyMM_CL(y, X, d, frailty = "LogN", penalty = "SCAD", tune = 3)
 
+set.seed(5)
+sdata = sample_CL(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
 
 m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney, distribution = emfrail_dist(dist = 'gamma'))
+
+p1 = proc.time()[1]
+m_gam <- emfrail(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
+                   V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
+                   V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + cluster(id), 
+                 data = sdata, distribution = emfrail_dist(dist = 'gamma'))
+p2 = proc.time()[1]
+p2 - p1
+
+for (i in 1:100) {
+  set.seed(i)
+  sdata = sample_CL(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
+  
+  p3 = proc.time()[1]
+  rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "InvGauss", tol = 1e-6)
+  p4 = proc.time()[1]
+  p4 - p3
+}
+
 summary(m_gam)
 
-f_pack <- frailtyPenal(Surv(time, status) ~ age + sex + cluster(id), data = kidney, n.knots = 14, kappa = 10000)
-summary(f_pack)
+p5 = proc.time()[1]
+f_pack <- frailtyPenal(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
+                         V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
+                         V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + cluster(id),
+                       data = sdata, n.knots = 14, kappa = 10000)
+p6 = proc.time()[1]
 
+summary(f_pack)
 
 # Rat
 head(rats)

@@ -1,4 +1,4 @@
-
+#'@export 
 sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
   
   p = length(coef)
@@ -35,7 +35,14 @@ sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
   
   d = 1*(T <= cen)
   y = pmin(T, cen)
-  return(list(y = y, X = X, d = d))
+  
+  X1 = aperm(X, c(2,1,3))
+  outX = as.data.frame(matrix(c(X1), nrow = N, ncol = p))
+  outX$time = as.vector(t(y))
+  outX$status = as.vector(t(d))
+  outX$id = sort(rep(seq(1, a, 1), b))
+  
+  return(outX)
 }
 
 

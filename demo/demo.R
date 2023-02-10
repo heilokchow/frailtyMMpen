@@ -352,14 +352,20 @@ m_gam <- emfrail(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9
 p2 = proc.time()[1]
 p2 - p1
 
+
+test_coef = rep(0, 30)
+test_th = 0
 for (i in 1:100) {
   set.seed(i)
-  sdata = sample_CL(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
+  sdata = sample_CL(init.var = 1, cen = 5, frailty = "PVF", a = 50, b = 10, power = 2)
   
   p3 = proc.time()[1]
-  rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "InvGauss", tol = 1e-6)
+  rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-6, power = 2)
   p4 = proc.time()[1]
   p4 - p3
+  
+  test_coef = test_coef + rs1$coef
+  test_th = test_th + rs1$est.tht
 }
 
 summary(m_gam)
@@ -406,7 +412,7 @@ summary(fit)
 
 # Transfer to GSL ---------------------------------------------------------
 
-yy = sample_CL(init.var = 1, cen = 5, frailty = "Gamma", a = 50, b = 10)
+yy = sample_CL_old(init.var = 1, cen = 5, frailty = "Gamma", a = 50, b = 10)
 
 y = yy$y 
 d = yy$d
@@ -509,3 +515,15 @@ p1 = proc.time()[1]
 f1()
 p2 = proc.time()[1]
 p2-p1
+
+ldTweedie(2,mu=1,p=2,phi=1)
+ldTweedie(2,1,2,1)
+log(dtweedie(2,mu=1,p=2,phi=1))
+dtweedie.dldphi(2,mu=1,phi=1,power=2)
+
+f <- function(x) {
+  log(dtweedie(2,mu=1,phi=x,power=2))
+}
+
+numDeriv::hessian(f, 1)
+dl

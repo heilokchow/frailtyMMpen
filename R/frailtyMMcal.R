@@ -19,8 +19,12 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     frailtyc = 2
   }
   
+  if (frailty == "PVF") {
+    frailtyc = 3
+  }
+  
   if (is.null(penalty)) {
-    penaltyc = 1
+    penaltyc = 0
     tune = 0
   }
   
@@ -38,6 +42,10 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
       penaltyc = 3
     }
     
+  }
+  
+  if (is.null(power)) {
+    power = 0.0
   }
   
   # Initialize Parameters
@@ -67,7 +75,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     }
   }
   
-  l0 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p)
+  l0 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p, power)
   error = 3
 
   ## MM iteration
@@ -83,7 +91,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 
     p1 = proc.time()[1]
     # rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-    rs1 = MMCL_TEST(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+    rs1 = MMCL_TEST(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p, power)
     p2 = proc.time()[1]
     
     coef1 = rs1$coef
@@ -98,7 +106,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
 
     p3 = proc.time()[1]
     # rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-    rs2 = MMCL_TEST(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+    rs2 = MMCL_TEST(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p, power)
     p4 = proc.time()[1]
     
     coef2 = rs2$coef
@@ -126,7 +134,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
   
         p5 = proc.time()[1]
         # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-        rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p)
+        rs = MMCL_TEST(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, a, b, p, power)
         p6 = proc.time()[1]
   
         if (rs$error) {
@@ -157,7 +165,7 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     p0 = p0 + (p2 - p1) + (p4 - p3) + (p6 - p5)
   }
   
-  l1 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p)
+  l1 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p, power)
   
   output = list(coef = coef,
                 est.tht = est.tht,

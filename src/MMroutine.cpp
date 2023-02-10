@@ -55,7 +55,7 @@ template <typename T> int sgn(T val) {
 
 // [[Rcpp::export]]
 List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-         const double& tht0, int frailty, int penalty, double tune, int a, int b, int p) {
+         const double& tht0, int frailty, int penalty, double tune, int a, int b, int p, double power) {
 
   int N = a*b;
 
@@ -117,7 +117,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     }
   }
   
-  if (frailty == 1 || frailty == 2) {
+  if (frailty == 1 || frailty == 2 || frailty == 3) {
     
     gsl_set_error_handler_off();
     int status;
@@ -136,6 +136,13 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       F1.function = &InvG1int;
       F2.function = &InvG2int;
       F3.function = &InvG3int;
+    }
+    
+    if (frailty == 3) {
+      F1.function = &PVF1int;
+      F2.function = &PVF2int;
+      F3.function = &PVF3int;
+      kint.mpvf = power;
     }
     
     F1.params = &kint;
@@ -170,18 +177,45 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       int2[i] = result;
       
       status = gsl_integration_qagiu (&F3, 0, 0, 1e-7, 1000, w, &result, &error);
+      int3[i] = result;
       
-      if (status) {
-        Rcout << "F3: 0\n";
-        stop("F3 failed");
+    }
+    
+    // Update Frailty Parameter
+    
+    if (frailty == 1 || frailty == 2) {
+      tht = std::accumulate(int3.begin(), int3.end(), 0.0) / a;
+    }
+    
+    if (frailty == 3) {
+      
+      NumericVector int4(a, 0.0);
+      
+      gsl_function F4 ;
+      F4.function = &PVF4int;
+      F4.params = &kint;
+      
+      for (int i = 0; i < a; i++) {
+        
+        kint.a = A[i];
+        kint.b = B[i];
+        kint.d = D[i];
+        kint.por = int1[i];
+        
+        status = gsl_integration_qagiu (&F4, 0, 0, 1e-7, 1000, w, &result, &error);
+        int4[i] = result;
+        
       }
       
-      int3[i] = result;
+      double thtPVF = tht - std::accumulate(int3.begin(), int3.end(), 0.0) / std::accumulate(int4.begin(), int4.end(), 0.0);
+      
+      if (thtPVF > 0) {
+        tht = thtPVF;
+      }
+      
     }
     
     gsl_integration_workspace_free (w);
-    
-    tht = std::accumulate(int3.begin(), int3.end(), 0.0) / a;
     
   }
   
@@ -265,14 +299,8 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     coef[i] -= D1/D2;
     
   }
-  
-  // TEST CODE
-  Environment twd = Environment::namespace_env("tweedie");
-  Function ft1 = twd["dtweedie.dldphi"];
-  
-  double tst = *REAL(ft1(1, 1, 1, 2));
 
-  List ret = List::create(tst, _["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, AVEX, SUM1, D2, ME, SUM0, int1, int2);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0);
   return ret;
 }
 
@@ -280,7 +308,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
 
 // [[Rcpp::export]]
 double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-                const double& tht0, int frailty, int a, int b, int p) {
+                const double& tht0, int frailty, int a, int b, int p, double power) {
   
   int N = a*b;
   
@@ -344,6 +372,11 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
       F1.function = &InvG1int;
     }
     
+    if (frailty == 3) {
+      F1.function = &PVF1int;
+      kint.mpvf = power;
+    }
+    
     F1.params = &kint;
     kint.s = tht;
     
@@ -361,7 +394,6 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
         
       }
       
-      kint.por = result;
       int1[i] = result;
       
     }

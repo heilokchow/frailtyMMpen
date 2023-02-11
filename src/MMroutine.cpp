@@ -58,6 +58,8 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
          const double& tht0, int frailty, int penalty, double tune, int a, int b, int p, double power) {
 
   int N = a*b;
+  
+  double temp(0.0);
 
   NumericVector coef = clone(coef0);
   NumericVector lambda = clone(lambda0);
@@ -117,7 +119,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     }
   }
   
-  if (frailty == 1 || frailty == 2 || frailty == 3) {
+  if (frailty == 1 || frailty == 2) {
     
     gsl_set_error_handler_off();
     int status;
@@ -136,13 +138,6 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       F1.function = &InvG1int;
       F2.function = &InvG2int;
       F3.function = &InvG3int;
-    }
-    
-    if (frailty == 3) {
-      F1.function = &PVF1int;
-      F2.function = &PVF2int;
-      F3.function = &PVF3int;
-      kint.mpvf = power;
     }
     
     F1.params = &kint;
@@ -181,41 +176,76 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       
     }
     
-    // Update Frailty Parameter
-    
-    if (frailty == 1 || frailty == 2) {
-      tht = std::accumulate(int3.begin(), int3.end(), 0.0) / a;
-    }
-    
-    if (frailty == 3) {
-      
-      NumericVector int4(a, 0.0);
-      
-      gsl_function F4 ;
-      F4.function = &PVF4int;
-      F4.params = &kint;
-      
-      for (int i = 0; i < a; i++) {
-        
-        kint.a = A[i];
-        kint.b = B[i];
-        kint.d = D[i];
-        kint.por = int1[i];
-        
-        status = gsl_integration_qagiu (&F4, 0, 0, 1e-7, 1000, w, &result, &error);
-        int4[i] = result;
-        
-      }
-      
-      double thtPVF = tht - std::accumulate(int3.begin(), int3.end(), 0.0) / std::accumulate(int4.begin(), int4.end(), 0.0);
-      
-      if (thtPVF > 0) {
-        tht = thtPVF;
-      }
-      
-    }
+    tht = std::accumulate(int3.begin(), int3.end(), 0.0) / a;
     
     gsl_integration_workspace_free (w);
+    
+  }
+    
+  NumericVector int4(a, 0.0);
+  NumericVector int5(a, 0.0);
+  
+  if (frailty == 3) {
+    
+    gsl_set_error_handler_off();
+    
+    int status;
+    
+    
+    gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+    gsl_function F1, F2, F3, F4, F5;
+    double result(0.0), error;
+    
+    F1.function = &PVF1int;
+    F2.function = &PVF2int;
+    F3.function = &PVF3int;
+    F4.function = &PVF4int;
+    F5.function = &PVF5int;
+    
+    F1.params = &kint;
+    F2.params = &kint;
+    F3.params = &kint;
+    F4.params = &kint;
+    F5.params = &kint;
+    kint.s = tht;
+    kint.mpvf = power;
+    
+    for (int i = 0; i < a; i++) {
+      kint.a = A[i];
+      kint.b = B[i];
+      kint.d = D[i];
+      
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      kint.por = result;
+      int1[i] = result;
+      
+      status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        Rcout << "F2: 0\n";
+        return(List::create(_["error"] = 1));
+      }
+      
+      int2[i] = result;
+      
+      status = gsl_integration_qagiu (&F3, 0, 0, 1e-7, 1000, w, &result, &error);
+      int3[i] = result;
+      
+      status = gsl_integration_qagiu (&F4, 0, 0, 1e-7, 1000, w, &result, &error);
+      int4[i] = result;
+      
+      status = gsl_integration_qagiu (&F5, 0, 0, 1e-7, 1000, w, &result, &error);
+      int5[i] = result;
+      
+    }
+    
+    // temp = sum(int5);
+    double thtPVF = tht - std::accumulate(int3.begin(), int3.end(), 0.0) / std::accumulate(int4.begin(), int4.end(), 0.0);
+    
+    if (thtPVF > 0) {
+      tht = thtPVF;
+    }
     
   }
   
@@ -300,7 +330,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     
   }
 
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0);
+  List ret = List::create(int1, int2, int3, int4, int5, _["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0);
   return ret;
 }
 

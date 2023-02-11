@@ -94,7 +94,7 @@ double PVF3int(double x, void * params) {
   
   intParams k = *(intParams *) params;
   double ret = std::exp(*REAL(TW(x, 1, k.mpvf, k.s)));
-  ret = *(REAL(TW(x, 1, k.mpvf, k.s))+1);
+  ret *= *(REAL(TW(x, 1, k.mpvf, k.s))+1);
   ret *= std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
   return ret;
   
@@ -104,7 +104,17 @@ double PVF4int(double x, void * params) {
   
   intParams k = *(intParams *) params;
   double ret = std::exp(*REAL(TW(x, 1, k.mpvf, k.s)));
-  ret = *(REAL(TW(x, 1, k.mpvf, k.s))+2);
+  ret *= *(REAL(TW(x, 1, k.mpvf, k.s))+2);
+  ret *= std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
+  return ret;
+  
+}
+
+double PVF5int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = std::exp(*REAL(TW(x, 1, k.mpvf, k.s)));
+  ret *= *REAL(TW(x, 1, k.mpvf, k.s));
   ret *= std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
   return ret;
   

@@ -325,11 +325,18 @@ head(kidney)
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss")
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "Gamma")
-rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN", penalty = "LASSO")
+rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss", penalty = "SCAD")
+rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss", penalty = "SCAD", tune = 0.2)
 rs1$coef
 rs1$est.tht
 summary(rs1)
 plot(rs2)
+
+m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney, distribution = emfrail_dist(dist = 'gamma'))
+summary(mm_gam)
+
+f_pack <- frailtyPenal(Surv(time, status) ~ age + sex + cluster(id), data = kidney, n.knots = 14, kappa = 10000)
+summary(f_pack)
 
 # DEBUG -------------------------------------------------------------------
 
@@ -342,7 +349,6 @@ res = frailtyMM_CL(y, X, d, frailty = "LogN", penalty = "SCAD", tune = 3)
 set.seed(5)
 sdata = sample_CL(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
 
-m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney, distribution = emfrail_dist(dist = 'gamma'))
 
 p1 = proc.time()[1]
 m_gam <- emfrail(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
@@ -357,10 +363,12 @@ test_coef = rep(0, 30)
 test_th = 0
 for (i in 1:100) {
   set.seed(i)
-  sdata = sample_CL(init.var = 1, cen = 5, frailty = "PVF", a = 50, b = 10, power = 2)
+  sdata = sample_CL(init.var = 1, cen = 5, frailty = "InvGauss", a = 50, b = 10, power = 1.5)
   
   p3 = proc.time()[1]
-  rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-6, power = 2)
+  rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "InvGauss", tol = 1e-6)
+  # rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-5, power = 1.5, maxit = 100)
+  # rs1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-5, power = 1.5, penalty = "LASSO", tune = 0.5)
   p4 = proc.time()[1]
   p4 - p3
   
@@ -412,7 +420,8 @@ summary(fit)
 
 # Transfer to GSL ---------------------------------------------------------
 
-yy = sample_CL_old(init.var = 1, cen = 5, frailty = "Gamma", a = 50, b = 10)
+set.seed(5)
+yy = sample_CL_old(init.var = 1, cen = 5, frailty = "PVF", a = 50, b = 10, power = 1.5)
 
 y = yy$y 
 d = yy$d
@@ -424,11 +433,11 @@ a = 50
 b = 10
 N = a*b
 p = 30
-coef = rep(0.5, p)
-lambda = c(rep(1/N/8, N/2), rep(1/N/4, N/2))
+coef = rep(1/p, p)
+lambda = c(rep(1/N, N))
 est.tht = 1
-frailty = "LogN"
-power = NULL
+frailty = "PVF"
+power = 1.5
 penalty = NULL
 
 p1 = proc.time()[1]
@@ -461,6 +470,51 @@ f2 <- function(){
                         i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
   }
   
+  ss2 = c()
+  ss3 = c()
+  ss4 = c()
+  for (est.tht in seq(0.5, 10, 0.5)) {
+    int2 <- vector("numeric", length = a)
+    int3 <- vector("numeric", length = a)
+    int4 <- vector("numeric", length = a)
+    for (i in 1:a) {  
+      int2[i] = integrate(int_tao1, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 2)$value
+      int3[i] = integrate(int_tao1, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 3)$value
+      int4[i] = integrate(int_tao1, lower = 0, upper = Inf, stop.on.error = FALSE,
+                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 4)$value
+    }
+    ss2 = c(ss2, sum(int2))
+    ss3 = c(ss3, sum(int3))
+    ss4 = c(ss4, sum(int4))
+  }
+  
+  test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 3, 0, 0, a, b, p, 1.5)
+  
+  f <- function(x) {
+    y = ldTweedie(x, mu = 1, phi = 1, p = 1.5)[2]*exp(ldTweedie(x, mu = 1, phi = 1, p = 1.5)[1])*
+      x^2*6.621605e-08*exp(-0.6476275*x)/3.071806e-08
+    return(y+1-1)
+  }
+
+  f1 <- function(x) {
+    (-0.5*log(2*pi*1)-(log(x))^2/(2*1))/(x*sqrt(2*pi*1))*exp(-(log(x))^2/(2*1))*
+      x^2*6.621605e-08*exp(-0.6476275*x)/3.071806e-08
+  }
+  
+  integrate(f, 0, 2)[[1]] + integrate(f, 2, 8)[[1]]
+  integrate(f, 0, Inf)[[1]]
+
+  est.tht = est.tht - sum(int2)/sum(int3)
+
+  tt = c()
+  for (j in seq(0.01, 10, 0.01)) {
+    tt = c(tt, f(j))
+  }
+  
+  plot(seq(0.01, 10, 0.01), tt)
+    
   ME = matrix(int1, a, b)
   E_0 = as.vector(ME*YpreExp)
   SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])
@@ -509,6 +563,9 @@ f2 <- function(){
   }
 }
 
+
+
+
 microbenchmark(f1(), f2())
 
 p1 = proc.time()[1]
@@ -516,14 +573,27 @@ f1()
 p2 = proc.time()[1]
 p2-p1
 
-ldTweedie(2,mu=1,p=2,phi=1)
-ldTweedie(2,1,2,1)
-log(dtweedie(2,mu=1,p=2,phi=1))
-dtweedie.dldphi(2,mu=1,phi=1,power=2)
 
-f <- function(x) {
-  log(dtweedie(2,mu=1,phi=x,power=2))
+f1 <- function(x) {
+  return (exp(ldTweedie(x,mu=1,p=2,phi=10)[1]))
 }
 
-numDeriv::hessian(f, 1)
-dl
+integrate(Vectorize(f1), 0, Inf)
+
+for (i in 1:20) {
+  cat(ldTweedie(6,1,1.5,i)[2], "\n")
+}
+
+log(dtweedie(1,mu=1,p=2,phi=100))
+f <- function(x) {
+  ldTweedie(10,mu=1,p=2,phi=x)[1]
+}
+
+ldTweedie(0.001,mu=1,p=2,phi=100)
+log(dgamma(0.001, 1/100, 1/100))
+
+numDeriv::grad(f, 1)
+
+dtweedie.dldphi.saddle(y=2,mu=1,phi=2,power=1.5)
+dtweedie.dldphi(y=2,mu=1,phi=2,power=1.5)
+ldTweedie(2,mu=1,p=1.5,phi=0.3)

@@ -62,10 +62,10 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     est.tht = init$est.tht
     lambda = init$lambda
     
-    if (!is.null(lambda.ini)) {
-      lambda = lambda.ini
-    }
-    
+    # coef = rep(1/p, p)
+    # est.tht = 1
+    # lambda = rep(1/N/10, N)
+
     if (!is.null(coef.ini)) {
       coef = coef.ini
     }
@@ -73,7 +73,16 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
     if (!is.null(est.tht.ini)) {
       est.tht = est.tht.ini
     }
+    
+    if (!is.null(lambda.ini)) {
+      lambda = lambda.ini
+    } 
+    
   }
+  
+  coef.ini = coef
+  lambda.ini = lambda
+  est.tht.ini = est.tht
   
   l0 = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, a, b, p, power)
   error = 3
@@ -138,9 +147,9 @@ frailtyMM_CL <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.in
         p6 = proc.time()[1]
   
         if (rs$error) {
-          coef = init$coef
-          est.tht = init$est.tht
-          lambda = init$lambda
+          coef = coef.ini
+          est.tht = est.tht.ini
+          lambda = lambda.ini
           SQS1 = 0
           num = 0
           break

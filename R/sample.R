@@ -112,18 +112,18 @@ sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lam
     u = rtweedie(a, mu = 1, phi = init.var, power = power)
   }
   
-  X = array(runif(2*n*p, 0, 0.5), c(2, n, p))
-  T = matrix(0, 2, n)  
-  cen1 = matrix(0, 2, n)  
+  X = array(runif(2*n*p, 0, 0.5), c(n, p, 2))
+  T = matrix(0, n, 2)  
+  cen1 = matrix(0, n, 2)  
   
-  cen1[1,] = runif(n, 0, cen)
-  cen1[2,] = runif(n, 0, cen)
+  cen1[,1] = runif(n, 0, cen)
+  cen1[,2] = runif(n, 0, cen)
   
   U1 = runif(n, 0, 1)
   U2 = runif(n, 0, 1)
   
-  T[1,] <- -log(U1)/(lambda1*u*exp(X[1,,] %*% coef)) 
-  T[2,] <- (exp(-log(U2)/(u*exp(X[2,,] %*% coef))) - 1)/lambda2
+  T[,1] <- -log(U1)/(lambda1*u*exp(X[,,1] %*% coef)) 
+  T[,2] <- (exp(-log(U2)/(u*exp(X[,,2] %*% coef))) - 1)/lambda2
   
   d = 1*(T <= cen1)
   y = pmin(T, cen1)

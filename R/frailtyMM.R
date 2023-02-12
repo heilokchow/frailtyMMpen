@@ -95,9 +95,9 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       nord = order(mxid)
       mx1 = mx1[nord, ]
       X = array(c(mx1), c(n, 2, p))
-      X = aperm(X, c(2, 1, 3))
-      y = matrix(m[[1]][nord, 1], c(2, n), byrow = TRUE)
-      d = matrix(m[[1]][nord, 2], c(2, n), byrow = TRUE)
+      X = aperm(X, c(1, 3, 2))
+      y = matrix(m[[1]][nord, 1], c(n, 2), byrow = FALSE)
+      d = matrix(m[[1]][nord, 2], c(n, 2), byrow = FALSE)
       
       output = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = tol)
       ret = list(coef = output$coef,

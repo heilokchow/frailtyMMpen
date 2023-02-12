@@ -144,29 +144,29 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
   
   p = length(coef)
   coef = as.matrix(coef)
-  n = ncol(y)
+  n = nrow(y)
   
   La1 = La2 = rep(0,n)
   for(i in 1:n){
-    La1[i] = sum(lambda1*(y[1,] <= y[1,i]))
-    La2[i] = sum(lambda2*(y[2,] <= y[2,i]))
+    La1[i] = sum(lambda1*(y[,1] <= y[i,1]))
+    La2[i] = sum(lambda2*(y[,2] <= y[i,2]))
   }
   
-  YpreExp = matrix(0, 2, n)
+  YpreExp = matrix(0, n, 2)
   for (i in 1:2) {
-    YpreExp[i,] = exp(X[i,,] %*% coef)
+    YpreExp[,i] = exp(X[,,i] %*% coef)
   }
   
-  CC =  La1*YpreExp[1,] + La2*YpreExp[2,]
+  CC =  La1*YpreExp[,1] + La2*YpreExp[,2]
   D = colSums(d)
-  d1 = d[1,]
-  d2 = d[2,]
+  d1 = d[,1]
+  d2 = d[,2]
   
   int0 <- vector("numeric", length = n)
   int1 <- vector("numeric", length = n)
 
   if (frailty == "LogN" || frailty == "InvGauss" || frailty == "PVF") {
-    AA = (lambda1*YpreExp[1,])^(d1)*(lambda2*YpreExp[2,])^(d2)
+    AA = (lambda1*YpreExp[,1])^(d1)*(lambda2*YpreExp[,2])^(d2)
     
     for (i in 1:n) {  
       int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
@@ -190,29 +190,29 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
   }
   
   # Update lambda Variables
-  E_01 = int1*YpreExp[1,]
-  SUM_01 = cumsum((E_01[order(y[1,])])[seq(n,1,-1)])
-  SUM_01 = (SUM_01[seq(n,1,-1)])[rank(y[1,])] 
+  E_01 = int1*YpreExp[,1]
+  SUM_01 = cumsum((E_01[order(y[,1])])[seq(n,1,-1)])
+  SUM_01 = (SUM_01[seq(n,1,-1)])[rank(y[,1])] 
   
-  lambda1 = d[1,]/SUM_01
+  lambda1 = d[,1]/SUM_01
   if(any(is.na(lambda1))) lambda1 = rep(1/n, n)
   
-  E_02 = int1*YpreExp[2,]
-  SUM_02 = cumsum((E_02[order(y[2,])])[seq(n,1,-1)])
-  SUM_02 = (SUM_02[seq(n,1,-1)])[rank(y[2,])] 
+  E_02 = int1*YpreExp[,2]
+  SUM_02 = cumsum((E_02[order(y[,2])])[seq(n,1,-1)])
+  SUM_02 = (SUM_02[seq(n,1,-1)])[rank(y[,2])] 
   
-  lambda2 = d[2,]/SUM_02
+  lambda2 = d[,2]/SUM_02
   if(any(is.na(lambda2))) lambda2 = rep(1/n, n)
   
 
   # Update coefficients
-  AVE_X = apply(abs(X), c(1,2), sum)
+  AVE_X = apply(abs(X), c(1,3), sum)
   for(k in 1:p)
   {
-    E1 = La1*X[1,,k]*YpreExp[1,] + La2*X[2,,k]*YpreExp[2,]
-    DE_1 = sum(d*X[,,k]) - sum(int1*E1)   
+    E1 = La1*X[,k,1]*YpreExp[,1] + La2*X[,k,2]*YpreExp[,2]
+    DE_1 = sum(d*X[,k,]) - sum(int1*E1)   
     
-    E2 = La1*abs(X[1,,k])*AVE_X[1,]*YpreExp[1,] + La2*abs(X[2,,k])*AVE_X[2,]*YpreExp[2,]
+    E2 = La1*abs(X[,k,1])*AVE_X[,1]*YpreExp[,1] + La2*abs(X[,k,2])*AVE_X[,2]*YpreExp[,2]
     
     if (frailty == "LogN" || frailty == "InvGauss") {
       DE_2 = -2*sum(int1*E2)  

@@ -53,12 +53,11 @@ template <typename T> int sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
 
+
 // [[Rcpp::export]]
 List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-         const double& tht0, int frailty, int penalty, double tune, int a, int b, int p, double power) {
-
-  int N = a*b;
-
+          const double& tht0, int frailty, int penalty, double tune, const NumericVector& id, int N, int a, int p, double power) {
+  
   NumericVector coef = clone(coef0);
   NumericVector lambda = clone(lambda0);
   double tht = tht0;
@@ -81,7 +80,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   NumericVector int1(a, 0.0);
   NumericVector int2(a, 0.0);
   NumericVector int3(a, 0.0);
-
+  
   NumericVector ME(N, 0.0);
   NumericVector E0(N, 0.0);
   NumericVector SUM0(N, 0.0);
@@ -94,6 +93,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   NumericVector SUM2(N, 0.0);
   NumericVector D22(N, 0.0);
   
+  int tempID(0);
   double D1(0.0), D2(0.0);
   
   computeLAM(La, lambda, y, N, 0);
@@ -101,19 +101,18 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   for (int i = 0; i < p; i++) {
     YpreExp += X[Range(i*N, (i+1)*N-1)] * coef[i];
   }
-
+  
   YpreExp = exp(YpreExp);
   
   AA = La * YpreExp;
   BB = lambda * YpreExp;
   
-  for (int j = 0; j < b; j++) {
-    for (int i = 0; i < a; i++) {
-      A[i] += AA[j*a + i];
-      if (d[j*a + i] == 1) {
-        B[i] *= BB[j*a + i];
-        D[i]++;
-      }
+  for (int j = 0; j < N; j++) {
+    tempID = id[j];
+    A[tempID] += AA[j];
+    if (d[j] == 1) {
+      B[tempID] *= BB[j];
+      D[tempID]++;
     }
   }
   
@@ -155,7 +154,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
         Rcout << "F1: Approximated by Interval\n";
-
+        
       }
       
       kint.por = result;
@@ -180,7 +179,6 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     gsl_integration_workspace_free (w);
     
   }
-    
   
   if (frailty == 3) {
     
@@ -276,11 +274,12 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     }
     
   }
-
+  
   // Update lambda Variables
   
-  for (int i = 0; i < b; i++) {
-    ME[Range(i*a, (i+1)*a-1)] = int2;
+  for (int j = 0; j < N; j++) {
+    tempID = id[j];
+    ME[j] = int2[tempID];
   }
   
   E0 = ME * YpreExp;
@@ -328,8 +327,8 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     coef[i] -= D1/D2;
     
   }
-
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0);
+  
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, A, B, D, int2);
   return ret;
 }
 
@@ -622,10 +621,9 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
 
 // [[Rcpp::export]]
 double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-                const double& tht0, int frailty, int a, int b, int p, double power) {
+                const double& tht0, int frailty, const NumericVector& id, int N, int a, int p, double power) {
   
-  int N = a*b;
-  
+
   NumericVector coef = clone(coef0);
   NumericVector lambda = clone(lambda0);
   double tht = tht0;
@@ -648,6 +646,8 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
   
   NumericVector int1(a, 0.0);
   
+  int tempID(0);
+  
   computeLAM(La, lambda, y, N, 0);
   
   for (int i = 0; i < p; i++) {
@@ -659,13 +659,12 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
   AA = La * YpreExp;
   BB = lambda * YpreExp;
   
-  for (int j = 0; j < b; j++) {
-    for (int i = 0; i < a; i++) {
-      A[i] += AA[j*a + i];
-      if (d[j*a + i] == 1) {
-        B[i] *= BB[j*a + i];
-        D[i]++;
-      }
+  for (int j = 0; j < N; j++) {
+    tempID = id[j];
+    A[tempID] += AA[j];
+    if (d[j] == 1) {
+      B[tempID] *= BB[j];
+      D[tempID]++;
     }
   }
   

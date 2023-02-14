@@ -322,20 +322,37 @@ kidney <- kidney[c("time", "status", "id", "age", "sex" )]
 kidney$sex <- ifelse(kidney$sex == 1, "male", "female")
 head(kidney)
 
-rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss")
-rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
+p1 = proc.time()[1]
 rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "Gamma")
-rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss", penalty = "SCAD")
+rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney1, frailty = "InvGauss")
+# rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "LogN")
+# rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "Gamma")
+# rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), kidney, frailty = "PVF", power = 1.5)
 rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss", penalty = "SCAD", tune = 0.2)
+rs2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), kidney, frailty = "InvGauss", penalty = "SCAD")
+p2 = proc.time()[1]
+p2 - p1
+
 rs1$coef
 rs1$est.tht
 summary(rs1)
 plot(rs2)
 
-m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney, distribution = emfrail_dist(dist = 'gamma'))
+kidney1 = kidney[c(-3,-5),]
+
+p3 = proc.time()[1]
+m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney1, distribution = emfrail_dist(dist = 'pvf', pvfm = -0.5))
+m_gam <- emfrail(Surv(time, status) ~ age + sex + cluster(id), data = kidney, distribution = emfrail_dist(dist = 'pvf', pvfm = -0.5))
+p4 = proc.time()[1]
+p4 - p3
+
 summary(mm_gam)
 
+p5 = proc.time()[1]
 f_pack <- frailtyPenal(Surv(time, status) ~ age + sex + cluster(id), data = kidney, n.knots = 14, kappa = 10000)
+f_pack <- frailtyPenal(Surv(time, status) ~ age + sex + cluster(id), data = kidney1, n.knots = 14, kappa = 10000)
+p6 = proc.time()[1]
+
 summary(f_pack)
 
 # DEBUG -------------------------------------------------------------------
@@ -349,26 +366,16 @@ res = frailtyMM_CL(y, X, d, frailty = "LogN", penalty = "SCAD", tune = 3)
 set.seed(5)
 sdata = sample_CL(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
 
-
-p1 = proc.time()[1]
-m_gam <- emfrail(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
-                   V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
-                   V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + cluster(id), 
-                 data = sdata, distribution = emfrail_dist(dist = 'gamma'))
-p2 = proc.time()[1]
-p2 - p1
-
-
 test_coef = rep(0, 30)
 test_th = 0
 for (i in 1:100) {
   set.seed(i)
-  sdata = sample_CL(init.var = 1, cen = 5, frailty = "InvGauss", a = 50, b = 10, power = 1.5)
+  sdata = sample_CL(init.var = 1, cen = 5, frailty = "InvGauss", a = 50, b = 10)
   
   p3 = proc.time()[1]
   rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "InvGauss", tol = 1e-6)
   # rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-5, power = 1.5, maxit = 100)
-  # rs1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-5, power = 1.5, penalty = "LASSO", tune = 0.5)
+  rs1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), sdata, frailty = "LogN", tol = 1e-5, power = 1.5, penalty = "SCAD")
   p4 = proc.time()[1]
   p4 - p3
   
@@ -377,6 +384,15 @@ for (i in 1:100) {
 }
 
 summary(m_gam)
+
+p1 = proc.time()[1]
+m_gam <- emfrail(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
+                   V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
+                   V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + cluster(id), 
+                 data = sdata, distribution = emfrail_dist(dist = 'pvf', pvfm = -0.5))
+p2 = proc.time()[1]
+p2 - p1
+
 
 p5 = proc.time()[1]
 f_pack <- frailtyPenal(Surv(time, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
@@ -391,13 +407,13 @@ summary(f_pack)
 head(rats)
 
 p1 = proc.time()[1]
-rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "Gamma")
+rs1 = frailtyMM(Surv(time, status) ~ . + cluster(litter), rats, frailty = "InvGauss", tol = 1e-6)
 p2 = proc.time()[1]
 rs1$coef
 rs1$est.tht
 summary(rs1)
 
-mm_gam = emfrail(Surv(time, status) ~ rx + sex + cluster(litter), data = rats, distribution = emfrail_dist(dist = 'gamma'))
+mm_gam = emfrail(Surv(time, status) ~ rx + sex + cluster(litter), data = rats, distribution = emfrail_dist(dist = 'pvf', pvfm = -0.5))
 summary(mm_gam)
 
 f_pack <- frailtyPenal(Surv(time, status) ~ rx + sex + cluster(litter), data = rats, n.knots = 14, kappa = 10000)
@@ -421,7 +437,7 @@ summary(fit)
 # Transfer to GSL ---------------------------------------------------------
 
 set.seed(5)
-yy = sample_CL_old(init.var = 1, cen = 5, frailty = "PVF", a = 50, b = 10, power = 1.5)
+yy = sample_CL_old(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
 
 y = yy$y 
 d = yy$d
@@ -436,13 +452,36 @@ p = 30
 coef = rep(1/p, p)
 lambda = c(rep(1/N, N))
 est.tht = 1
-frailty = "PVF"
+frailty = "LogN"
 power = 1.5
 penalty = NULL
 
+y1 = vy
+d1 = vd
+X1 = matrix(as.vector(X), nrow = N, ncol = p)
+id = rep(seq(0,a-1,1), b)
+
+#
+mxid_info = table(mxid)
+a = length(mxid_info)
+b = min(mxid_info)
+p = ncol(mx1)
+
+nord = order(mxid)
+mx1 = mx1[nord, ]
+X = array(c(mx1), c(b, a, p))
+X = aperm(X, c(2, 1, 3))
+y = matrix(m[[1]][nord, 1], c(a, b), byrow = TRUE)
+d = matrix(m[[1]][nord, 2], c(a, b), byrow = TRUE)
+N = a*b
+#
+
+
 p1 = proc.time()[1]
 f1 <- function() {
-  test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, a, b, p)
+  test = MMCL_TEST(y1, X1, d1, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
+  test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
+  test1 = MMCL_TEST1(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, a, b, p, power)
 }
 
 p2 = proc.time()[1]

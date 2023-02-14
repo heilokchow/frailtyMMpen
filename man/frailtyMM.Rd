@@ -9,7 +9,7 @@ frailtyMM(
   data,
   frailty = "LogN",
   power = NULL,
-  tol = 1e-06,
+  tol = 1e-05,
   maxit = 200,
   ...
 )

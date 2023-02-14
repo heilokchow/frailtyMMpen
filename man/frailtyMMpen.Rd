@@ -11,7 +11,7 @@ frailtyMMpen(
   power = NULL,
   penalty = "LASSO",
   tune = NULL,
-  tol = 1e-06,
+  tol = 1e-05,
   maxit = 200
 )
 }

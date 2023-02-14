@@ -42,22 +42,33 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       mxid = mx[, cluster_id]
       coef_name = colnames(mx1)
       
-      mxid_info = table(mxid)
-      a = length(mxid_info)
-      b = min(mxid_info)
-      p = ncol(mx1)
-      if (b != max(mxid_info)) {
-        stop("each cluster should have same amount of objects")
+      nord = order(mxid)
+      mxid = mxid[nord]
+      
+      N = length(mxid)
+      newid = rep(0, N)
+      
+      if (N <= 2) {
+        stop("Please check the sample size of data")
       }
       
-      nord = order(mxid)
-      mx1 = mx1[nord, ]
-      X = array(c(mx1), c(b, a, p))
-      X = aperm(X, c(2, 1, 3))
-      y = matrix(m[[1]][nord, 1], c(a, b), byrow = TRUE)
-      d = matrix(m[[1]][nord, 2], c(a, b), byrow = TRUE)
+      for (i in 2:N) {
+        if (mxid[i] > mxid[i-1]) {
+          newid[i:N] = newid[i:N] + 1
+        }
+      }
       
-      output = frailtyMM_CL(y, X, d, frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol)
+      y = m[[1]][nord, 1]
+      X = mx1[nord, ]
+      d = m[[1]][nord, 2]
+      a = max(newid) + 1
+      
+      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 1)
+      
+      output = frailtyMMcal(y, X, d, N, a, newid,
+                            coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
+                            frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 1)
+      
       ret = list(coef = output$coef,
                  est.tht = output$est.tht,
                  lambda = output$lambda,

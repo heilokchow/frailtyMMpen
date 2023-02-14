@@ -1,20 +1,11 @@
 init_para <- function(y, X, d, frailty = "LogN") {
   
-  p = dim(X)[3]
-  a = nrow(y)
-  b = ncol(y)
-  N = a*b
-  vy = as.vector(y)
-  vd = as.vector(d)
+  p = dim(X)[2]
+  N = length(y)
+
+  newY <- Surv(y, d)
   
-  # Initialize Parameters
-  newX = matrix(0, nrow = 0, ncol = p)
-  for (i in 1:a) {
-    newX = rbind(newX, X[i,,])
-  }
-  newY <- Surv(rep(0, N), as.vector(t(y)), as.vector(t(d)))
-  
-  coxret = survival::agreg.fit(x = newX, y = newY, strata = NULL, offset = NULL, init = NULL, control = survival::coxph.control(),
+  coxret = survival::coxph.fit(x = X, y = newY, strata = NULL, offset = NULL, init = NULL, control = survival::coxph.control(),
                                weights = NULL, method = "breslow", rownames = NULL)  
   
   coef = coxret$coefficients

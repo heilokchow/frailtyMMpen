@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // MMCL
-List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, int penalty, double tune, int a, int b, int p, double power);
-RcppExport SEXP _frailtyMMpen_MMCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP penaltySEXP, SEXP tuneSEXP, SEXP aSEXP, SEXP bSEXP, SEXP pSEXP, SEXP powerSEXP) {
+List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, int penalty, double tune, const NumericVector& id, int N, int a, int p, double power);
+RcppExport SEXP _frailtyMMpen_MMCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP penaltySEXP, SEXP tuneSEXP, SEXP idSEXP, SEXP NSEXP, SEXP aSEXP, SEXP pSEXP, SEXP powerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,17 +26,41 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type frailty(frailtySEXP);
     Rcpp::traits::input_parameter< int >::type penalty(penaltySEXP);
     Rcpp::traits::input_parameter< double >::type tune(tuneSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type id(idSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
     Rcpp::traits::input_parameter< int >::type a(aSEXP);
-    Rcpp::traits::input_parameter< int >::type b(bSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type power(powerSEXP);
-    rcpp_result_gen = Rcpp::wrap(MMCL(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, a, b, p, power));
+    rcpp_result_gen = Rcpp::wrap(MMCL(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, id, N, a, p, power));
+    return rcpp_result_gen;
+END_RCPP
+}
+// MMME
+List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda01, const NumericVector& lambda02, const double& tht0, int frailty, int penalty, double tune, int n, int p, double power);
+RcppExport SEXP _frailtyMMpen_MMME(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda01SEXP, SEXP lambda02SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP penaltySEXP, SEXP tuneSEXP, SEXP nSEXP, SEXP pSEXP, SEXP powerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type coef0(coef0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lambda01(lambda01SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lambda02(lambda02SEXP);
+    Rcpp::traits::input_parameter< const double& >::type tht0(tht0SEXP);
+    Rcpp::traits::input_parameter< int >::type frailty(frailtySEXP);
+    Rcpp::traits::input_parameter< int >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< double >::type tune(tuneSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type power(powerSEXP);
+    rcpp_result_gen = Rcpp::wrap(MMME(y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power));
     return rcpp_result_gen;
 END_RCPP
 }
 // LogLikCL
-double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, int a, int b, int p, double power);
-RcppExport SEXP _frailtyMMpen_LogLikCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP aSEXP, SEXP bSEXP, SEXP pSEXP, SEXP powerSEXP) {
+double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, const NumericVector& id, int N, int a, int p, double power);
+RcppExport SEXP _frailtyMMpen_LogLikCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP idSEXP, SEXP NSEXP, SEXP aSEXP, SEXP pSEXP, SEXP powerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -47,18 +71,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type lambda0(lambda0SEXP);
     Rcpp::traits::input_parameter< const double& >::type tht0(tht0SEXP);
     Rcpp::traits::input_parameter< int >::type frailty(frailtySEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type id(idSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
     Rcpp::traits::input_parameter< int >::type a(aSEXP);
-    Rcpp::traits::input_parameter< int >::type b(bSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type power(powerSEXP);
-    rcpp_result_gen = Rcpp::wrap(LogLikCL(y, X, d, coef0, lambda0, tht0, frailty, a, b, p, power));
+    rcpp_result_gen = Rcpp::wrap(LogLikCL(y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_frailtyMMpen_MMCL", (DL_FUNC) &_frailtyMMpen_MMCL, 13},
-    {"_frailtyMMpen_LogLikCL", (DL_FUNC) &_frailtyMMpen_LogLikCL, 11},
+    {"_frailtyMMpen_MMCL", (DL_FUNC) &_frailtyMMpen_MMCL, 14},
+    {"_frailtyMMpen_MMME", (DL_FUNC) &_frailtyMMpen_MMME, 13},
+    {"_frailtyMMpen_LogLikCL", (DL_FUNC) &_frailtyMMpen_LogLikCL, 12},
     {NULL, NULL, 0}
 };
 

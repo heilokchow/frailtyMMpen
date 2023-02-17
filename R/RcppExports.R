@@ -5,10 +5,6 @@ MMCL <- function(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, id, N, a
     .Call(`_frailtyMMpen_MMCL`, y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, id, N, a, p, power)
 }
 
-MMMEOLD <- function(y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power) {
-    .Call(`_frailtyMMpen_MMMEOLD`, y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power)
-}
-
 MMME <- function(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, N, n, p, power) {
     .Call(`_frailtyMMpen_MMME`, y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, N, n, p, power)
 }

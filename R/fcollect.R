@@ -15,12 +15,6 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N,
 }
 
 #'@export
-MMME_TEST1 <- function(y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power) {
-  
-  return(MMMEOLD(y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power))
-}
-
-#'@export
 MMME_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
   
   TEST = NULL

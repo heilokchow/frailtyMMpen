@@ -363,6 +363,7 @@ d = rs2$d
 
 res = frailtyMM_CL(y, X, d, frailty = "LogN", penalty = "SCAD", tune = 3)
 
+
 set.seed(5)
 sdata = sample_CL(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
 
@@ -370,12 +371,21 @@ test_coef = rep(0, 30)
 test_th = 0
 for (i in 1:100) {
   set.seed(i)
-  sdata = sample_CL(init.var = 1, cen = 5, frailty = "InvGauss", a = 50, b = 10)
+  sdata = sample_ME(init.var = 1, cen = 5, frailty = "InvGauss")
+  y = sdata$y
+  X = sdata$X
+  d = sdata$d
+  # 
+  y = sdata$data$time
+  X = unname(unlist(sdata$data[,1:30]))
+  d = sdata$data$status
+  
+  # rs0 = frailtyMM_ME(y, X, d, frailty = "LogN")
   
   p3 = proc.time()[1]
-  rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "InvGauss", tol = 1e-6)
+  rs1 = frailtyMM(Surv(time, status) ~ . + event(id), sdata$data, frailty = "LogN", tol = 1e-6)
   # rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-5, power = 1.5, maxit = 100)
-  rs1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), sdata, frailty = "LogN", tol = 1e-5, power = 1.5, penalty = "SCAD")
+  rs1 = frailtyMMpen(Surv(time, status) ~ . + event(id), sdata$data, frailty = "InvGauss", tol = 1e-5, power = 1.5, penalty = "SCAD", maxit = 400)
   p4 = proc.time()[1]
   p4 - p3
   
@@ -437,20 +447,25 @@ summary(fit)
 # Transfer to GSL ---------------------------------------------------------
 
 set.seed(5)
-yy = sample_CL_old(init.var = 1, cen = 5, frailty = "LogN", a = 50, b = 10)
+yy = sample_ME(init.var = 1, cen = 5, frailty = "LogN")
 
+sdata = yy$data
 y = yy$y 
 d = yy$d
 X = yy$X
+
+
 vy = as.vector(y)
 vd = as.vector(d)
 
+N = nrow(sdata)
 a = 50
 b = 10
-N = a*b
+n = nrow(y)
 p = 30
 coef = rep(1/p, p)
-lambda = c(rep(1/N, N))
+lambda1 = c(rep(1/n, n))
+lambda2 = c(rep(1/n, n))
 est.tht = 1
 frailty = "LogN"
 power = 1.5
@@ -461,148 +476,21 @@ d1 = vd
 X1 = matrix(as.vector(X), nrow = N, ncol = p)
 id = rep(seq(0,a-1,1), b)
 
-#
-mxid_info = table(mxid)
-a = length(mxid_info)
-b = min(mxid_info)
-p = ncol(mx1)
+formula = Surv(time, status) ~ . + event(id)
+rs1 = frailtyMM(Surv(time, status) ~ . + event(id), sdata, frailty = "InvGauss", tol = 1e-6)
 
-nord = order(mxid)
-mx1 = mx1[nord, ]
-X = array(c(mx1), c(b, a, p))
-X = aperm(X, c(2, 1, 3))
-y = matrix(m[[1]][nord, 1], c(a, b), byrow = TRUE)
-d = matrix(m[[1]][nord, 2], c(a, b), byrow = TRUE)
-N = a*b
-#
-
-
-p1 = proc.time()[1]
 f1 <- function() {
-  test = MMCL_TEST(y1, X1, d1, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
-  test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
-  test1 = MMCL_TEST1(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, a, b, p, power)
+  # test = MMCL_TEST(y1, X1, d1, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
+  # test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
+  # p1 = proc.time()[1]
+  test1 = MMME_TEST1(y, X, d, coef, lambda1, lambda2, 1, 1, 0, 0, n, p, power)
+  # p2 = proc.time()[1]
+  # MMME_TEST(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type)
 }
-
-p2 = proc.time()[1]
-p2-p1
 
 f2 <- function(){
-  La = (cumsum(lambda[order(vy)]))[rank(vy)]
-  La = matrix(La, a, b)
-  
-  YpreExp = matrix(0, a, b)
-  for (i in 1:a) {
-    YpreExp[i,] = exp(X[i,,] %*% coef)
-  }
-  A = rowSums(La*YpreExp)
-  B = apply((lambda*YpreExp)^d, 1, prod)
-  D = rowSums(d)
-  
-  
-  int0 <- vector("numeric", length = a)
-  int1 <- vector("numeric", length = a)
-  for (i in 1:a) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, frailty = frailty, power = power, mode = 0)$value
-    int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
-                        i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
-  }
-  
-  ss2 = c()
-  ss3 = c()
-  ss4 = c()
-  for (est.tht in seq(0.5, 10, 0.5)) {
-    int2 <- vector("numeric", length = a)
-    int3 <- vector("numeric", length = a)
-    int4 <- vector("numeric", length = a)
-    for (i in 1:a) {  
-      int2[i] = integrate(int_tao1, lower = 0, upper = Inf, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 2)$value
-      int3[i] = integrate(int_tao1, lower = 0, upper = Inf, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 3)$value
-      int4[i] = integrate(int_tao1, lower = 0, upper = Inf, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 4)$value
-    }
-    ss2 = c(ss2, sum(int2))
-    ss3 = c(ss3, sum(int3))
-    ss4 = c(ss4, sum(int4))
-  }
-  
-  test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 3, 0, 0, a, b, p, 1.5)
-  
-  f <- function(x) {
-    y = ldTweedie(x, mu = 1, phi = 1, p = 1.5)[2]*exp(ldTweedie(x, mu = 1, phi = 1, p = 1.5)[1])*
-      x^2*6.621605e-08*exp(-0.6476275*x)/3.071806e-08
-    return(y+1-1)
-  }
-
-  f1 <- function(x) {
-    (-0.5*log(2*pi*1)-(log(x))^2/(2*1))/(x*sqrt(2*pi*1))*exp(-(log(x))^2/(2*1))*
-      x^2*6.621605e-08*exp(-0.6476275*x)/3.071806e-08
-  }
-  
-  integrate(f, 0, 2)[[1]] + integrate(f, 2, 8)[[1]]
-  integrate(f, 0, Inf)[[1]]
-
-  est.tht = est.tht - sum(int2)/sum(int3)
-
-  tt = c()
-  for (j in seq(0.01, 10, 0.01)) {
-    tt = c(tt, f(j))
-  }
-  
-  plot(seq(0.01, 10, 0.01), tt)
-    
-  ME = matrix(int1, a, b)
-  E_0 = as.vector(ME*YpreExp)
-  SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])
-  SUM_0 = (SUM_0[seq(N,1,-1)])[rank(vy)] 
-  
-  SUM_0 = cumsum((E_0[order(vy)])[seq(N,1,-1)])[rank(-vy)] 
-  
-  AVE_X = apply(abs(X), c(1,2), sum)
-  for(k in 1:p) {
-    E_1 = as.vector(ME*X[,,k]*YpreExp)
-    E_2 = as.vector(ME*AVE_X*abs(X[,,k])*YpreExp)
-    
-    SUM_1 = cumsum((E_1[order(vy)])[seq(N, 1, -1)])
-    SUM_1 = (SUM_1[seq(N, 1, -1)])[rank(vy)]
-    SUM_2 = cumsum((E_2[order(vy)])[seq(N, 1, -1)])
-    SUM_2 = (SUM_2[seq(N, 1, -1)])[rank(vy)]
-    
-    DE_1 = sum(d*X[,,k]) - sum(vd*SUM_1/SUM_0)
-    DE_2 = -sum(vd*SUM_2/SUM_0)
-    
-    if (!is.null(penalty)) {
-      if (penalty == "LASSO") {
-        DE_1 = DE_1 - N*sign(coef[k])*tune
-        DE_2 = DE_2 - N*tune/abs(coef[k])
-      }
-      if (penalty == "MCP") {
-        DE_1 = DE_1 - N*sign(coef[k])*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)
-        DE_2 = DE_2 - N*(tune - abs(coef[k])/3)*(abs(coef[k]) <= 3*tune)/abs(coef[k])
-      }
-      if (penalty == "SCAD") {
-        DE_1 = DE_1 - N*sign(coef[k])*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)
-        DE_2 = DE_2 - N*(tune*(abs(coef[k]) <= tune) + max(0,3.7*tune - abs(coef[k]))*(abs(coef[k]) > tune)/2.7)/abs(coef[k])
-      }
-    }
-    
-    coef[k] = coef[k] - DE_1/DE_2
-  }
-  
-  if (frailty == "LogN" || frailty == "InvGauss") {
-    int2 <- vector("numeric", length = a)
-    for (i in 1:a) {
-      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
-                          i = i, est.tht = est.tht, A = A, B = B, D = D, tao0 = int0[i], frailty = frailty, mode = 2)$value
-    }
-    est.tht = sum(int2)/a
-  }
+  test2 = MMME_TEST(sdata$time, unname(unlist(sdata[,1:30])), sdata$status, coef, c(lambda1, lambda2), 1, 1, 0, 0, NULL, N, n, p, power, 1)
 }
-
-
 
 
 microbenchmark(f1(), f2())

@@ -158,7 +158,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
   }
   
   CC =  La1*YpreExp[,1] + La2*YpreExp[,2]
-  D = colSums(d)
+  D = rowSums(d)
   d1 = d[,1]
   d2 = d[,2]
   
@@ -169,7 +169,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     AA = (lambda1*YpreExp[,1])^(d1)*(lambda2*YpreExp[,2])^(d2)
     
     for (i in 1:n) {  
-      int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+      int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, power = power, mode = 0)$value
     }
     
@@ -178,7 +178,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     }
     
     for (i in 1:n) {  
-      int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+      int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
     }
   }
@@ -271,7 +271,7 @@ MMprocess_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "Lo
     int2 <- vector("numeric", length = n) 
     
     for (i in 1:n) {  
-      int2[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+      int2[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = CC, B = AA, D = D, tao0 = int0[i], frailty = frailty, power = power, mode = 2)$value
     }
     

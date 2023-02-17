@@ -43,48 +43,7 @@ sample_CL <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
   outX$status = as.vector(t(d))
   outX$id = sort(rep(seq(1, a, 1), b))
   
-  return(outX)
-}
-
-sample_CL_old <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frailty = "LogN", power = NULL, init.var = 10, a = 50, b = 10, cen = 2) {
-  
-  p = length(coef)
-  coef = as.matrix(coef)
-  N = a * b
-  
-  cen = matrix(runif(a*b, 0.001 * cen, 0.002 * cen), a, b)
-  
-  if (frailty == "Gamma") {
-    th = init.var
-    u = rgamma(a, 1/th, scale = 1/th)
-  }
-  
-  if (frailty == "LogN") {
-    si = sqrt(init.var)
-    u = rlnorm(a, 0, si)  
-  }
-  
-  if (frailty == "InvGauss") {
-    alp = 1/init.var
-    u = SuppDists::rinvGauss(a, 1, alp)
-  }
-  
-  if (frailty == "PVF") {
-    u = rtweedie(a, mu = 1, phi = init.var, power = power)
-  }
-  
-  X = array(runif(a*b*p, 0, 0.5), c(a, b, p))
-  T = matrix(0, a, b)  
-  
-  for(i in seq_len(a)) {
-    U = runif(b, 0, 1)
-    T[i,] <- -log(U)/(lambda*u[i]*exp(X[i,,] %*% coef))    
-  }
-  
-  d = 1*(T <= cen)
-  y = pmin(T, cen)
-  
-  return(list(y = y, X = X, d = d))
+  return(list(data = outX, y = y, X = X, d = d))
 }
 
 
@@ -127,7 +86,13 @@ sample_ME <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda1 = 3, lam
   
   d = 1*(T <= cen1)
   y = pmin(T, cen1)
-  return(list(y = y, X = X, d = d))
+  
+  outX = as.data.frame(rbind(X[,,1], X[,,2]))
+  outX$time = as.vector(y)
+  outX$status = as.vector(d)
+  outX$id = c(rep(1, n), rep(2, n))
+  
+  return(list(data = outX, y = y, X = X, d = d))
 }
 
 

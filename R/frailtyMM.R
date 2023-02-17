@@ -99,22 +99,26 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       n = length(mxid_info)
       b = min(mxid_info)
       p = ncol(mx1)
-      if (b != max(mxid_info) || b != 2) {
-        stop("every subject should have exactly two events")
+      if (b != max(mxid_info)) {
+        stop("every subject should have same number of events")
       }
       
       nord = order(mxid)
+      N = length(nord)
       mx1 = mx1[nord, ]
-      X = array(c(mx1), c(n, 2, p))
-      X = aperm(X, c(1, 3, 2))
-      y = matrix(m[[1]][nord, 1], c(n, 2), byrow = FALSE)
-      d = matrix(m[[1]][nord, 2], c(n, 2), byrow = FALSE)
+      X = mx1[nord, ]
+      y = m[[1]][nord, 1]
+      d = m[[1]][nord, 2]
       
-      output = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = tol)
+      initGam = frailtyMMcal(y, X, d, N, b, NULL, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 2)
+      
+      output = frailtyMMcal(y, X, d, N, b, NULL,
+                            coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
+                            frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 2)
+      
       ret = list(coef = output$coef,
                  est.tht = output$est.tht,
-                 lambda = output$lambda1,
-                 lambda2 = output$lambda2,
+                 lambda = output$lambda,
                  likelihood = output$likelihood,
                  input = output$input,
                  frailty = frailty,

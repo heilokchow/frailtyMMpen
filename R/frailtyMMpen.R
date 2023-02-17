@@ -81,16 +81,16 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       n = length(mxid_info)
       b = min(mxid_info)
       p = ncol(mx1)
-      if (b != max(mxid_info) || b != 2) {
-        stop("every subject should have exactly two events")
+      if (b != max(mxid_info)) {
+        stop("every subject should have same number of events")
       }
       
       nord = order(mxid)
+      N = length(nord)
       mx1 = mx1[nord, ]
-      X = array(c(mx1), c(n, 2, p))
-      X = aperm(X, c(2, 1, 3))
-      y = matrix(m[[1]][nord, 1], c(2, n), byrow = TRUE)
-      d = matrix(m[[1]][nord, 2], c(2, n), byrow = TRUE)
+      X = mx1[nord, ]
+      y = m[[1]][nord, 1]
+      d = m[[1]][nord, 2]
     }
   }
   
@@ -191,6 +191,67 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   d = d)
   }
   
+  if (type == "Multiple") {
+    
+    initGam = frailtyMMcal(y, X, d, N, b, NULL, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 2)
+    
+    ini =  frailtyMMcal(y, X, d, N, b, NULL,
+                        coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
+                        frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 2)
+    
+    coef0 = ini$coef
+    est.tht0 = ini$est.tht
+    lambda0 = ini$lambda
+    likelihood0 = ini$likelihood
+    
+    coef_all = list()
+    est.tht_all = list()
+    lambda_all = list()
+    likelihood_all = list()
+    BIC_all = list()
+    
+    for (z in seq_len(length(tuneseq))) {
+      cur = frailtyMMcal(y, X, d, N, b, NULL,
+                         coef.ini = coef0, est.tht.ini = est.tht0, lambda.ini = lambda0,
+                         frailty = frailty, power = power, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = tol, type = 2)
+      
+      coef0 = cur$coef
+      est.tht0 = cur$est.tht
+      lambda0 = cur$lambda
+      likelihood0 = cur$likelihood
+      
+      coef_all[[z]] = coef0
+      est.tht_all[[z]] = est.tht0
+      lambda_all[[z]] = lambda0
+      likelihood_all[[z]] = likelihood0
+      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(b)
+      
+      if (sum(abs(coef0)) < 1e-6) {
+        cat(sum(abs(coef0)), "????\n")
+        break
+      }
+      
+      cat(z, "---------\n")
+    }
+    
+    
+    coef_all = data.frame(matrix(unlist(coef_all), nrow = length(coef0)))
+    est.tht_all = unlist(coef_all)
+    likelihood_all = unlist(likelihood_all)
+    BIC_all = unlist(BIC_all)
+    
+    output = list(coef = coef_all,
+                  est.tht = est.tht_all,
+                  lambda = lambda_all,
+                  likelihood = likelihood_all,
+                  BIC = BIC_all,
+                  tune = tuneseq[seq_len(z)],
+                  tune.min = tuneseq[which.min(BIC_all)],
+                  y = y,
+                  X = X,
+                  d = d)
+  } 
+  
   if (type == "Recurrent") {
     # NO PVF for RE
     
@@ -251,70 +312,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   d = d)
   } 
   
-  if (type == "Multiple") {
-    # NO PVF for ME
-    
-    p = dim(X)[3]
-    n = ncol(y)
-    
-    ini = frailtyMM_ME(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = threshold)
-    coef0 = ini$coef
-    est.tht0 = ini$est.tht
-    lambda01 = ini$lambda1
-    lambda02 = ini$lambda2
-    likelihood0 = ini$likelihood
-    
-    coef_all = list()
-    est.tht_all = list()
-    lambda1_all = list()
-    lambda2_all = list()
-    likelihood_all = list()
-    BIC_all = list()
-    
-    for (z in seq_len(length(tuneseq))) {
-      cur = frailtyMM_ME(y, X, d, 
-                         coef.ini = coef0, est.tht.ini = est.tht0, lambda1.ini = lambda01, lambda2.ini = lambda02,
-                         frailty = frailty, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = threshold)
-      
-      coef0 = cur$coef
-      est.tht0 = cur$est.tht
-      lambda01 = cur$lambda1
-      lambda02 = cur$lambda2
-      likelihood0 = cur$likelihood
-      
-      coef_all[[z]] = coef0
-      est.tht_all[[z]] = est.tht0
-      lambda1_all[[z]] = lambda01
-      lambda2_all[[z]] = lambda02
-      likelihood_all[[z]] = likelihood0
-      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(n)
-      
-      if (sum(abs(coef0)) < 1e-6) {
-        cat(sum(abs(coef0)), "????\n")
-        break
-      }
-      
-      cat(z, "---------\n")
-    }
-    
-    
-    coef_all = data.frame(matrix(unlist(coef_all), nrow = length(coef0)))
-    est.tht_all = unlist(coef_all)
-    likelihood_all = unlist(likelihood_all)
-    BIC_all = unlist(BIC_all)
-    
-    output = list(coef = coef_all,
-                  est.tht = est.tht_all,
-                  lambda1 = lambda1_all,
-                  lambda2 = lambda2_all,
-                  likelihood = likelihood_all,
-                  BIC = BIC_all,
-                  tune = tuneseq[seq_len(z)],
-                  tune.min = tuneseq[which.min(BIC_all)],
-                  y = y,
-                  X = X,
-                  d = d)
-  } 
+ 
   
   attr(output, "call") <-  Call
   class(output) = "fpen"

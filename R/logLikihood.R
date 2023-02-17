@@ -54,25 +54,25 @@ logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "
   
   p = length(coef)
   coef = as.matrix(coef)
-  n = ncol(y)
+  n = nrow(y)
   
   La1 = La2 = rep(0,n)
   for(i in 1:n){
-    La1[i] = sum(lambda1*(y[1,] <= y[1,i]))
-    La2[i] = sum(lambda2*(y[2,] <= y[2,i]))
+    La1[i] = sum(lambda1*(y[,1] <= y[i,1]))
+    La2[i] = sum(lambda2*(y[,2] <= y[i,2]))
   }
   
-  YpreExp = matrix(0, 2, n)
+  YpreExp = matrix(0, n, 2)
   for (i in 1:2) {
-    YpreExp[i,] = exp(X[i,,] %*% coef)
+    YpreExp[,i] = exp(X[,,i] %*% coef)
   }
   
-  CC =  La1*YpreExp[1,] + La2*YpreExp[2,]
-  D = colSums(d)
-  d1 = d[1,]
-  d2 = d[2,]
+  CC =  La1*YpreExp[,1] + La2*YpreExp[,2]
+  D = rowSums(d)
+  d1 = d[,1]
+  d2 = d[,2]
   
-  AA = (lambda1*YpreExp[1,])^(d1)*(lambda2*YpreExp[2,])^(d2)
+  AA = (lambda1*YpreExp[,1])^(d1)*(lambda2*YpreExp[,2])^(d2)
   
   if (frailty == "Gamma") {
     C = 1/est.tht + CC
@@ -81,7 +81,7 @@ logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "
     
     l1 = sum(lgamma(A)) - n*(lgamma(1/est.tht)+log(est.tht)/est.tht) - sum(A*log(C)) 
     l2 = sum(log(lambda1[d1 != 0])) + sum(log(lambda2[d2 != 0])) 
-    l3 = sum(d1*rowSums(X[1,,] %*% coef) + d2*rowSums(X[2,,] %*% coef))
+    l3 = sum(d1*rowSums(X[,,1] %*% coef) + d2*rowSums(X[,,2] %*% coef))
     
     return(l1+l2+l3) 
   }
@@ -89,7 +89,7 @@ logLikihood_ME <- function(y, X, d, coef, lambda1, lambda2, est.tht, frailty = "
   int0 <- vector("numeric", length = n)
   
   for (i in 1:n) {  
-    int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+    int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                         i = i, est.tht = est.tht, A = CC, B = AA, D = D, frailty = frailty, power = power, mode = 0)$value
   }
   

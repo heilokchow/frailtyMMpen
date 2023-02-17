@@ -7,9 +7,32 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N,
     TEST = MMCL(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power)
   }
   
+  if (type == 2) {
+    TEST = MMME(y, X, d, coef, lambda, tht, frailty, penalty, tune, N, a, p, power)
+  }
+  
   return(TEST)
 }
 
+#'@export
+MMME_TEST1 <- function(y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power) {
+  
+  return(MMMEOLD(y, X, d, coef0, lambda01, lambda02, tht0, frailty, penalty, tune, n, p, power))
+}
+
+#'@export
+MMME_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
+  
+  TEST = NULL
+  
+  if (type == 1) {
+    TEST = MMME(y, X, d, coef, lambda, tht, frailty, penalty, tune, N, a, p, power)
+  }
+  
+  return(TEST)
+}
+
+#'@export
 logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power, type) {
   
   s = 0
@@ -18,6 +41,20 @@ logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, pow
     s = LogLikCL(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power)
   }
   
+  if (type == 2) {
+    s = LogLikME(y, X, d, coef, lambda, est.tht, frailtyc, N, a, p, power)
+  }
+  
   return(s)
   
+}
+
+#'@export
+cluster <- function(x) {
+  x
+}
+
+#'@export
+event <- function(x) {
+  x
 }

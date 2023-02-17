@@ -144,13 +144,13 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
 frailtyMM_ME <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda1.ini = NULL, lambda2.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-6) {
   
   p = dim(X)[2]
-  n = ncol(y)
+  n = nrow(y)
   
   # Initialize Parameters
   coef = rep(0.5, p)
   est.tht = 1
-  lambda1 = rep(1/n, n)
-  lambda2 = rep(1/n, n)
+  lambda1 = rep(1/n/2, n)
+  lambda2 = rep(1/n/2, n)
   
   if (!is.null(lambda1.ini)) {
     lambda1 = lambda1.ini

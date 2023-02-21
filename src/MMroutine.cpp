@@ -689,8 +689,9 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
       XMexp[Range(i*a, (i+1)*a-1)] += XM[Range(i*a*p+z*a, i*a*p+(z+1)*a-1)] * coef[z];
     }
   }
+  XMexp = exp(XMexp);
   
-  int L0 = 0;
+  double L0 = 0;
   for (int i = 0; i < N; i++) {
     tempID = id[i];
     if (i == 0 || tempID > id[i-1]) {
@@ -926,7 +927,7 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
     
   }
   
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, A, B, D, int2);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, AVEX, XM, XMexp, SUM0);
   return ret;
 }
 

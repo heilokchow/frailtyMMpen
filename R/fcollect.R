@@ -11,16 +11,20 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N,
     TEST = MMME(y, X, d, coef, lambda, tht, frailty, penalty, tune, N, a, p, power)
   }
   
+  if (type == 3) {
+    TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type)
+  }
+  
   return(TEST)
 }
 
 #'@export
-MMME_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
+MMRE_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
   
   TEST = NULL
   
   if (type == 1) {
-    TEST = MMME(y, X, d, coef, lambda, tht, frailty, penalty, tune, N, a, p, power)
+    TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power)
   }
   
   return(TEST)

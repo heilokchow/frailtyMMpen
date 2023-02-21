@@ -12,7 +12,7 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N,
   }
   
   if (type == 3) {
-    TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type)
+    TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power)
   }
   
   return(TEST)
@@ -41,6 +41,10 @@ logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, pow
   
   if (type == 2) {
     s = LogLikME(y, X, d, coef, lambda, est.tht, frailtyc, N, a, p, power)
+  }
+  
+  if (type == 3) {
+    s = LogLikRE(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power)
   }
   
   return(s)

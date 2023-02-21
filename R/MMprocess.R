@@ -317,12 +317,11 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
   
   for (i in 1:n) {
     for (j in 1:p) {
-      cont = 1
       for (z in 1:ntime) {
-        it = length(y[[i]])
-        Xmat[i, j, z] = X[[i]][cont, j]
-        if (cont < it && y[[i]][cont] < tall[z] && y[[i]][cont + 1] >= tall[z]) {
-          cont = cont + 1
+        for (it in 1:length(y[[i]])) {
+          if (it == 1 || y[[i]][it] <= tall[z]) {
+            Xmat[i, j, z] = X[[i]][it, j]
+          }
         }
       }
     }
@@ -358,7 +357,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
     BB = unlist(purrr::pmap(list(lambda, Yexp, d), function(x, y, z) {prod((x*y)^z)}))
     
     for (i in 1:n) {  
-      int0[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+      int0[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = AA, B = BB, D = DD, frailty = frailty, power = power, mode = 0)$value
     }
     
@@ -367,7 +366,7 @@ MMprocess_RE <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power
     }
     
     for (i in 1:n) {  
-      int1[i] = integrate(int_tao, lower = 0, upper = 20, stop.on.error = FALSE,
+      int1[i] = integrate(int_tao, lower = 0, upper = Inf, stop.on.error = FALSE,
                           i = i, est.tht = est.tht, A = AA, B = BB, D = DD, tao0 = int0[i], frailty = frailty, power = power, mode = 1)$value
     }
   }

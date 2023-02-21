@@ -72,7 +72,6 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       ret = list(coef = output$coef,
                  est.tht = output$est.tht,
                  lambda = output$lambda,
-                 lambda2 = NULL,
                  likelihood = output$likelihood,
                  input = output$input,
                  frailty = frailty,
@@ -143,27 +142,38 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
     coef_name = colnames(mx1)
     
     mxid_info = table(mxid)
-    n = length(mxid_info)
-    b = min(mxid_info)
     p = ncol(mx1)
-    
+
     nord = order(mxid)
-    mx1 = mx1[nord, ]
-    y1 = m[[1]][nord, 2]
-    d1 = m[[1]][nord, 3]
+    mxid = mxid[nord]
     
-    dfX = as.data.frame(cbind(mxid, mx1))
-    X = split(dfX, f = dfX$mxid)
-    X = lapply(X, function(x) {x = as.matrix(x[, -1])})
+    N = length(mxid)
+    newid = rep(0, N)
     
-    y = split(y1, f = mxid)
-    d = split(d1, f = mxid)
+    if (N <= 2) {
+      stop("Please check the sample size of data")
+    }
     
-    output = frailtyMM_RE(y, X, d, frailty = frailty, penalty = NULL, maxit = maxit, threshold = tol)
+    for (i in 2:N) {
+      if (mxid[i] > mxid[i-1]) {
+        newid[i:N] = newid[i:N] + 1
+      }
+    }
+    
+    y = m[[1]][nord, 2]
+    X = mx1[nord, ]
+    d = m[[1]][nord, 3]
+    a = max(newid) + 1
+    
+    initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 3)
+    
+    output = frailtyMMcal(y, X, d, N, a, newid,
+                          coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
+                          frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 3)
+    
     ret = list(coef = output$coef,
                est.tht = output$est.tht,
                lambda = output$lambda,
-               lambda2 = NULL,
                likelihood = output$likelihood,
                input = output$input,
                frailty = frailty,

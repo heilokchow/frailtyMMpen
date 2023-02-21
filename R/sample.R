@@ -155,6 +155,14 @@ sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
   
   out = unlist(y)
   N = length(out)
+  
+  lambda = y
+  for (i in 1:a) {
+    for (j in seq_len(length(y[[i]]))) {
+      lambda[[i]][j] = 1/N
+    }
+  }
+  
   outX = matrix(0, nrow = 0, ncol = p)
   for (i in seq_len(n)) {
     outX = rbind(outX, X[[i]])
@@ -165,7 +173,7 @@ sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
   outX$status = unlist(d)
   outX$id = unlist(id)
   
-  return(outX)
+  return(list(outX, y, X, d, lambda))
 }
 
 

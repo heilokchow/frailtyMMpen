@@ -1078,12 +1078,6 @@ double LogLikME(const NumericVector& y, NumericVector X, const NumericVector& d,
   NumericVector DT(n, 0.0);
   
   NumericVector int1(n, 0.0);
-  NumericVector int2(n, 0.0);
-  NumericVector int3(n, 0.0);
-  
-  NumericVector E0n(N);
-  NumericVector SUM0n(N);
-  NumericVector AVEXn(N);
   
   for (int i = 0; i < ne; i++) {
     
@@ -1181,3 +1175,128 @@ double LogLikME(const NumericVector& y, NumericVector X, const NumericVector& d,
 
   return 0;
 }
+
+
+// [[Rcpp::export]]
+double LogLikRE(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
+                const double& tht0, int frailty, const NumericVector& id, int N, int a, int p, double power) {
+  
+  
+  NumericVector coef = clone(coef0);
+  NumericVector lambda = clone(lambda0);
+  double tht = tht0;
+  
+  NumericVector La(N);
+  
+  NumericVector Ypre(N, 0.0);
+  NumericVector YpreExp(N, 0.0);
+  intParams kint;
+  
+  NumericVector A(a, 0.0);
+  NumericVector B(a, 1.0);
+  NumericVector D(a, 0.0);
+  
+  NumericVector AT(a, 0.0);
+  NumericVector DT(a, 0.0);
+  
+  NumericVector int1(a, 0.0);
+  
+  
+  int tempID(0);
+
+  computeLAM(La, lambda, y, N, 0);
+  
+  for (int i = 0; i < p; i++) {
+    Ypre += X[Range(i*N, (i+1)*N-1)] * coef[i];
+  }
+  
+  YpreExp = exp(Ypre);
+  
+  double L0 = 0;
+  for (int i = 0; i < N; i++) {
+    tempID = id[i];
+    if (i == 0 || tempID > id[i-1]) {
+      L0 = 0;
+    }
+    A[tempID] += (La[i] - L0) * YpreExp[i];
+    L0 = La[i];
+  }
+  
+  for (int j = 0; j < N; j++) {
+    tempID = id[j];
+    if (d[j] == 1) {
+      B[tempID] *= lambda[j] * YpreExp[j];
+      D[tempID]++;
+    }
+  }
+  
+  if (frailty == 1 || frailty == 2) {
+    
+    gsl_set_error_handler_off();
+    int status;
+    
+    gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+    gsl_function F1;
+    double result(0.0), error;
+    
+    if (frailty == 1) {
+      F1.function = &logN1int;
+    }
+    
+    if (frailty == 2) {
+      F1.function = &InvG1int;
+    }
+    
+    if (frailty == 3) {
+      F1.function = &PVF1int;
+      kint.mpvf = power;
+    }
+    
+    F1.params = &kint;
+    kint.s = tht;
+    
+    for (int i = 0; i < a; i++) {
+      kint.a = A[i];
+      kint.b = B[i];
+      kint.d = D[i];
+      
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        
+        status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
+        Rcout << "F1: Approximated by Interval\n";
+        
+      }
+      
+      int1[i] = result;
+      
+    }
+    
+    gsl_integration_workspace_free (w);
+    
+    return(sum(log(int1)));
+  }
+  
+  if (frailty == 0) {
+    AT = 1/tht + A;
+    DT = 1/tht + D;
+    
+    double l(0.0);
+    l -= a*(lgamma(1/tht) + std::log(tht)/tht);
+    l += sum(lgamma(DT)) - sum(DT*log(AT));
+    l += sum(d * Ypre);
+    
+    for (int i = 0; i < N; i++) {
+      if (lambda[i] > 0) {
+        l += std::log(lambda[i]);
+      }
+    }
+    
+    return l;
+    
+  } 
+  
+  return 0.0;
+}
+

@@ -9,11 +9,19 @@ MMME <- function(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, N, n, p,
     .Call(`_frailtyMMpen_MMME`, y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, N, n, p, power)
 }
 
+MMRE <- function(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, id, N, a, p, power) {
+    .Call(`_frailtyMMpen_MMRE`, y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, id, N, a, p, power)
+}
+
 LogLikCL <- function(y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power) {
     .Call(`_frailtyMMpen_LogLikCL`, y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power)
 }
 
 LogLikME <- function(y, X, d, coef0, lambda0, tht0, frailty, N, n, p, power) {
     .Call(`_frailtyMMpen_LogLikME`, y, X, d, coef0, lambda0, tht0, frailty, N, n, p, power)
+}
+
+LogLikRE <- function(y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power) {
+    .Call(`_frailtyMMpen_LogLikRE`, y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power)
 }
 

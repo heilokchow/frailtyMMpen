@@ -310,10 +310,11 @@ X[,,2] = x3
 
 
 # CGD
-rs1 = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), cgd, frailty = "InvGauss", tol = 1e-6)
+rs1 = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), cgd, frailty = "Gamma", tol = 1e-6)
+rs1 = frailtyMMpen(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), cgd, frailty = "LogN", penalty = "SCAD", tol = 1e-6)
 rs1$coef
 
-gam <- emfrail(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), data = cgd, distribution = emfrail_dist(dist = 'pvf'))
+gam <- emfrail(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), data = cgd, distribution = emfrail_dist(dist = 'gamma'))
 summary(gam)
 
 
@@ -371,21 +372,21 @@ test_coef = rep(0, 30)
 test_th = 0
 for (i in 1:100) {
   set.seed(i)
-  sdata = sample_ME(init.var = 1, cen = 5, frailty = "InvGauss")
-  y = sdata$y
-  X = sdata$X
-  d = sdata$d
-  # 
-  y = sdata$data$time
-  X = unname(unlist(sdata$data[,1:30]))
-  d = sdata$data$status
+  sdata = sample_ME(init.var = 1, cen = 5, frailty = "LogN", n = 100)
+  # y = sdata$y
+  # X = sdata$X
+  # d = sdata$d
+  # # 
+  # y = sdata$data$time
+  # X = unname(unlist(sdata$data[,1:30]))
+  # d = sdata$data$status
   
   # rs0 = frailtyMM_ME(y, X, d, frailty = "LogN")
   
   p3 = proc.time()[1]
   rs1 = frailtyMM(Surv(time, status) ~ . + event(id), sdata$data, frailty = "LogN", tol = 1e-6)
   # rs1 = frailtyMM(Surv(time, status) ~ . + cluster(id), sdata, frailty = "PVF", tol = 1e-5, power = 1.5, maxit = 100)
-  rs1 = frailtyMMpen(Surv(time, status) ~ . + event(id), sdata$data, frailty = "InvGauss", tol = 1e-5, power = 1.5, penalty = "SCAD", maxit = 400)
+  rs1 = frailtyMMpen(Surv(time, status) ~ . + event(id), sdata$data, frailty = "LogN", tol = 1e-5, power = 1.5, penalty = "LASSO", maxit = 400)
   p4 = proc.time()[1]
   p4 - p3
   
@@ -447,25 +448,32 @@ summary(fit)
 # Transfer to GSL ---------------------------------------------------------
 
 set.seed(5)
-yy = sample_ME(init.var = 1, cen = 5, frailty = "LogN")
+yy = sample_RE(init.var = 1, cen = 5, frailty = "Gamma")
 
-sdata = yy$data
-y = yy$y 
-d = yy$d
-X = yy$X
+sdata = yy[[1]]
+y = sdata$end
+d = sdata$status
+X = unname(unlist(sdata[,1:30]))
+lambda = c(rep(1/N, N))
 
+y1 = yy[[2]]
+X1 = yy[[3]]
+d1 = yy[[4]]
+lambda1 = yy[[5]]
+
+y = yy[[2]]
+X = yy[[3]]
+d = yy[[4]]
+lambda = yy[[5]]
 
 vy = as.vector(y)
 vd = as.vector(d)
 
 N = nrow(sdata)
 a = 50
-b = 10
-n = nrow(y)
 p = 30
 coef = rep(1/p, p)
-lambda1 = c(rep(1/n, n))
-lambda2 = c(rep(1/n, n))
+
 est.tht = 1
 frailty = "LogN"
 power = 1.5
@@ -474,22 +482,33 @@ penalty = NULL
 y1 = vy
 d1 = vd
 X1 = matrix(as.vector(X), nrow = N, ncol = p)
-id = rep(seq(0,a-1,1), b)
+id = sdata$id-1
 
-formula = Surv(time, status) ~ . + event(id)
+formula = Surv(start, end, status) ~ . + cluster(id)
 rs1 = frailtyMM(Surv(time, status) ~ . + event(id), sdata, frailty = "InvGauss", tol = 1e-6)
+rs1 = frailtyMM(Surv(start, end, status) ~ . + cluster(id), sdata, frailty = "LogN", tol = 1e-6, maxit = 100)
+rs1 = frailtyMM(Surv(start, end, status) ~ . + cluster(id), sdata, frailty = "Gamma", tol = 1e-6, maxit = 200)
+
+rs2 = emfrail(Surv(start, end, status) ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
+                V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
+                V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + cluster(id), data = sdata, distribution = emfrail_dist(dist = 'gamma'))
+
+ttemp = c()
+for (i in 1:93) { 
+  ttemp = c(ttemp, test1[[7]][3+(i-1)*a])
+}
 
 f1 <- function() {
   # test = MMCL_TEST(y1, X1, d1, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
   # test = MMCL_TEST(y, X, d, coef, lambda, 1.0, 1, 0, 0.1, id, N, a, p, power)
   # p1 = proc.time()[1]
-  test1 = MMME_TEST1(y, X, d, coef, lambda1, lambda2, 1, 1, 0, 0, n, p, power)
+  test1 = MMRE_TEST(y, X, d, coef, lambda, 1, 1, 0, 0, id, N, a, p, power, 1)
   # p2 = proc.time()[1]
   # MMME_TEST(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type)
 }
 
 f2 <- function(){
-  test2 = MMME_TEST(sdata$time, unname(unlist(sdata[,1:30])), sdata$status, coef, c(lambda1, lambda2), 1, 1, 0, 0, NULL, N, n, p, power, 1)
+  test2 = MMprocess_RE(y1, X1, d1, coef, lambda1, 1)
 }
 
 

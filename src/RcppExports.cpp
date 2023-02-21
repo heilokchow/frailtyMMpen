@@ -58,6 +58,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// MMRE
+List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, int penalty, double tune, const NumericVector& id, int N, int a, int p, double power);
+RcppExport SEXP _frailtyMMpen_MMRE(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP penaltySEXP, SEXP tuneSEXP, SEXP idSEXP, SEXP NSEXP, SEXP aSEXP, SEXP pSEXP, SEXP powerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type coef0(coef0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lambda0(lambda0SEXP);
+    Rcpp::traits::input_parameter< const double& >::type tht0(tht0SEXP);
+    Rcpp::traits::input_parameter< int >::type frailty(frailtySEXP);
+    Rcpp::traits::input_parameter< int >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< double >::type tune(tuneSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type id(idSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type a(aSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type power(powerSEXP);
+    rcpp_result_gen = Rcpp::wrap(MMRE(y, X, d, coef0, lambda0, tht0, frailty, penalty, tune, id, N, a, p, power));
+    return rcpp_result_gen;
+END_RCPP
+}
 // LogLikCL
 double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, const NumericVector& id, int N, int a, int p, double power);
 RcppExport SEXP _frailtyMMpen_LogLikCL(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP idSEXP, SEXP NSEXP, SEXP aSEXP, SEXP pSEXP, SEXP powerSEXP) {
@@ -101,12 +125,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LogLikRE
+double LogLikRE(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0, const double& tht0, int frailty, const NumericVector& id, int N, int a, int p, double power);
+RcppExport SEXP _frailtyMMpen_LogLikRE(SEXP ySEXP, SEXP XSEXP, SEXP dSEXP, SEXP coef0SEXP, SEXP lambda0SEXP, SEXP tht0SEXP, SEXP frailtySEXP, SEXP idSEXP, SEXP NSEXP, SEXP aSEXP, SEXP pSEXP, SEXP powerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type coef0(coef0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lambda0(lambda0SEXP);
+    Rcpp::traits::input_parameter< const double& >::type tht0(tht0SEXP);
+    Rcpp::traits::input_parameter< int >::type frailty(frailtySEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type id(idSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type a(aSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type power(powerSEXP);
+    rcpp_result_gen = Rcpp::wrap(LogLikRE(y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_frailtyMMpen_MMCL", (DL_FUNC) &_frailtyMMpen_MMCL, 14},
     {"_frailtyMMpen_MMME", (DL_FUNC) &_frailtyMMpen_MMME, 13},
+    {"_frailtyMMpen_MMRE", (DL_FUNC) &_frailtyMMpen_MMRE, 14},
     {"_frailtyMMpen_LogLikCL", (DL_FUNC) &_frailtyMMpen_LogLikCL, 12},
     {"_frailtyMMpen_LogLikME", (DL_FUNC) &_frailtyMMpen_LogLikME, 11},
+    {"_frailtyMMpen_LogLikRE", (DL_FUNC) &_frailtyMMpen_LogLikRE, 12},
     {NULL, NULL, 0}
 };
 

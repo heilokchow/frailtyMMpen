@@ -1,14 +1,14 @@
-loglik = function(x1, data, lambda, lambda2, frailty, power, datatype) {
-  if (datatype == "Cluster") {
-    return(logLikihood_CL(data$y, data$X, data$d, x1[-1], lambda = lambda, x1[1], frailty = frailty, power = power))
-  }
-  if (datatype == "Multi-event") {
-    return(logLikihood_ME(data$y, data$X, data$d, x1[-1], lambda1 = lambda, lambda2 = lambda2, x1[1], frailty = frailty, power = power))
-  }
-  if (datatype == "Recurrent") {
-    return(logLikihood_RE(data$y, data$X, data$d, x1[-1], lambda = lambda, x1[1], frailty = frailty, power = power))
-  }
-}
+# loglik = function(x1, data, lambda, lambda2, frailty, power, datatype) {
+#   if (datatype == "Cluster") {
+#     return(logLikihood_CL(data$y, data$X, data$d, x1[-1], lambda = lambda, x1[1], frailty = frailty, power = power))
+#   }
+#   if (datatype == "Multi-event") {
+#     return(logLikihood_ME(data$y, data$X, data$d, x1[-1], lambda1 = lambda, lambda2 = lambda2, x1[1], frailty = frailty, power = power))
+#   }
+#   if (datatype == "Recurrent") {
+#     return(logLikihood_RE(data$y, data$X, data$d, x1[-1], lambda = lambda, x1[1], frailty = frailty, power = power))
+#   }
+# }
 
 logLikihood_CL <- function(y, X, d, coef, lambda, est.tht, frailty = "LogN", power = NULL) {
   

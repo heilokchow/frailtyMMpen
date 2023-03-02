@@ -51,6 +51,18 @@ logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, pow
   
 }
 
+logLik <- function(x1, data, lambda, frailtyc, id, N, a, p, power, type) {
+  
+  est.tht = x1[1]
+  coef = x1[-1]
+  y = data$y
+  X = data$X
+  d = data$d
+  
+  return(logLikcal(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power, type))
+  
+}
+
 #'@export
 cluster <- function(x) {
   x

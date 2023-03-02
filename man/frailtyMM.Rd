@@ -32,6 +32,44 @@ due to the non-explicit expression of likelihood function)}
 
 \item{maixt}{Maximum iterations for MM algorithm.}
 }
+\value{
+An object of class \code{fmm} that contains the following fields:
+\item{coef}{coeficient estimated from a specific model.}
+\item{est.tht}{frailty parameter estimated from a specific model.}
+\item{lambda}{frailty for each observation estimated from a specific model.}
+\item{likelihood}{The observed log-likelihood given estimated parameters.}
+\item{input}{input data.},
+\item{frailty}{frailty used for model fitting.}
+\item{power}{power used for model fitting is PVF frailty is applied.},
+\item{iter}{total number of iterations.}
+\item{convergence}{convergence threshold.}
+\item{formula}{formula applied as input.}
+\item{coefname}{name of each coeficient from input.}
+\item{id}{id for individuals or clusters.}
+\item{N}{total number of observarions.}
+\item{a}{total number of individuals or clusters.}
+\item{datatype}{model used for fitting.}
+}
 \description{
-Fitting frailty models with clustered, multi-event and recurrent data using MM algorithm
+{
+This formula is used to fit the non-penalized regression. 3 types of the models can be fitted, shared frailty model where
+hazard rate of \eqn{j^{th}} object in \eqn{i^{th}} cluster is
+\deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\beta' \mathbf{X_{ij}}).}
+The multi-event frailty model with different baseline hazard of different event and the hazard rate of \eqn{j^{th}} event for individual \eqn{i^{th}} is 
+\deqn{\lambda_{ij}(t|\omega_i) = \lambda_{0j}(t) \omega_i \exp(\beta' \mathbf{X_{ij}}).}
+}
+The recurrent event model where the \eqn{j^{th}} event of individual \eqn{i} has observed feature \eqn{\mathbf{X_{ij}}},
+\deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\beta' \mathbf{X_{ij}}).}
+}
+\details{
+To run the shared frailty model, \code{Surv(tstop, status)} formula should be applied along with \code{+cluster()} to specify the
+corresponding clusters, if you want to run the frailty model without shared frailty, you should also use \code{+cluster()} for individual id 
+to treat it as a special case of shared frailty model with only 1 object in each cluster. To run the multi-event model, 
+\code{Surv(tstop, status)} formula should be applied along with \code{+event()} to specify the corresponding events. To run the recurrent event model, 
+\code{Surv(tstart, tstop, status)} formula should be applied along with \code{+cluster()} where the cluster here denotes the individual id and
+each individual may have many observed events at different time points.
+
+The default frailty will be log-normal frailty, in order to fit other frailty models, simply set parameter \code{frailty} as "InvGauss", "Gamma" or "PVF",
+the parameter \code{power} is only used when \code{frailty}=PVF and since the likelihood of PVF (tweedie) distribution is approximated using 
+\code{Tweedie} function from package mgcv, 1<\code{power}<2.
 }

@@ -13,15 +13,28 @@
 
 summary.fmm <- function(model, ...) {
   
-  Fisher = -numDeriv::hessian(loglik,
+  frailtyc = switch(model$frailty, "Gamma" = 0, "LogN" = 1, "InvGauss" = 2, "PVF" = 3)
+  datatype = switch(model$datatype, "Cluster" = 1, "Multi-event" = 2, "Recurrent" = 3)
+  p = length(model$coef)
+  
+  if (is.null(model$power)) {
+    power = 0.0
+  } else {
+    power = model$power
+  }
+  
+  Fisher = -numDeriv::hessian(logLik,
                               x = c(model$est.tht, model$coef),
                               method="Richardson",
                               data = model$input,
                               lambda = model$lambda,
-                              lambda2 = model$lambda2,
-                              frailty = model$frailty,
-                              power = model$power,
-                              datatype = model$datatype)
+                              frailtyc = frailtyc,
+                              id = model$id,
+                              N = model$N,
+                              a = model$a,
+                              p = p,
+                              power = power,
+                              type = datatype)
   
   sd = diag(solve(Fisher))
   

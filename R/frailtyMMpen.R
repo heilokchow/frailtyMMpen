@@ -1,6 +1,8 @@
 #' Fitting penalized frailty models with clustered, multi-event and recurrent data using MM algorithm
 #' 
-#' @importFrom purrr pmap
+#' @description {This formula is used to fit the non-penalized regression. 3 types of the models can be fitted similar to the function
+#' \code{frailtyMM}. In addition, variable selection can be done by three types of penalty, LASSO, MCP and SCAD.
+#' }
 #' @param formula Formula where the left hand side is an object of the type \code{Surv}
 #' and the right hand side contains the variables and additional specifications. 
 #' \code{+cluster()} function specify the group id for clustered data or individual id for recurrent data.
@@ -17,6 +19,24 @@
 #' @export
 #' @importFrom Rcpp evalCpp
 #' @useDynLib frailtyMMpen, .registration = TRUE
+#' 
+#' @details Without a given \code{tune}, the default sequence of tuning parameters are used to provide the regularization path, 
+#' the \eqn{a} used for MCP is 3 and SCAD is 3.7. The formula is same as the input for function \code{frailtyMM}.
+#' 
+#' @return An object of class \code{fmm} that contains the following fields:
+#' \item{coef}{matrix of coeficient estimated from a specific model.}
+#' \item{est.tht}{vector of frailty parameter estimated from a specific model.}
+#' \item{lambda}{list of frailty for each observation estimated from a specific model.}
+#' \item{likelihood}{vector of the observed log-likelihood given estimated parameters.}
+#' \item{BIC}{vector of the BIC given estimated parameters.}
+#' \item{tune}{vector of tuning parameters used for penalized regression.}
+#' \item{tune.min}{tuning parameter where minimal of BIC is obtained.}
+#' \item{convergence}{convergence threshold.}
+#' \item{y}{input stopping time.}
+#' \item{X}{input covariate matrix.}
+#' \item{d}{input censoring indicator.}
+#' 
+#' @seealso \code{\link{frailtyMM}}
 #' 
 frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", tune = NULL, tol = 1e-5, maxit = 200) {
   

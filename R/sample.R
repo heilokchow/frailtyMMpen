@@ -134,8 +134,8 @@ sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
     d[[i]] = c(0)
     X[[i]] = matrix(rep(0, p), nrow = 1)
     while (temps < cen[i,]) {
-      U = runif(1, 0, 1)
       tempX = runif(p, 0, 0.5)
+      U = runif(1, 0, 1)
       tempT = -log(U)/(lambda*u[i]*exp(tempX %*% coef)) 
       temps = temps + tempT
       y[[i]] = c(y[[i]], temps)
@@ -157,7 +157,7 @@ sample_RE <- function(coef = matrix(c(1, 2, 3, 4, rep(0, 26))), lambda = 5, frai
   N = length(out)
   
   lambda = y
-  for (i in 1:a) {
+  for (i in 1:n) {
     for (j in seq_len(length(y[[i]]))) {
       lambda[[i]][j] = 1/N
     }

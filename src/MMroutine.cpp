@@ -664,10 +664,10 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
   
   YpreExp = exp(YpreExp);
   
-  for (int i = 0; i < N; i++) {
+  for (int i = N - 1; i >= 0; i--) {
     tempID = id[i];
     double ct = y[i];
-    if (i == 0 || tempID > id[i-1]) {
+    if (i == N - 1 || tempID < id[i+1]) {
       for (int j = 0; j < N; j++) {
         for (int z = 0; z < p; z++) {
           XM[j*a*p + z*a + tempID] = X[z*N + i];
@@ -675,7 +675,7 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
       }
     } else {
       for (int j = 0; j < N; j++) {
-        if (ct <= y[j]) {
+        if (ct >= y[j]) {
           for (int z = 0; z < p; z++) {
             XM[j*a*p + z*a + tempID] = X[z*N + i];
           }

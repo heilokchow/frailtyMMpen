@@ -38,9 +38,9 @@ An object of class \code{fmm} that contains the following fields:
 \item{est.tht}{frailty parameter estimated from a specific model.}
 \item{lambda}{frailty for each observation estimated from a specific model.}
 \item{likelihood}{The observed log-likelihood given estimated parameters.}
-\item{input}{input data.},
+\item{input}{input data.}
 \item{frailty}{frailty used for model fitting.}
-\item{power}{power used for model fitting is PVF frailty is applied.},
+\item{power}{power used for model fitting is PVF frailty is applied.}
 \item{iter}{total number of iterations.}
 \item{convergence}{convergence threshold.}
 \item{formula}{formula applied as input.}

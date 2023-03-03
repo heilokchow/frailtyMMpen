@@ -1,8 +1,14 @@
 #' Fitting penalized frailty models with clustered, multi-event and recurrent data using MM algorithm
 #' 
-#' @description {This formula is used to fit the non-penalized regression. 3 types of the models can be fitted similar to the function
-#' \code{frailtyMM}. In addition, variable selection can be done by three types of penalty, LASSO, MCP and SCAD.
+#' @description {This formula is used to fit the penalized regression. 3 types of the models can be fitted similar to the function
+#' \code{frailtyMM}. In addition, variable selection can be done by three types of penalty, LASSO, MCP and SCAD with the following
+#' objective function where \eqn{\lambda} is the tuning parameter and \eqn{q} is the dimension of \eqn{\boldsymbol{\beta}},
+#'  \deqn{l(\boldsymbol{\beta},\Lambda_0|Y_{obs}) + n\sum_{p=1}^{q} p(|\beta_p|, \lambda).}
+#'  The BIC is computed using the following equation,
+#'  \deqn{-2l(\hat{\boldsymbol{\beta}}, \hat{\Lambda}_0) + G_n(\hat{S}+1)\log(n),}
+#'  where \eqn{G_n=\max{1, \log(\log(q+1))}} and \eqn{\hat{S}} is the degree of freedom.
 #' }
+#' 
 #' @param formula Formula where the left hand side is an object of the type \code{Surv}
 #' and the right hand side contains the variables and additional specifications. 
 #' \code{+cluster()} function specify the group id for clustered data or individual id for recurrent data.
@@ -37,6 +43,48 @@
 #' \item{d}{input censoring indicator.}
 #' 
 #' @seealso \code{\link{frailtyMM}}
+#' 
+#' @examples 
+#' 
+#' data(simdataCL)
+#' 
+#' # Penalized regression under clustered frailty model
+#' 
+#' # Clustered Gamma Frailty Model
+#' 
+#' # Using default tuning parameter sequence
+#' gam_cl1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
+#'                        simdataCL, frailty = "Gamma")
+#' 
+#' # Using given tuning parameter sequence
+#' gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), 
+#'                        simdataCL, frailty = "Gamma", tune = 0.1)
+#' 
+#' # Obtain the coefficient where minimum BIC is obtained
+#' coef(gam_cl1)
+#' 
+#' # Obtain the coefficient with tune = a.
+#' coef(gam_cl1, tune = a)
+#' 
+#' # Plot the regularization path
+#' plot(gam_cl1)
+#' 
+#' # Get the degree of freedom and BIC for the sequence of tuning parameters provided
+#' print(gam_cl1)
+#' 
+#' \dontrun{
+#' # Clustered Log-Normal Frailty Model
+#' logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+#'                     simdataCL, frailty = "LogN")
+#' 
+#' # Clustered Inverse Gaussian Frailty Model
+#' invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+#'                     simdataCL, frailty = "InvGauss")
+#' 
+#' # Clustered PVF Frailty Model
+#' pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+#'                    simdataCL, frailty = "PVF", power = 1.5)
+#' }
 #' 
 frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", tune = NULL, tol = 1e-5, maxit = 200) {
   

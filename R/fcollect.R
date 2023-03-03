@@ -1,4 +1,3 @@
-#'@export
 MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
   
   TEST = NULL
@@ -18,7 +17,6 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N,
   return(TEST)
 }
 
-#'@export
 MMRE_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
   
   TEST = NULL
@@ -30,7 +28,6 @@ MMRE_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N,
   return(TEST)
 }
 
-#'@export
 logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power, type) {
   
   s = 0

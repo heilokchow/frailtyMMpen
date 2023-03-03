@@ -13,9 +13,10 @@ print.fmm_summary <- function(x, ...) {
   coef_summary = data.frame(coef = x$coef,
                             "exp(coef)" = exp(x$coef),
                             "se(coef)" = x$coef_sd,
-                            zval = x$zcoef,
-                            pval = x$pval_coef)
+                            z = x$zcoef,
+                            p = x$pval_coef)
   row.names(coef_summary) = x$coefname
+  colnames(coef_summary) = c("coef", "exp(coef)", "se(coef)", "z", "p")
   
   printCoefmat(coef_summary, digits = 3, signif.stars = TRUE)
   
@@ -30,35 +31,27 @@ print.fmm_summary <- function(x, ...) {
 
 }
 
-#'@export
-
+#' print a non-penalized regression object
+#' 
+#' Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMM}
+#' 
+#' #'@export
+#' @seealso \code{\link{frailtyMM}}
 print.fmm <- function(x, ...) {
   
-  cat("Call:\n")
-  dput(attr(x, "call"))
-  cat("\n")
-  
-  cat(paste("  ", x$frailty, "frailty model with", x$datatype, "data, estimated using MM algorithm\n"))
-  
-  cat("\n")
-  
-  coef_summary = data.frame(coef = x$coef, "exp(coef)" = exp(x$coef))
-  row.names(coef_summary) = x$coefname
-  
-  printCoefmat(coef_summary, digits = 3, signif.stars = TRUE)
-  
-  cat("\n")
-  cat(paste("   Frailty parameter, theta:", round(x$est.tht, 3)))
-  cat("\n")
-  cat(paste("   Observed likelihood:", round(x$likelihood, 3), "\n"))
-  cat("\n")
-  cat("   Convergence criteria:")
-  cat(paste(" thershold:", sprintf("%.3e", x$convergence), ", number of iterations:", x$iter))
+  print(summary(x))
   
 }
 
+#' print a penalized regression object
+#' 
+#' Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMMpen}.
+#' The first column is the tuning parameter sequence, the second column is the degree of freedom and the third column is the BIC.
+#'
+#'
 #'@export
-
+#'
+#' @seealso \code{\link{frailtyMMpen}}
 print.fpen <- function(x, ...) {
   
   cat("Call:\n")
@@ -70,7 +63,7 @@ print.fpen <- function(x, ...) {
   
   tune_summary = data.frame(tune = round(tune, 5),
                             Df = df,
-                            Lik = round(x$likelihood, 3))
+                            BIC = round(x$BIC, 3))
   
   print(tune_summary)
   

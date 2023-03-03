@@ -52,13 +52,61 @@ An object of class \code{fmm} that contains the following fields:
 \item{d}{input censoring indicator.}
 }
 \description{
-{This formula is used to fit the non-penalized regression. 3 types of the models can be fitted similar to the function
-\code{frailtyMM}. In addition, variable selection can be done by three types of penalty, LASSO, MCP and SCAD.
+{This formula is used to fit the penalized regression. 3 types of the models can be fitted similar to the function
+\code{frailtyMM}. In addition, variable selection can be done by three types of penalty, LASSO, MCP and SCAD with the following
+objective function where \eqn{\lambda} is the tuning parameter and \eqn{q} is the dimension of \eqn{\boldsymbol{\beta}},
+ \deqn{l(\boldsymbol{\beta},\Lambda_0|Y_{obs}) + n\sum_{p=1}^{q} p(|\beta_p|, \lambda).}
+ The BIC is computed using the following equation,
+ \deqn{-2l(\hat{\boldsymbol{\beta}}, \hat{\Lambda}_0) + G_n(\hat{S}+1)\log(n),}
+ where \eqn{G_n=\max{1, \log(\log(q+1))}} and \eqn{\hat{S}} is the degree of freedom.
 }
 }
 \details{
 Without a given \code{tune}, the default sequence of tuning parameters are used to provide the regularization path, 
 the \eqn{a} used for MCP is 3 and SCAD is 3.7. The formula is same as the input for function \code{frailtyMM}.
+}
+\examples{
+
+data(simdataCL)
+
+# Penalized regression under clustered frailty model
+
+# Clustered Gamma Frailty Model
+
+# Using default tuning parameter sequence
+gam_cl1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
+                       simdataCL, frailty = "Gamma")
+
+# Using given tuning parameter sequence
+gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), 
+                       simdataCL, frailty = "Gamma", tune = 0.1)
+
+# Obtain the coefficient where minimum BIC is obtained
+coef(gam_cl1)
+
+# Obtain the coefficient with tune = a.
+coef(gam_cl1, tune = a)
+
+# Plot the regularization path
+plot(gam_cl1)
+
+# Get the degree of freedom and BIC for the sequence of tuning parameters provided
+print(gam_cl1)
+
+\dontrun{
+# Clustered Log-Normal Frailty Model
+logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                    simdataCL, frailty = "LogN")
+
+# Clustered Inverse Gaussian Frailty Model
+invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                    simdataCL, frailty = "InvGauss")
+
+# Clustered PVF Frailty Model
+pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                   simdataCL, frailty = "PVF", power = 1.5)
+}
+
 }
 \seealso{
 \code{\link{frailtyMM}}

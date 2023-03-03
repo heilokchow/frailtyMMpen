@@ -54,12 +54,12 @@ An object of class \code{fmm} that contains the following fields:
 {
 This formula is used to fit the non-penalized regression. 3 types of the models can be fitted, shared frailty model where
 hazard rate of \eqn{j^{th}} object in \eqn{i^{th}} cluster is
-\deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\beta' \mathbf{X_{ij}}).}
+\deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
 The multi-event frailty model with different baseline hazard of different event and the hazard rate of \eqn{j^{th}} event for individual \eqn{i^{th}} is 
-\deqn{\lambda_{ij}(t|\omega_i) = \lambda_{0j}(t) \omega_i \exp(\beta' \mathbf{X_{ij}}).}
+\deqn{\lambda_{ij}(t|\omega_i) = \lambda_{0j}(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
 }
 The recurrent event model where the \eqn{j^{th}} event of individual \eqn{i} has observed feature \eqn{\mathbf{X_{ij}}},
-\deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\beta' \mathbf{X_{ij}}).}
+\deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
 }
 \details{
 To run the shared frailty model, \code{Surv(tstop, status)} formula should be applied along with \code{+cluster()} to specify the
@@ -72,4 +72,72 @@ each individual may have many observed events at different time points.
 The default frailty will be log-normal frailty, in order to fit other frailty models, simply set parameter \code{frailty} as "InvGauss", "Gamma" or "PVF",
 the parameter \code{power} is only used when \code{frailty}=PVF and since the likelihood of PVF (tweedie) distribution is approximated using 
 \code{Tweedie} function from package mgcv, 1<\code{power}<2.
+}
+\examples{
+
+data(simdataCL)
+data(simdataME)
+data(simdataRE)
+
+# Parameter estimation under different model structure and frailties
+
+# Clustered Gamma Frailty Model
+gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                   simdataCL, frailty = "Gamma")
+
+\dontrun{
+# Clustered Log-Normal Frailty Model
+logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                    simdataCL, frailty = "LogN")
+
+# Clustered Inverse Gaussian Frailty Model
+invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                    simdataCL, frailty = "InvGauss")
+
+# Clustered PVF Frailty Model
+pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                   simdataCL, frailty = "PVF", power = 1.5)
+}
+
+# Multi-event Gamma Frailty Model
+gam_me = frailtyMM(Surv(time, status) ~ . + cluster(id), 
+                   simdataCL, frailty = "Gamma")
+
+\dontrun{
+# Multi-event Log-Normal Frailty Model
+logn_me = frailtyMM(Surv(time, status) ~ . + event(id), 
+                    simdataME, frailty = "LogN")
+
+# Multi-event Inverse Gaussian Frailty Model
+invg_me = frailtyMM(Surv(time, status) ~ . + event(id),
+                    simdataME, frailty = "InvGauss")
+
+# Multi-event PVF Frailty Model
+pvf_me = frailtyMM(Surv(time, status) ~ . + event(id), 
+                   simdataME, frailty = "PVF", power = 1.5)
+}
+
+# Recurrent event Gamma Frailty Model
+gam_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
+                   simdataRE, frailty = "Gamma")
+
+\dontrun{
+# Recurrent event Log-Normal Frailty Model
+logn_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
+                   simdataRE, frailty = "LogN")
+
+# Recurrent event Inverse Gaussian Frailty Model
+invg_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id), 
+                    simdataRE, frailty = "InvGauss")
+
+# Recurrent event PVF Frailty Model
+pvf_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
+                   simdataRE, frailty = "PVF", power = 1.5)
+}
+
+# Obtain the summary statistics under fitted model
+
+coef(gam_cl)
+summary(gam_cl)
+
 }

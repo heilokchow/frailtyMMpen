@@ -8,8 +8,13 @@ coef.fmm <- function(x, ...) {
   return(ret)
 } 
 
+#' retreive the coefficence under given tuning parameter
+#'
+#'@details Without given a specific tune value, the coefficenct with minimum BIC is returned. If \code{tune=a},
+#' the coefficient is computed using linear interpolation of the result from the coefficents estimated from the run of regularization path.
+#' Thus, \code{a} should between the minimum and maximum value of the tuning parameter sequences used for the model fitting.
 #'@export
-
+#'
 coef.fpen <- function(x, tune = NULL) {
   
   n = length(x$tune)

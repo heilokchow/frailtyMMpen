@@ -132,6 +132,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
                 est.tht = est.tht,
                 lambda = lambda,
                 likelihood = l1,
+                Ar = rs$Ar,
                 input = list(y = y, X = X, d = d),
                 iter = num,
                 convergence = error)

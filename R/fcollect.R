@@ -48,6 +48,7 @@ logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, pow
   
 }
 
+#'@export
 logLik <- function(x1, data, lambda, frailtyc, id, N, a, p, power, type) {
   
   est.tht = x1[1]

@@ -325,7 +325,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     
   }
   
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, A, B, D, int2);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
   return ret;
 }
 
@@ -607,7 +607,7 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
 
   }
   
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, int1, YpreExp, A, B, D);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
   return ret;
 }
 
@@ -927,7 +927,7 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
     
   }
   
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, AVEX, XM, XMexp, SUM0);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
   return ret;
 }
 

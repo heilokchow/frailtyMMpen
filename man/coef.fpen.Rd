@@ -4,7 +4,7 @@
 \alias{coef.fpen}
 \title{retreive the coefficence under given tuning parameter}
 \usage{
-coef.fpen(x, tune = NULL)
+\method{coef}{fpen}(x, tune = NULL)
 }
 \description{
 retreive the coefficence under given tuning parameter

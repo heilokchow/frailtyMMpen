@@ -57,7 +57,7 @@ template <typename T> int sgn(T val) {
 
 // [[Rcpp::export]]
 List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-          const double& tht0, int frailty, int penalty, double tune, const NumericVector& id, int N, int a, int p, double power) {
+          const double& tht0, int frailty, int penalty, double gam, double tune, const NumericVector& id, int N, int a, int p, double power) {
   
   NumericVector coef = clone(coef0);
   NumericVector lambda = clone(lambda0);
@@ -311,13 +311,13 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       }
       
       if (penalty == 2) {
-        D1 -= N*sgn(coef[i])*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune);
-        D2 -= N*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune)/std::abs(coef[i]);
+        D1 -= N*sgn(coef[i])*(tune - std::abs(coef[i])/gam)*(std::abs(coef[i]) <= gam*tune);
+        D2 -= N*(tune - std::abs(coef[i])/gam)*(std::abs(coef[i]) <= gam*tune)/std::abs(coef[i]);
       }
       
       if (penalty == 3) {
-        D1 -= N*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7);
-        D2 -= N*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7)/std::abs(coef[i]);
+        D1 -= N*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, gam*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/(gam - 1));
+        D2 -= N*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, gam*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/(gam - 1))/std::abs(coef[i]);
       }
     }
     
@@ -331,7 +331,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
 
 // [[Rcpp::export]]
 List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-          const double& tht0, int frailty, int penalty, double tune, int N, int n, int p, double power) {
+          const double& tht0, int frailty, int penalty, double gam, double tune, int N, int n, int p, double power) {
   
   NumericVector coef = clone(coef0);
   NumericVector lambda = clone(lambda0);
@@ -593,13 +593,13 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
       }
 
       if (penalty == 2) {
-        D1 -= n*sgn(coef[i])*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune);
-        D2 -= n*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune)/std::abs(coef[i]);
+        D1 -= n*sgn(coef[i])*(tune - std::abs(coef[i])/gam)*(std::abs(coef[i]) <= gam*tune);
+        D2 -= n*(tune - std::abs(coef[i])/gam)*(std::abs(coef[i]) <= gam*tune)/std::abs(coef[i]);
       }
 
       if (penalty == 3) {
-        D1 -= n*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7);
-        D2 -= n*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7)/std::abs(coef[i]);
+        D1 -= n*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, gam*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/(gam - 1));
+        D2 -= n*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, gam*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/(gam - 1))/std::abs(coef[i]);
       }
     }
 
@@ -615,7 +615,7 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
 
 // [[Rcpp::export]]
 List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
-          const double& tht0, int frailty, int penalty, double tune, const NumericVector& id, int N, int a, int p, double power) {
+          const double& tht0, int frailty, int penalty, double gam, double tune, const NumericVector& id, int N, int a, int p, double power) {
   
   NumericVector coef = clone(coef0);
   NumericVector lambda = clone(lambda0);
@@ -913,13 +913,13 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
       }
       
       if (penalty == 2) {
-        D1 -= N*sgn(coef[i])*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune);
-        D2 -= N*(tune - std::abs(coef[i])/3)*(std::abs(coef[i]) <= 3*tune)/std::abs(coef[i]);
+        D1 -= N*sgn(coef[i])*(tune - std::abs(coef[i])/gam)*(std::abs(coef[i]) <= gam*tune);
+        D2 -= N*(tune - std::abs(coef[i])/gam)*(std::abs(coef[i]) <= gam*tune)/std::abs(coef[i]);
       }
       
       if (penalty == 3) {
-        D1 -= N*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7);
-        D2 -= N*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, 3.7*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/2.7)/std::abs(coef[i]);
+        D1 -= N*sgn(coef[i])*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, gam*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/(gam - 1));
+        D2 -= N*(tune*(std::abs(coef[i]) <= tune) + std::max(0.0, gam*tune - std::abs(coef[i]))*(std::abs(coef[i]) > tune)/(gam - 1))/std::abs(coef[i]);
       }
     }
     

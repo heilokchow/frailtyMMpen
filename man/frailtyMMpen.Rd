@@ -10,6 +10,7 @@ frailtyMMpen(
   frailty = "LogN",
   power = NULL,
   penalty = "LASSO",
+  gam = NULL,
   tune = NULL,
   tol = 1e-05,
   maxit = 200
@@ -31,6 +32,11 @@ due to the non-explicit expression of likelihood function)}
 
 \item{penalty}{The penalty used for regulization, the default is "LASSO", other choices are "MCP" and "SCAD".}
 
+\item{gam}{The tuning parameter for MCP and SCAD which controls the concavity of the penalty. For MCP, 
+\deqn{p^{\prime}(\beta, \lambda)=sign(\beta)(\lambda - \frac{|\beta|}{\gamma})} and for SCAD,
+\deqn{p^{\prime}(\beta, \lambda)=\lambda\{I(|\beta| \leq \lambda)+\frac{(\gamma \lambda-|\beta|)_{+}}{(\gamma-1) \lambda} I(|\beta|>\lambda)\}.}
+The default value of \eqn{\gamma} for MCP is 3 and SCAD is 3.7.}
+
 \item{tune}{The sequence of tuning parameters provided by user. If not provided, the default grid will be applied.}
 
 \item{tol}{The tolerance level for convergence.}
@@ -47,9 +53,17 @@ An object of class \code{fmm} that contains the following fields:
 \item{tune}{vector of tuning parameters used for penalized regression.}
 \item{tune.min}{tuning parameter where minimal of BIC is obtained.}
 \item{convergence}{convergence threshold.}
+\item{input}{The input data re-orderd by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
 \item{y}{input stopping time.}
 \item{X}{input covariate matrix.}
 \item{d}{input censoring indicator.}
+\item{formula}{formula applied as input.}
+\item{coefname}{name of each coeficient from input.}
+\item{id}{id for individuals or clusters, {1,2...,a}. Note that, since the original id may not be the sequence starting from 1, this output
+id may not be identical to the original id. Also, the order of id is corresponding to the returned \code{input}.}
+\item{N}{total number of observarions.}
+\item{a}{total number of individuals or clusters.}
+\item{datatype}{model used for fitting.}
 }
 \description{
 {This formula is used to fit the penalized regression. 3 types of the models can be fitted similar to the function
@@ -62,8 +76,8 @@ objective function where \eqn{\lambda} is the tuning parameter and \eqn{q} is th
 }
 }
 \details{
-Without a given \code{tune}, the default sequence of tuning parameters are used to provide the regularization path, 
-the \eqn{a} used for MCP is 3 and SCAD is 3.7. The formula is same as the input for function \code{frailtyMM}.
+Without a given \code{tune}, the default sequence of tuning parameters are used to provide the regularization path.
+The formula is same as the input for function \code{frailtyMM}.
 }
 \examples{
 

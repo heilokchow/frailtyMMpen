@@ -9,9 +9,6 @@
 \description{
 Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMM}
 }
-\details{
-#'@export
-}
 \seealso{
 \code{\link{frailtyMM}}
 }

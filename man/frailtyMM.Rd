@@ -38,14 +38,15 @@ An object of class \code{fmm} that contains the following fields:
 \item{est.tht}{frailty parameter estimated from a specific model.}
 \item{lambda}{frailty for each observation estimated from a specific model.}
 \item{likelihood}{The observed log-likelihood given estimated parameters.}
-\item{input}{input data.}
+\item{input}{The input data re-orderd by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
 \item{frailty}{frailty used for model fitting.}
 \item{power}{power used for model fitting is PVF frailty is applied.}
 \item{iter}{total number of iterations.}
 \item{convergence}{convergence threshold.}
 \item{formula}{formula applied as input.}
 \item{coefname}{name of each coeficient from input.}
-\item{id}{id for individuals or clusters.}
+\item{id}{id for individuals or clusters, {1,2...,a}. Note that, since the original id may not be the sequence starting from 1, this output
+id may not be identical to the original id. Also, the order of id is corresponding to the returned \code{input}.}
 \item{N}{total number of observarions.}
 \item{a}{total number of individuals or clusters.}
 \item{datatype}{model used for fitting.}
@@ -65,7 +66,8 @@ The recurrent event model where the \eqn{j^{th}} event of individual \eqn{i} has
 To run the shared frailty model, \code{Surv(tstop, status)} formula should be applied along with \code{+cluster()} to specify the
 corresponding clusters, if you want to run the frailty model without shared frailty, you should also use \code{+cluster()} for individual id 
 to treat it as a special case of shared frailty model with only 1 object in each cluster. To run the multi-event model, 
-\code{Surv(tstop, status)} formula should be applied along with \code{+event()} to specify the corresponding events. To run the recurrent event model, 
+\code{Surv(tstop, status)} formula should be applied along with \code{+event()} to specify the corresponding events. If multi-event data
+is fitted, please use {1,2...,K} to denote the event id from the input data. To run the recurrent event model, 
 \code{Surv(tstart, tstop, status)} formula should be applied along with \code{+cluster()} where the cluster here denotes the individual id and
 each individual may have many observed events at different time points.
 
@@ -74,6 +76,18 @@ the parameter \code{power} is only used when \code{frailty}=PVF and since the li
 \code{Tweedie} function from package mgcv, 1<\code{power}<2.
 }
 \examples{
+
+# Kidney data fitted by Clustered Inverse Gaussian Frailty Model
+
+InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id), kidney, frailty = "InvGauss")
+InvG_real_cl
+
+# Cgd data fitted by Recurrent Log-Normal Frailty Model
+
+logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), cgd, frailty = "Gamma")
+logN_real_re
+
+# Simulated data example
 
 data(simdataCL)
 data(simdataME)

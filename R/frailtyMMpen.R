@@ -19,6 +19,10 @@
 #' due to the non-explicit expression of likelihood function)
 #' @param power The power used if PVF frailty is applied.
 #' @param penalty The penalty used for regulization, the default is "LASSO", other choices are "MCP" and "SCAD".
+#' @param gam The tuning parameter for MCP and SCAD which controls the concavity of the penalty. For MCP, 
+#' \deqn{p^{\prime}(\beta, \lambda)=sign(\beta)(\lambda - \frac{|\beta|}{\gamma})} and for SCAD,
+#' \deqn{p^{\prime}(\beta, \lambda)=\lambda\{I(|\beta| \leq \lambda)+\frac{(\gamma \lambda-|\beta|)_{+}}{(\gamma-1) \lambda} I(|\beta|>\lambda)\}.}
+#' The default value of \eqn{\gamma} for MCP is 3 and SCAD is 3.7.
 #' @param tune The sequence of tuning parameters provided by user. If not provided, the default grid will be applied.
 #' @param tol The tolerance level for convergence.
 #' @param maixt Maximum iterations for MM algorithm.
@@ -26,8 +30,8 @@
 #' @importFrom Rcpp evalCpp
 #' @useDynLib frailtyMMpen, .registration = TRUE
 #' 
-#' @details Without a given \code{tune}, the default sequence of tuning parameters are used to provide the regularization path, 
-#' the \eqn{a} used for MCP is 3 and SCAD is 3.7. The formula is same as the input for function \code{frailtyMM}.
+#' @details Without a given \code{tune}, the default sequence of tuning parameters are used to provide the regularization path.
+#' The formula is same as the input for function \code{frailtyMM}.
 #' 
 #' @return An object of class \code{fmm} that contains the following fields:
 #' \item{coef}{matrix of coeficient estimated from a specific model.}
@@ -38,9 +42,17 @@
 #' \item{tune}{vector of tuning parameters used for penalized regression.}
 #' \item{tune.min}{tuning parameter where minimal of BIC is obtained.}
 #' \item{convergence}{convergence threshold.}
+#' \item{input}{The input data re-orderd by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
 #' \item{y}{input stopping time.}
 #' \item{X}{input covariate matrix.}
 #' \item{d}{input censoring indicator.}
+#' \item{formula}{formula applied as input.}
+#' \item{coefname}{name of each coeficient from input.}
+#' \item{id}{id for individuals or clusters, {1,2...,a}. Note that, since the original id may not be the sequence starting from 1, this output
+#' id may not be identical to the original id. Also, the order of id is corresponding to the returned \code{input}.}
+#' \item{N}{total number of observarions.}
+#' \item{a}{total number of individuals or clusters.}
+#' \item{datatype}{model used for fitting.}
 #' 
 #' @seealso \code{\link{frailtyMM}}
 #' 
@@ -86,7 +98,7 @@
 #'                    simdataCL, frailty = "PVF", power = 1.5)
 #' }
 #' 
-frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", tune = NULL, tol = 1e-5, maxit = 200) {
+frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", gam = NULL, tune = NULL, tol = 1e-5, maxit = 200) {
   
   Call <- match.call()
   
@@ -113,9 +125,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       mx1 = mx[, -c(1, remove_cluster_id)]
       mxid = mx[, cluster_id]
       
+      coef_name = colnames(mx1)
       nord = order(mxid)
       mxid = mxid[nord]
-      
+      p = ncol(mx1)
       N = length(mxid)
       newid = rep(0, N)
       
@@ -145,6 +158,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       mx1 = mx[, -c(1, remove_event_id)]
       mxid = mx[, event_id]
       
+      coef_name = colnames(mx1)
       mxid_info = table(mxid)
       n = length(mxid_info)
       b = min(mxid_info)
@@ -172,11 +186,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     mx1 = mx[, -c(1, remove_cluster_id)]
     mxid = mx[, cluster_id]
     
-    p = ncol(mx1)
-    
+    coef_name = colnames(mx1)
     nord = order(mxid)
     mxid = mxid[nord]
-    
+    p = ncol(mx1)
     N = length(mxid)
     newid = rep(0, N)
     
@@ -226,7 +239,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMMcal(y, X, d, N, a, newid,
                          coef.ini = coef0, est.tht.ini = est.tht0, lambda.ini = lambda0,
-                         frailty = frailty, power = power, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = threshold, type = 1)
+                         frailty = frailty, power = power, penalty = penalty, gam.val = gam, tune = tuneseq[z], maxit = maxit, threshold = threshold, type = 1)
       
       coef0 = cur$coef
       est.tht0 = cur$est.tht
@@ -260,9 +273,17 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   BIC = BIC_all,
                   tune = tuneseq[seq_len(z)],
                   tune.min = tuneseq[which.min(BIC_all)],
+                  Ar = ini$Ar,
+                  input = initGam$input,
                   y = y,
                   X = X,
-                  d = d)
+                  d = d,
+                  formula = formula,
+                  coefname = coef_name,
+                  id = newid + 1,
+                  N = N,
+                  a = a,
+                  datatype = "Cluster")
   }
   
   if (type == "Multiple") {
@@ -287,7 +308,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMMcal(y, X, d, N, b, NULL,
                          coef.ini = coef0, est.tht.ini = est.tht0, lambda.ini = lambda0,
-                         frailty = frailty, power = power, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = tol, type = 2)
+                         frailty = frailty, power = power, penalty = penalty, gam.val = gam, tune = tuneseq[z], maxit = maxit, threshold = tol, type = 2)
       
       coef0 = cur$coef
       est.tht0 = cur$est.tht
@@ -321,9 +342,17 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   BIC = BIC_all,
                   tune = tuneseq[seq_len(z)],
                   tune.min = tuneseq[which.min(BIC_all)],
+                  Ar = ini$Ar,
+                  input = initGam$input,
                   y = y,
                   X = X,
-                  d = d)
+                  d = d,
+                  formula = formula,
+                  coefname = coef_name,
+                  id = NULL,
+                  N = N,
+                  a = b,
+                  datatype = "Multi-event")
   } 
   
   if (type == "Recurrent") {
@@ -349,7 +378,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMMcal(y, X, d, N, a, newid,
                          coef.ini = coef0, est.tht.ini = est.tht0, lambda.ini = lambda0,
-                         frailty = frailty, power = power, penalty = penalty, tune = tuneseq[z], maxit = maxit, threshold = threshold, type = 3)
+                         frailty = frailty, power = power, penalty = penalty, gam.val = gam, tune = tuneseq[z], maxit = maxit, threshold = threshold, type = 3)
       
       coef0 = cur$coef
       est.tht0 = cur$est.tht
@@ -360,7 +389,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       est.tht_all[[z]] = est.tht0
       lambda_all[[z]] = lambda0
       likelihood_all[[z]] = likelihood0
-      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(n)
+      BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(a)
       
       if (sum(abs(coef0)) < 1e-6) {
         cat(sum(abs(coef0)), "????\n")
@@ -383,9 +412,17 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
                   BIC = BIC_all,
                   tune = tuneseq[seq_len(z)],
                   tune.min = tuneseq[which.min(BIC_all)],
+                  Ar = ini$Ar,
+                  input = initGam$input,
                   y = y,
                   X = X,
-                  d = d)
+                  d = d,
+                  formula = formula,
+                  coefname = coef_name,
+                  id = newid + 1,
+                  N = N,
+                  a = a,
+                  datatype = "Recurrent")
   } 
   
  

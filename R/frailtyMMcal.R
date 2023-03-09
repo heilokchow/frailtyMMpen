@@ -1,4 +1,4 @@
-frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "Gamma", power = NULL, penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-5, type = 0) {
+frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "Gamma", power = NULL, penalty = NULL, gam.val = NULL, tune = NULL, maxit = 200, threshold = 1e-5, type = 0) {
   
   p = dim(X)[2]
   
@@ -6,9 +6,15 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
   
   if (is.null(penalty)) {
     penaltyc = 0
+    gam = 0
     tune = 0
   } else {
     penaltyc = switch(penalty, "LASSO" = 1, "MCP" = 2, "SCAD" = 3)
+    gam = switch(penalty, "LASSO" = 0, "MCP" = 3, "SCAD" = 3.7)
+  }
+  
+  if (!is.null(gam.val)) {
+    gam = gam.val
   }
   
   if (is.null(power)) {
@@ -52,12 +58,13 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
 
     p1 = proc.time()[1]
     # rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-    rs1 = MMroutine(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, tune, id, N, a, p, power, type)
+    rs1 = MMroutine(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, gam, tune, id, N, a, p, power, type)
     p2 = proc.time()[1]
     
     coef1 = rs1$coef
     est.tht = rs1$est.tht
     lambda = rs1$lambda
+    Ar = rs1$Ar
     
     if (sum(abs(coef1)) < threshold) {
       break
@@ -67,7 +74,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
 
     p3 = proc.time()[1]
     # rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-    rs2 = MMroutine(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, tune, id, N, a, p, power, type)
+    rs2 = MMroutine(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, gam, tune, id, N, a, p, power, type)
     p4 = proc.time()[1]
     
     coef2 = rs2$coef
@@ -95,7 +102,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
   
         p5 = proc.time()[1]
         # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-        rs = MMroutine(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, tune, id, N, a, p, power, type)
+        rs = MMroutine(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, gam, tune, id, N, a, p, power, type)
         p6 = proc.time()[1]
   
         if (rs$error) {
@@ -116,6 +123,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
         coef = rs$coef
         est.tht = rs$est.tht
         lambda = rs$lambda
+        Ar = rs$Ar
       }
     }
  
@@ -132,7 +140,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
                 est.tht = est.tht,
                 lambda = lambda,
                 likelihood = l1,
-                Ar = rs$Ar,
+                Ar = Ar,
                 input = list(y = y, X = X, d = d),
                 iter = num,
                 convergence = error)

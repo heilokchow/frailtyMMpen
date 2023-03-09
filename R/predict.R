@@ -1,5 +1,42 @@
+#' 
+#' Estimate the baseline hazard or the predict hazard rate based on the new data for non-penalized regression
+#' 
+#' @description This function is used to estimate the baseline hazard or to predict the hazard rate of a specific individual
+#' given result from model fitting.
 #' @importFrom numDeriv jacobian
+#' 
+#' @usage
+#' ##S3 method for class "fmm"
+#' @param object Object with class "fmm"
+#' @param newdata The new data for prediction of hazard, catgorical data has to be transformed to 0 and 1
+#' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
+#' @param ... Further arguments pass to or from other methods
 #' @export
+#' 
+#' @details If parameter \code{newdata} is given, the predicted hazard is calculated based on the given data.
+#' If parameter \code{newdata} is not given, the estimation of baseline hazard will be returned. 
+#' The confidence band is calculated based on the delta method. Please insure that the input of new data
+#' should be of the same coeffeicent name as \code{object$coefname}. Note that if original data contains catgorical data, you could check
+#' \code{object$coefname} to input the corresponding 0 or 1 and name of coefficent for the newdata. 
+#' For example, if the coeffeicent name is "sexfemale", then 1 denotes female while 0 denotes male. You may refer to the
+#' example below to construct the new data.
+#'
+#' @return A dataframe output:
+#' \item{output}{A dataframe that the first column is the evaluated time point, the second column is the estimated cumulative
+#' hazard or survival curve, the third column is the standard error of the estimation result and the fourth and fifth column
+#' are the lower bound and upper bound based on 95% confidence interval.}
+#' 
+#' @examples 
+#'  
+#' gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
+#' 
+#' # Calculate the survival curve based on baseline hazard
+#' predict(gam_re, surv = TRUE)
+#' 
+#' # Construct new data and calculate the cumulative hazard based on new data
+#' newre = c(1, 1, 2)
+#' names(newre) = c(gam_re$coefname, "id")
+#' predict(gam_re, newdata = newre)
 #' 
 predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
   
@@ -22,7 +59,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
                               data = object$input,
                               lambda = object$lambda,
                               frailtyc = frailtyc,
-                              id = object$id,
+                              id = object$id - 1,
                               N = object$N,
                               a = object$a,
                               p = p,
@@ -36,7 +73,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
   
   if (!is.null(newdata)) {
     for (i in object$coefname) {
-      pos = which(colnames(newdata) == i)
+      pos = which(names(newdata) == i)
       
       if (length(pos) == 0) {
         stop("The new data dose not have the same format as original dataset.")
@@ -68,6 +105,10 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
     }
     new_event = newdata[pos][[1]]
     
+    vy = object$input$y
+    a = object$a
+    vy = vy[((new_event-1)*a + 1):(new_event*a)]
+    
     estimate = hazardME(c(1, coef), object = object, new_covariate = new_covariate, new_event = new_event, Surv = surv)
     
     gradT = jacobian(hazardME, c(1, coef), object = object, new_covariate = new_covariate, new_event = new_event, Surv = surv)
@@ -81,6 +122,9 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
     
     if (object$datatype == "Cluster") {
       
+      vy = object$input$y
+      vy = sort(vy)
+      
       estimate = hazardCL(c(1, coef), object = object, new_covariate = new_covariate, Surv = surv)
       
       gradT = jacobian(hazardCL, c(1, coef), object = object, new_covariate = new_covariate, Surv = surv)
@@ -91,6 +135,9 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
     }
     
     if (object$datatype == "Recurrent") {
+      
+      vy = object$input$y
+      vy = sort(vy)
       
       estimate = hazardRE(c(1, coef), object = object, new_covariate = new_covariate, Surv = surv)
       
@@ -103,15 +150,142 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
   }
   
   if (surv == TRUE) {
-    output = data.frame(estimate = estimate,
+    output = data.frame(time = vy,
+                        estimate = estimate,
                         estimateSD = estimateSD,
                         estimatelb = pmax(estimate - 1.96 * estimateSD, 0),
                         estimateub = pmin(estimate + 1.96 * estimateSD, 1))
   } else {
-    output = data.frame(estimate = estimate,
+    output = data.frame(time = vy,
+                        estimate = estimate,
                         estimateSD = estimateSD,
                         estimatelb = pmax(estimate - 1.96 * estimateSD, 0),
                         estimateub = estimate + 1.96 * estimateSD)
+  }
+  
+  return(output)
+}
+
+
+#' Estimate the baseline hazard or the predict hazard rate based on the new data for penalized regression
+#' 
+#' @description This function is used to estimate the baseline hazard or to predict the hazard rate of a specific individual
+#' given result from model fitting.
+#' @importFrom numDeriv jacobian
+#' 
+#' @usage
+#' ##S3 method for class "fpen"
+#' @param object Object with class "fpen"
+#' @param tune The tuning parameter for estimating coefficients
+#' @param coef Instead of providing tuning parameter, you can directly provide the coefficients for prediction
+#' @param newdata The new data for prediction of hazard, catgorical data has to be transformed to 0 and 1
+#' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
+#' @param ... Further arguments pass to or from other methods
+#' @export
+#' 
+#' @details If parameter \code{newdata} is given, the predicted hazard is calculated based on the given data.
+#' If parameter \code{newdata} is not given, the estimation of baseline hazard will be returned. 
+#' Since the covariance of estimated paramters for penalized regression cannot be obtained from MLE theorem, we
+#' only provide the estimation without confidence band. For the formulation of new data, you may refer to
+#' function \code{predict.fmm} for detailed description.
+#'
+#' @return 
+#' \item{output}{A dataframe that the first column is the evaluated time point and the second column is the estimated cumulative
+#' hazard or survival curve.}
+#' 
+#' @examples
+#'  
+#' data(simdataCL)
+#' 
+#' gam_cl = frailtyMMpen(Surv(time, status) ~  . + cluster(id), simdataCL, frailty = "Gamma")
+#' 
+#' # Calculate the survival curve based on baseline hazard
+#' predict(gam_cl, surv = TRUE)
+#' 
+#' # Construct new data and calculate the cumulative hazard based on new data
+#' newcl = c(gam_cl$X[1,], 2)
+#' names(newcl) = c(gam_cl$coefname, "id")
+#' predict(gam_cl, newdata = newcl)
+#' 
+predict.fpen <- function(object, tune = NULL, coef = NULL, newdata = NULL, surv = FALSE, ...) {
+
+  coef = unlist(coef(object, tune = tune))
+  
+  if (!is.null(coef)) {
+    coef = coef
+  }
+  
+  new_covariate = c()
+  
+  if (!is.null(newdata)) {
+    for (i in object$coefname) {
+      pos = which(names(newdata) == i)
+      
+      if (length(pos) == 0) {
+        stop("The new data dose not have the same format as original dataset.")
+      }
+      
+      if (length(newdata[pos][[1]]) > 1) {
+        stop("Please provide one vector of new data.")
+      }
+      new_covariate = c(new_covariate, newdata[pos][[1]])
+    }
+  } else {
+    new_covariate = rep(0, length(coef))
+  }
+  
+  
+  if (object$datatype == "Multi-event") {
+    
+    m <- model.frame(object$formula, newdata)
+    cluster_id <- grep("event", names(m))
+    pb = unlist(gregexpr('\\(', names(m)[cluster_id])) + 1
+    pe = unlist(gregexpr('\\)', names(m)[cluster_id])) - 1
+    clsname = substr(names(m)[cluster_id], pb, pe)
+    
+    pos = which(colnames(newdata) == clsname)
+    
+    if (length(pos) == 0) {
+      stop("The new data dose not have the information about the event's id.\n
+               Please ckeck whether the newdata is of the same format as original data.")
+    }
+    new_event = newdata[pos][[1]]
+    
+    vy = object$input$y
+    a = object$a
+    vy = vy[((new_event-1)*a + 1):(new_event*a)]
+    
+    estimate = hazardME(c(1, coef), object = object, new_covariate = new_covariate, new_event = new_event, Surv = surv)
+    
+  }
+  
+  if (object$datatype == "Cluster" || object$datatype == "Recurrent") {
+    
+    if (object$datatype == "Cluster") {
+      
+      vy = object$input$y
+      vy = sort(vy)
+      
+      estimate = hazardCL(c(1, coef), object = object, new_covariate = new_covariate, Surv = surv)
+      
+    }
+    
+    if (object$datatype == "Recurrent") {
+      
+      vy = object$input$y
+      vy = sort(vy)
+      
+      estimate = hazardRE(c(1, coef), object = object, new_covariate = new_covariate, Surv = surv)
+      
+    }
+  }
+  
+  if (surv == TRUE) {
+    output = data.frame(time = vy,
+                        estimate = estimate)
+  } else {
+    output = data.frame(time = vy,
+                        estimate = estimate)
   }
   
   return(output)
@@ -127,7 +301,7 @@ hazardCL <- function(coefall, object, new_covariate, Surv = FALSE) {
   int2 = object$Ar
   YpreExp = exp(object$input$X %*% coef)
   
-  ME = object$id + 1
+  ME = object$id
   for (i in 1:N) {
     ME[i] = int2[ME[i]]
   }
@@ -191,10 +365,11 @@ hazardRE <- function(coefall, object, new_covariate, Surv = FALSE) {
   N = length(y)
   wi = coefall[1]
   coef = coefall[-1]
-  id = object$id + 1
+  id = object$id
   a = object$a
   X = object$input$X
   int2 = object$Ar
+  p = length(coef)
   XM = array(0, c(a, p, N))
   
   for (i in N:1) {

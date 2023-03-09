@@ -29,7 +29,7 @@ summary.fmm <- function(model, ...) {
                               data = model$input,
                               lambda = model$lambda,
                               frailtyc = frailtyc,
-                              id = model$id,
+                              id = model$id - 1,
                               N = model$N,
                               a = model$a,
                               p = p,

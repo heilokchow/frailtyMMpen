@@ -130,7 +130,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
     error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0))
     
     num = num + 1
-    cat(error, " ", est.tht, " ", " ", al_be, " ", num, '\n')
+    # cat(error, " ", est.tht, " ", " ", al_be, " ", num, '\n')
     p0 = p0 + (p2 - p1) + (p4 - p3) + (p6 - p5)
   }
   
@@ -145,7 +145,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
                 iter = num,
                 convergence = error)
   
-  cat("->", p0)
+  # cat("->", p0)
   return(output)
 }
 

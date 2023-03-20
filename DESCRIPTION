@@ -11,7 +11,7 @@ Description: Penalized and non-penalized frailty model fitting with
 License: LGPL
 Encoding: UTF-8
 LazyData: false
-Depends: R (>= 3.3.0), survival, SuppDists, numDeriv, mgcv, msm
+Depends: R (>= 3.5.0), survival, numDeriv, mgcv
 Imports: Rcpp (>= 1.0.8), RcppGSL
 LinkingTo: Rcpp, RcppGSL
 RoxygenNote: 7.2.3

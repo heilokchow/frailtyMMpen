@@ -16,7 +16,9 @@
 \item{...}{Further arguments pass to or from other methods}
 }
 \value{
-
+\item{output}{A dataframe that the first column is the evaluated time point, the second column is the estimated cumulative
+hazard or survival curve, the third column is the standard error of the estimation result and the fourth and fifth column
+are the lower bound and upper bound based on 95 percent confidence interval.}
 }
 \description{
 This function is used to estimate the baseline hazard or to predict the hazard rate of a specific individual

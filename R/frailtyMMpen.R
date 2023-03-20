@@ -25,7 +25,8 @@
 #' The default value of \eqn{\gamma} for MCP is 3 and SCAD is 3.7.
 #' @param tune The sequence of tuning parameters provided by user. If not provided, the default grid will be applied.
 #' @param tol The tolerance level for convergence.
-#' @param maixt Maximum iterations for MM algorithm.
+#' @param maxit Maximum iterations for MM algorithm.
+#' @param ... additional arguments pass to the function.
 #' @export
 #' @importFrom Rcpp evalCpp
 #' @useDynLib frailtyMMpen, .registration = TRUE
@@ -98,7 +99,7 @@
 #'                    simdataCL, frailty = "PVF", power = 1.5)
 #' }
 #' 
-frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", gam = NULL, tune = NULL, tol = 1e-5, maxit = 200) {
+frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", gam = NULL, tune = NULL, tol = 1e-5, maxit = 200, ...) {
   
   Call <- match.call()
   
@@ -253,11 +254,11 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > threshold) + 1)*log(N)
       
       if (sum(abs(coef0)) < threshold) {
-        cat(sum(abs(coef0)), "????\n")
+        # cat(sum(abs(coef0)), "????\n")
         break
       }
       
-      cat(z, "---------\n")
+      # cat(z, "---------\n")
     }
     
     
@@ -322,11 +323,11 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(b)
       
       if (sum(abs(coef0)) < 1e-6) {
-        cat(sum(abs(coef0)), "????\n")
+        # cat(sum(abs(coef0)), "????\n")
         break
       }
       
-      cat(z, "---------\n")
+      # cat(z, "---------\n")
     }
     
     
@@ -392,11 +393,11 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(a)
       
       if (sum(abs(coef0)) < 1e-6) {
-        cat(sum(abs(coef0)), "????\n")
+        # cat(sum(abs(coef0)), "????\n")
         break
       }
       
-      cat(z, "---------\n")
+      # cat(z, "---------\n")
     }
     
     

@@ -1,4 +1,3 @@
-#'@export
 MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, id, N, a, p, power, type) {
   
   TEST = NULL
@@ -18,18 +17,6 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, i
   return(TEST)
 }
 
-# MMRE_TEST <- function(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power, type) {
-#   
-#   TEST = NULL
-#   
-#   if (type == 1) {
-#     TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, tune, id, N, a, p, power)
-#   }
-#   
-#   return(TEST)
-# }
-
-#'@export
 logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power, type) {
   
   s = 0
@@ -50,7 +37,6 @@ logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, pow
   
 }
 
-#'@export
 logLik <- function(x1, data, lambda, frailtyc, id, N, a, p, power, type) {
   
   est.tht = x1[1]
@@ -63,12 +49,20 @@ logLik <- function(x1, data, lambda, frailtyc, id, N, a, p, power, type) {
   
 }
 
-#'@export
+#' cluster function
+#' 
+#' @param x name from original dataframe which specifies the cluster or object id.
+#' @description {Specify cluster id for clustered data or object id for recurrent data in the input \code{formula}.}
+#' @export
 cluster <- function(x) {
   x
 }
 
-#'@export
+#' event function
+#' 
+#' @param x name from original dataframe which specifies the event id.
+#' @description {Specify event id for multi-event data in the input \code{formula}.}
+#' @export
 event <- function(x) {
   x
 }

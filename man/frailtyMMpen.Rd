@@ -13,7 +13,8 @@ frailtyMMpen(
   gam = NULL,
   tune = NULL,
   tol = 1e-05,
-  maxit = 200
+  maxit = 200,
+  ...
 )
 }
 \arguments{
@@ -41,7 +42,9 @@ The default value of \eqn{\gamma} for MCP is 3 and SCAD is 3.7.}
 
 \item{tol}{The tolerance level for convergence.}
 
-\item{maixt}{Maximum iterations for MM algorithm.}
+\item{maxit}{Maximum iterations for MM algorithm.}
+
+\item{...}{additional arguments pass to the function.}
 }
 \value{
 An object of class \code{fmm} that contains the following fields:
@@ -98,8 +101,8 @@ gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
 # Obtain the coefficient where minimum BIC is obtained
 coef(gam_cl1)
 
-# Obtain the coefficient with tune = a.
-coef(gam_cl1, tune = a)
+# Obtain the coefficient with tune = 0.2.
+coef(gam_cl1, tune = 0.2)
 
 # Plot the regularization path
 plot(gam_cl1)

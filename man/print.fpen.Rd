@@ -6,6 +6,11 @@
 \usage{
 \method{print}{fpen}(x, ...)
 }
+\arguments{
+\item{x}{Object with class "fpen" fitted by function \code{frailtyMMpen}.}
+
+\item{...}{Ignored}
+}
 \description{
 Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMMpen}.
 The first column is the tuning parameter sequence, the second column is the degree of freedom and the third column is the BIC.

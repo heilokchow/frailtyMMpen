@@ -30,7 +30,9 @@ due to the non-explicit expression of likelihood function)}
 
 \item{tol}{The tolerance level for convergence.}
 
-\item{maixt}{Maximum iterations for MM algorithm.}
+\item{maxit}{Maximum iterations for MM algorithm.}
+
+\item{...}{additional arguments pass to the function.}
 }
 \value{
 An object of class \code{fmm} that contains the following fields:
@@ -79,12 +81,14 @@ the parameter \code{power} is only used when \code{frailty}=PVF and since the li
 
 # Kidney data fitted by Clustered Inverse Gaussian Frailty Model
 
-InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id), kidney, frailty = "InvGauss")
+InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
+                         kidney, frailty = "InvGauss")
 InvG_real_cl
 
 # Cgd data fitted by Recurrent Log-Normal Frailty Model
 
-logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), cgd, frailty = "Gamma")
+logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
+                         cgd, frailty = "Gamma")
 logN_real_re
 
 # Simulated data example

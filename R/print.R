@@ -1,3 +1,4 @@
+#' @method print fmm_summary
 #' @export
 
 print.fmm_summary <- function(x, ...) {
@@ -35,6 +36,9 @@ print.fmm_summary <- function(x, ...) {
 #' 
 #' Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMM}
 #' 
+#' @param x Object with class "fmm" fitted by function \code{frailtyMM}.
+#' @param ... Ignored
+#' @method print fmm
 #' @export
 #' @seealso \code{\link{frailtyMM}}
 print.fmm <- function(x, ...) {
@@ -49,7 +53,9 @@ print.fmm <- function(x, ...) {
 #' Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMMpen}.
 #' The first column is the tuning parameter sequence, the second column is the degree of freedom and the third column is the BIC.
 #'
-#'
+#' @param x Object with class "fpen" fitted by function \code{frailtyMMpen}.
+#' @param ... Ignored
+#' @method print fpen
 #' @export
 #'
 #' @seealso \code{\link{frailtyMMpen}}

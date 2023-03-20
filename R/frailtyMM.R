@@ -20,7 +20,8 @@
 #' due to the non-explicit expression of likelihood function)
 #' @param power The power used if PVF frailty is applied.
 #' @param tol The tolerance level for convergence.
-#' @param maixt Maximum iterations for MM algorithm.
+#' @param maxit Maximum iterations for MM algorithm.
+#' @param ... additional arguments pass to the function.
 #' @export
 #' 
 #' @details To run the shared frailty model, \code{Surv(tstop, status)} formula should be applied along with \code{+cluster()} to specify the
@@ -57,12 +58,14 @@
 #' 
 #' # Kidney data fitted by Clustered Inverse Gaussian Frailty Model
 #' 
-#' InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id), kidney, frailty = "InvGauss")
+#' InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
+#'                          kidney, frailty = "InvGauss")
 #' InvG_real_cl
 #' 
 #' # Cgd data fitted by Recurrent Log-Normal Frailty Model
 #' 
-#' logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id), cgd, frailty = "Gamma")
+#' logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
+#'                          cgd, frailty = "Gamma")
 #' logN_real_re
 #' 
 #' # Simulated data example

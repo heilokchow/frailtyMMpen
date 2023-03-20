@@ -7,7 +7,7 @@
 ##S3 method for class "fmm"
 }
 \arguments{
-\item{model}{Object with class "fmm", generated from \code{frailtyMM}.}
+\item{object}{Object with class "fmm", generated from \code{frailtyMM}.}
 
 \item{...}{Ignored}
 }

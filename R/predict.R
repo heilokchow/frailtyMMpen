@@ -11,6 +11,8 @@
 #' @param newdata The new data for prediction of hazard, catgorical data has to be transformed to 0 and 1
 #' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
 #' @param ... Further arguments pass to or from other methods
+#' 
+#' @method predict fmm
 #' @export
 #' 
 #' @details If parameter \code{newdata} is given, the predicted hazard is calculated based on the given data.
@@ -21,10 +23,10 @@
 #' For example, if the coeffeicent name is "sexfemale", then 1 denotes female while 0 denotes male. You may refer to the
 #' example below to construct the new data.
 #'
-#' @return A dataframe output:
+#' @return 
 #' \item{output}{A dataframe that the first column is the evaluated time point, the second column is the estimated cumulative
 #' hazard or survival curve, the third column is the standard error of the estimation result and the fourth and fifth column
-#' are the lower bound and upper bound based on 95% confidence interval.}
+#' are the lower bound and upper bound based on 95 percent confidence interval.}
 #' 
 #' @examples 
 #'  
@@ -181,6 +183,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
 #' @param newdata The new data for prediction of hazard, catgorical data has to be transformed to 0 and 1
 #' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
 #' @param ... Further arguments pass to or from other methods
+#' @method predict fpen
 #' @export
 #' 
 #' @details If parameter \code{newdata} is given, the predicted hazard is calculated based on the given data.

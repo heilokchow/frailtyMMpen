@@ -3,16 +3,18 @@
 #' @importFrom numDeriv hessian
 #' @usage
 #' ##S3 method for class "fmm"
-#' @param model Object with class "fmm", generated from \code{frailtyMM}.
+#' @param object Object with class "fmm", generated from \code{frailtyMM}.
 #' @param ... Ignored
 #' 
 #' @details the summary for the model of frailtyMM.
 #' The standard error and p-value of estimated parameters are based on Fisher Information martix.
-
+#'
+#' @method summary fmm
 #' @export
 
-summary.fmm <- function(model, ...) {
+summary.fmm <- function(object, ...) {
   
+  model = object
   frailtyc = switch(model$frailty, "Gamma" = 0, "LogN" = 1, "InvGauss" = 2, "PVF" = 3)
   datatype = switch(model$datatype, "Cluster" = 1, "Multi-event" = 2, "Recurrent" = 3)
   p = length(model$coef)

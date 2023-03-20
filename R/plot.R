@@ -5,6 +5,7 @@
 #' ##S3 method for class "fpen"
 #' @param x Object with class "fpen"
 #' @param ... Further arguments pass to or from other methods
+#' @method plot fpen
 #' @export
 #' 
 plot.fpen <- function(x, ...) {
@@ -25,6 +26,7 @@ plot.fpen <- function(x, ...) {
 #' @param newdata The new data for prediction of hazard
 #' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
 #' @param ... Further arguments pass to or from other methods
+#' @method plot fmm
 #' @export
 #' 
 #' @details If parameter \code{newdata} is given, the plot is based on the predicted hazard while if it is not given,

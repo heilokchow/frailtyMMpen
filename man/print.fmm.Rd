@@ -6,6 +6,11 @@
 \usage{
 \method{print}{fmm}(x, ...)
 }
+\arguments{
+\item{x}{Object with class "fmm" fitted by function \code{frailtyMM}.}
+
+\item{...}{Ignored}
+}
 \description{
 Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMM}
 }

@@ -75,8 +75,8 @@
 #' # Obtain the coefficient where minimum BIC is obtained
 #' coef(gam_cl1)
 #' 
-#' # Obtain the coefficient with tune = a.
-#' coef(gam_cl1, tune = a)
+#' # Obtain the coefficient with tune = 0.2.
+#' coef(gam_cl1, tune = 0.2)
 #' 
 #' # Plot the regularization path
 #' plot(gam_cl1)

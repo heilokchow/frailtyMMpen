@@ -57,6 +57,12 @@
 #' 
 #' @seealso \code{\link{frailtyMM}}
 #' 
+#' @references 
+#' \itemize{
+#' \item Huang, X., Xu, J. and Zhou, Y. (2022). Profile and Non-Profile MM Modeling of Cluster Failure Time and Analysis of ADNI Data. \emph{Mathematics}, 10(4), 538.
+#' \item Huang, X., Xu, J. and Zhou, Y. (2023). Efficient algorithms for survival data with multiple outcomes using the frailty model. \emph{Statistical Methods in Medical Research}, 32(1), 118-132.
+#' }
+#' 
 #' @examples 
 #' 
 #' data(simdataCL)
@@ -117,7 +123,32 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
   if (ncol(m[[1]]) == 2) {
     
     cluster_id <- grep("cluster", names(m))
+    event_id <- grep("event", names(m))
+    
+    
+    if (length(cluster_id) == 0 && length(event_id) == 0) {
+      
+      type = "Cluster"
+      mx1 = mx[, -c(1)]
+      coef_name = colnames(mx1)
+      
+      N = nrow(mx1)
+      p = ncol(mx1)
+      newid = seq(0, N-1, 1)
+      
+      if (N <= 2) {
+        stop("Please check the sample size of data")
+      }
+      
+      y = m[[1]][, 1]
+      X = mx1
+      d = m[[1]][, 2]
+      a = N
+      
+    }
+    
     if (length(cluster_id) == 1) {
+      
       type = "Cluster"
       pb = unlist(gregexpr('\\(', names(m)[cluster_id])) + 1
       pe = unlist(gregexpr('\\)', names(m)[cluster_id])) - 1
@@ -147,10 +178,12 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       X = mx1[nord, ]
       d = m[[1]][nord, 2]
       a = max(newid) + 1
+      
     }
     
-    event_id <- grep("event", names(m))
+    
     if (length(event_id) == 1) {
+      
       type = "Multiple"
       pb = unlist(gregexpr('\\(', names(m)[event_id])) + 1
       pe = unlist(gregexpr('\\)', names(m)[event_id])) - 1
@@ -174,10 +207,12 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
       X = mx1[nord, ]
       y = m[[1]][nord, 1]
       d = m[[1]][nord, 2]
+      
     }
   }
   
   if (ncol(m[[1]]) == 3) {
+    
     type = "Recurrent"
     cluster_id <- grep("cluster", names(m))
     pb = unlist(gregexpr('\\(', names(m)[cluster_id])) + 1
@@ -208,6 +243,7 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     X = mx1[nord, ]
     d = m[[1]][nord, 3]
     a = max(newid) + 1
+    
   }
   
   threshold = tol

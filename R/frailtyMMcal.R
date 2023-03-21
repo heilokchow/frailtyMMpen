@@ -57,7 +57,6 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
     lambda0 = lambda
 
     p1 = proc.time()[1]
-    # rs1 = MMprocess_CL(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
     rs1 = MMroutine(y, X, d, coef, lambda, est.tht, frailtyc, penaltyc, gam, tune, id, N, a, p, power, type)
     p2 = proc.time()[1]
     
@@ -73,7 +72,6 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
     u_be = coef1 - coef
 
     p3 = proc.time()[1]
-    # rs2 = MMprocess_CL(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
     rs2 = MMroutine(y, X, d, coef1, lambda, est.tht, frailtyc, penaltyc, gam, tune, id, N, a, p, power, type)
     p4 = proc.time()[1]
     
@@ -101,7 +99,6 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
         coef.temp = coef - dc
   
         p5 = proc.time()[1]
-        # rs = MMprocess_CL(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
         rs = MMroutine(y, X, d, coef.temp, lambda, est.tht, frailtyc, penaltyc, gam, tune, id, N, a, p, power, type)
         p6 = proc.time()[1]
   
@@ -149,94 +146,3 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
   return(output)
 }
 
-
-frailtyMM_RE <- function(y, X, d, coef.ini = NULL, est.tht.ini = NULL, lambda.ini = NULL, frailty = "LogN", power = NULL, penalty = NULL, tune = NULL, maxit = 200, threshold = 1e-6) {
-  
-  p = dim(X[[1]])[2]
-  n = length(y)
-  
-  # Initialize Parameters
-  coef = rep(0.5, p)
-  est.tht = 1
-  lambda = lapply(y, function(x) {x^0*1/n})
-  
-  if (!is.null(lambda.ini)) {
-    lambda = lambda.ini
-  }
-  
-  if (!is.null(coef.ini)) {
-    coef = coef.ini
-  }
-  
-  if (!is.null(est.tht.ini)) {
-    est.tht = est.tht.ini
-  }
-  
-  l0 = logLikihood_RE(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
-  l1 = l0
-  error = 3
-  
-  num = 0
-  # MM iteration
-  while(error > threshold && num < maxit) {
-    
-    coef0 = coef
-    est.tht0 = est.tht
-    lambda0 = lambda
-    
-    rs1 = MMprocess_RE(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-    coef1 = rs1$coef
-    est.tht = rs1$est.tht
-    lambda = rs1$lambda
-
-    if (sum(abs(coef1)) < threshold) {
-      break
-    }
-    
-    u_be = coef1 - coef
-    
-    rs2 = MMprocess_RE(y, X, d, coef1, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-    coef2 = rs2$coef
-    est.tht = rs2$est.tht
-    lambda = rs1$lambda
-    
-    v_be = coef2 - 2*coef1 + coef
-    al_be = sum(u_be*v_be)/sum(v_be^2)
-    if (al_be > -1) {al_be = -1}
-    
-    for (k1 in 0:4) {
-      dc = (2*al_be*u_be - al_be^2*v_be) * 2^(-k1)
-      coef.temp = coef - dc
-      rs = MMprocess_RE(y, X, d, coef.temp, lambda, est.tht, frailty = frailty, power = power, penalty = penalty, tune = tune)
-      if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
-        break
-      }
-    }
-
-    coef = rs$coef
-    est.tht = rs$est.tht
-    lambda = rs$lambda
-    
-    l1 = logLikihood_RE(y, X, d, coef, lambda, est.tht, frailty = frailty, power = power)
-    
-    if (is.null(penalty)) {
-      error = abs(l1 - l0)/(1 + abs(l0))
-      l0 = l1
-    } else {
-      error = sum(abs(coef - coef0)) + sum(abs(est.tht - est.tht0)) + sum(abs(unlist(lambda) - unlist(lambda0)))
-    }
-    
-    num = num + 1
-    cat(error, " ", est.tht, " ", l1, " ", num, '\n')
-  }
-  
-  output = list(coef = coef,
-                est.tht = est.tht,
-                lambda = lambda,
-                likelihood = l1,
-                input = list(y = y, X = X, d = d),
-                iter = num,
-                convergence = error)
-  
-  return(output)
-}

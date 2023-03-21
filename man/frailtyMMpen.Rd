@@ -125,6 +125,12 @@ pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id),
 }
 
 }
+\references{
+\itemize{
+\item Huang, X., Xu, J. and Zhou, Y. (2022). Profile and Non-Profile MM Modeling of Cluster Failure Time and Analysis of ADNI Data. \emph{Mathematics}, 10(4), 538.
+\item Huang, X., Xu, J. and Zhou, Y. (2023). Efficient algorithms for survival data with multiple outcomes using the frailty model. \emph{Statistical Methods in Medical Research}, 32(1), 118-132.
+}
+}
 \seealso{
 \code{\link{frailtyMM}}
 }

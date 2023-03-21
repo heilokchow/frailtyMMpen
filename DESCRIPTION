@@ -7,11 +7,11 @@ Maintainer: Yunpeng Zhou <u3514104@connect.hku.hk>
 Description: Penalized and non-penalized frailty model fitting with
     Clustered data, multi-event data and recurrent data,
     LASSO, MCP and SCAD penalized regression can be fitted,
-    efficient model fitting using MM algorithm.
+    efficient model fitting using MM algorithm. 
 License: LGPL
 Encoding: UTF-8
 LazyData: false
 Depends: R (>= 3.5.0), survival, numDeriv, mgcv
-Imports: Rcpp (>= 1.0.8), RcppGSL
+Imports: Rcpp (>= 1.0.8), graphics, stats
 LinkingTo: Rcpp, RcppGSL
 RoxygenNote: 7.2.3

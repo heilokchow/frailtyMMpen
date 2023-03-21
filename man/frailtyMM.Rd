@@ -66,8 +66,8 @@ The recurrent event model where the \eqn{j^{th}} event of individual \eqn{i} has
 }
 \details{
 To run the shared frailty model, \code{Surv(tstop, status)} formula should be applied along with \code{+cluster()} to specify the
-corresponding clusters, if you want to run the frailty model without shared frailty, you should also use \code{+cluster()} for individual id 
-to treat it as a special case of shared frailty model with only 1 object in each cluster. To run the multi-event model, 
+corresponding clusters, if you want to run the simple frailty model without shared frailty, you do not need to use \code{+cluster()} and the
+formula only contains the name of the covariates. To run the multi-event model, 
 \code{Surv(tstop, status)} formula should be applied along with \code{+event()} to specify the corresponding events. If multi-event data
 is fitted, please use {1,2...,K} to denote the event id from the input data. To run the recurrent event model, 
 \code{Surv(tstart, tstop, status)} formula should be applied along with \code{+cluster()} where the cluster here denotes the individual id and
@@ -158,4 +158,10 @@ pvf_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
 coef(gam_cl)
 summary(gam_cl)
 
+}
+\references{
+\itemize{
+\item Huang, X., Xu, J. and Zhou, Y. (2022). Profile and Non-Profile MM Modeling of Cluster Failure Time and Analysis of ADNI Data. \emph{Mathematics}, 10(4), 538.
+\item Huang, X., Xu, J. and Zhou, Y. (2023). Efficient algorithms for survival data with multiple outcomes using the frailty model. \emph{Statistical Methods in Medical Research}, 32(1), 118-132.
+}
 }

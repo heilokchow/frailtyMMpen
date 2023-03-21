@@ -1,8 +1,2 @@
-
-# set by configure
-GSL_CFLAGS = -I/usr/include
-GSL_LIBS   = -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm
-
-# combine with standard arguments for R
-PKG_CPPFLAGS = $(GSL_CFLAGS)
-PKG_LIBS = $(GSL_LIBS) 
+PKG_CPPFLAGS = -I$(LIB_GSL)/include
+PKG_LIBS = -L$(LIB_GSL)/lib${R_ARCH}${CRT} -lgsl -lgslcblas 

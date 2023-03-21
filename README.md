@@ -16,9 +16,9 @@ devtools::install_github("heilokchow/frailtyMMpen")
 Example
 -------
 
-This is a basic example which shows you how to use this package, you may refer to the package mannual for detailed descriptions and examples for each function.
+This is a basic example which shows you how to use this package, you may refer to the package manual for detailed descriptions and examples for each function.
 
-We use the simulated data with 50 clusters and 10 object in each cluster: 
+We use the simulated data with 50 clusters and 10 objects in each cluster: 
 
 ``` r
 data(simdataCL)

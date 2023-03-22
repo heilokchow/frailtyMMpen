@@ -29,7 +29,8 @@
 #' are the lower bound and upper bound based on 95 percent confidence interval.}
 #' 
 #' @examples 
-#'  
+#' 
+#' \dontrun{
 #' gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 #' 
 #' # Calculate the survival curve based on baseline hazard
@@ -39,6 +40,7 @@
 #' newre = c(1, 1, 2)
 #' names(newre) = c(gam_re$coefname, "id")
 #' predict(gam_re, newdata = newre)
+#' }
 #' 
 predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
   
@@ -200,6 +202,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
 #'  
 #' data(simdataCL)
 #' 
+#' \dontrun{
 #' gam_cl = frailtyMMpen(Surv(time, status) ~  . + cluster(id), simdataCL, frailty = "Gamma")
 #' 
 #' # Calculate the survival curve based on baseline hazard
@@ -209,7 +212,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
 #' newcl = c(gam_cl$X[1,], 2)
 #' names(newcl) = c(gam_cl$coefname, "id")
 #' predict(gam_cl, newdata = newcl)
-#' 
+#' }
 predict.fpen <- function(object, tune = NULL, coef = NULL, newdata = NULL, surv = FALSE, ...) {
 
   coef = unlist(coef(object, tune = tune))

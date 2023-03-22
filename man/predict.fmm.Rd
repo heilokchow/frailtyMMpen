@@ -34,7 +34,8 @@ For example, if the coeffeicent name is "sexfemale", then 1 denotes female while
 example below to construct the new data.
 }
 \examples{
- 
+
+\dontrun{
 gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 
 # Calculate the survival curve based on baseline hazard
@@ -44,5 +45,6 @@ predict(gam_re, surv = TRUE)
 newre = c(1, 1, 2)
 names(newre) = c(gam_re$coefname, "id")
 predict(gam_re, newdata = newre)
+}
 
 }

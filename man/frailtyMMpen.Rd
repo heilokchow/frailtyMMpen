@@ -94,6 +94,7 @@ data(simdataCL)
 gam_cl1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
                        simdataCL, frailty = "Gamma")
 
+\dontrun{
 # Using given tuning parameter sequence
 gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), 
                        simdataCL, frailty = "Gamma", tune = 0.1)
@@ -110,7 +111,6 @@ plot(gam_cl1)
 # Get the degree of freedom and BIC for the sequence of tuning parameters provided
 print(gam_cl1)
 
-\dontrun{
 # Clustered Log-Normal Frailty Model
 logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
                     simdataCL, frailty = "LogN")

@@ -67,6 +67,7 @@
 #' 
 #' # Kidney data fitted by Clustered Inverse Gaussian Frailty Model
 #' 
+#' \dontrun{
 #' InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
 #'                          kidney, frailty = "InvGauss")
 #' InvG_real_cl
@@ -76,13 +77,12 @@
 #' logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
 #'                          cgd, frailty = "Gamma")
 #' logN_real_re
+#' }
 #' 
 #' # Simulated data example
 #' 
 #' data(simdataCL)
-#' data(simdataME)
-#' data(simdataRE)
-#' 
+#'
 #' # Parameter estimation under different model structure and frailties
 #' 
 #' # Clustered Gamma Frailty Model
@@ -101,13 +101,14 @@
 #' # Clustered PVF Frailty Model
 #' pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                    simdataCL, frailty = "PVF", power = 1.5)
-#' }
+#'
+#' data(simdataME)
 #' 
 #' # Multi-event Gamma Frailty Model
 #' gam_me = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                    simdataCL, frailty = "Gamma")
 #' 
-#' \dontrun{
+#' 
 #' # Multi-event Log-Normal Frailty Model
 #' logn_me = frailtyMM(Surv(time, status) ~ . + event(id), 
 #'                     simdataME, frailty = "LogN")
@@ -119,13 +120,13 @@
 #' # Multi-event PVF Frailty Model
 #' pvf_me = frailtyMM(Surv(time, status) ~ . + event(id), 
 #'                    simdataME, frailty = "PVF", power = 1.5)
-#' }
+#' 
+#' data(simdataRE)
 #' 
 #' # Recurrent event Gamma Frailty Model
 #' gam_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
 #'                    simdataRE, frailty = "Gamma")
 #' 
-#' \dontrun{
 #' # Recurrent event Log-Normal Frailty Model
 #' logn_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
 #'                    simdataRE, frailty = "LogN")

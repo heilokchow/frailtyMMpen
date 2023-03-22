@@ -24,7 +24,8 @@ the plot is based on the baseline hazard. To construct the new data, please refe
 function \code{predict.fmm} and the following example.
 }
 \examples{
- 
+
+\dontrun{
 gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 
 # Plot the survival curve based on baseline hazard
@@ -34,7 +35,7 @@ plot(gam_re, surv = TRUE)
 newre = c(1, 1, 2)
 names(newre) = c(gam_re$coefname, "id")
 plot(gam_re, newdata = newre)
-
+}
 }
 \seealso{
 \code{\link{predict.fmm}}

@@ -36,7 +36,8 @@ plot.fpen <- function(x, ...) {
 #' @seealso \code{\link{predict.fmm}}
 #' 
 #' @examples 
-#'  
+#' 
+#' \dontrun{
 #' gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 #' 
 #' # Plot the survival curve based on baseline hazard
@@ -46,7 +47,7 @@ plot.fpen <- function(x, ...) {
 #' newre = c(1, 1, 2)
 #' names(newre) = c(gam_re$coefname, "id")
 #' plot(gam_re, newdata = newre)
-#' 
+#' }
 plot.fmm <- function(x, newdata = NULL, surv = FALSE, ...) {
   
   df = predict(object = x, newdata = newdata, surv = surv)

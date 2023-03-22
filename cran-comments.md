@@ -2,6 +2,7 @@
 
 This is a resubmission. In this version I have:
 
+* Edit the description file
 * Reduce the length of the title to less than 65 characters.
 * Change MM -> 'MM' in description.
 * Add reference in authors (year) <doi:...> in the description field of DESCRIPTION file.

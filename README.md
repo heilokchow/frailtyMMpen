@@ -29,7 +29,7 @@ data(simdataCL)
 We first run the non-penalized regression with Gamma frailty and obtain the summary statistics and the plot of conditional baseline hazard.
 
 ```r
-gam_cl = frailtyMMpen(Surv(time, status) ~ . + cluster(id), simdataCL, frailty = "Gamma")
+gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), simdataCL, frailty = "Gamma")
 
 summary(gam_cl)
 

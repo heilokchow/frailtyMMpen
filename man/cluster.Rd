@@ -9,6 +9,9 @@ cluster(x)
 \arguments{
 \item{x}{name from original dataframe which specifies the cluster or object id.}
 }
+\value{
+No return value, called to construct \code{formula}.
+}
 \description{
 {Specify cluster id for clustered data or object id for recurrent data in the input \code{formula}.}
 }

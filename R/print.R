@@ -39,6 +39,7 @@ print.fmm_summary <- function(x, ...) {
 #' @param x Object with class "fmm" fitted by function \code{frailtyMM}.
 #' @param ... Ignored
 #' @method print fmm
+#' @return No return value, called to print the summary for non-penalized regression.
 #' @export
 #' @seealso \code{\link{frailtyMM}}
 print.fmm <- function(x, ...) {
@@ -56,6 +57,7 @@ print.fmm <- function(x, ...) {
 #' @param x Object with class "fpen" fitted by function \code{frailtyMMpen}.
 #' @param ... Ignored
 #' @method print fpen
+#' @return No return value, called to print the summary for penalized regression.
 #' @export
 #'
 #' @seealso \code{\link{frailtyMMpen}}

@@ -8,7 +8,7 @@
 #' @usage
 #' ##S3 method for class "fmm"
 #' @param object Object with class "fmm"
-#' @param newdata The new data for prediction of hazard, catgorical data has to be transformed to 0 and 1
+#' @param newdata The new data for prediction of hazard, categorical data has to be transformed to 0 and 1
 #' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
 #' @param ... Further arguments pass to or from other methods
 #' 
@@ -18,9 +18,9 @@
 #' @details If parameter \code{newdata} is given, the predicted hazard is calculated based on the given data.
 #' If parameter \code{newdata} is not given, the estimation of baseline hazard will be returned. 
 #' The confidence band is calculated based on the delta method. Please insure that the input of new data
-#' should be of the same coeffeicent name as \code{object$coefname}. Note that if original data contains catgorical data, you could check
-#' \code{object$coefname} to input the corresponding 0 or 1 and name of coefficent for the newdata. 
-#' For example, if the coeffeicent name is "sexfemale", then 1 denotes female while 0 denotes male. You may refer to the
+#' should be of the same coefficient name as \code{object$coefname}. Note that if original data contains categorical data, you could check
+#' \code{object$coefname} to input the corresponding 0 or 1 and name of coefficient for the \code{newdata}. 
+#' For example, if the coefficient name is "sexfemale", then 1 denotes female while 0 denotes male. You may refer to the
 #' example below to construct the new data.
 #'
 #' @return 
@@ -30,7 +30,7 @@
 #' 
 #' @examples 
 #' 
-#' \dontrun{
+#' \donttest{
 #' gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 #' 
 #' # Calculate the survival curve based on baseline hazard
@@ -202,7 +202,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
 #'  
 #' data(simdataCL)
 #' 
-#' \dontrun{
+#' \donttest{
 #' gam_cl = frailtyMMpen(Surv(time, status) ~  . + cluster(id), simdataCL, frailty = "Gamma")
 #' 
 #' # Calculate the survival curve based on baseline hazard

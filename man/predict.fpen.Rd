@@ -38,7 +38,7 @@ function \code{predict.fmm} for detailed description.
  
 data(simdataCL)
 
-\dontrun{
+\donttest{
 gam_cl = frailtyMMpen(Surv(time, status) ~  . + cluster(id), simdataCL, frailty = "Gamma")
 
 # Calculate the survival curve based on baseline hazard

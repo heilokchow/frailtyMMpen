@@ -18,9 +18,9 @@
 #' "InvGauss", "Gamma" and "PVF". (Note that the computation time for PVF family will be slow 
 #' due to the non-explicit expression of likelihood function)
 #' @param power The power used if PVF frailty is applied.
-#' @param penalty The penalty used for regulization, the default is "LASSO", other choices are "MCP" and "SCAD".
+#' @param penalty The penalty used for regularization, the default is "LASSO", other choices are "MCP" and "SCAD".
 #' @param gam The tuning parameter for MCP and SCAD which controls the concavity of the penalty. For MCP, 
-#' \deqn{p^{\prime}(\beta, \lambda)=sign(\beta)(\lambda - \frac{|\beta|}{\gamma})} and for SCAD,
+#' \deqn{p^{\prime}(\beta, \lambda)=sign(\beta)(\lambda - \frac{|\beta|}{\gamma})} and for "SCAD",
 #' \deqn{p^{\prime}(\beta, \lambda)=\lambda\{I(|\beta| \leq \lambda)+\frac{(\gamma \lambda-|\beta|)_{+}}{(\gamma-1) \lambda} I(|\beta|>\lambda)\}.}
 #' The default value of \eqn{\gamma} for MCP is 3 and SCAD is 3.7.
 #' @param tune The sequence of tuning parameters provided by user. If not provided, the default grid will be applied.
@@ -75,7 +75,7 @@
 #' gam_cl1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
 #'                        simdataCL, frailty = "Gamma")
 #' 
-#' \dontrun{
+#' \donttest{
 #' # Using given tuning parameter sequence
 #' gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), 
 #'                        simdataCL, frailty = "Gamma", tune = 0.1)

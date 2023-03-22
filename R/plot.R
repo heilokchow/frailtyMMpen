@@ -19,7 +19,7 @@ plot.fpen <- function(x, ...) {
 
 #' Plot the baseline hazard or the predicted hazard based on the new data
 #' 
-#' @description Both the cumulative hazard and the survival curves can be ploted.
+#' @description Both the cumulative hazard and the survival curves can be plotted.
 #' @usage
 #' ##S3 method for class "fmm"
 #' @param object Object with class "fmm"
@@ -37,7 +37,7 @@ plot.fpen <- function(x, ...) {
 #' 
 #' @examples 
 #' 
-#' \dontrun{
+#' \donttest{
 #' gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 #' 
 #' # Plot the survival curve based on baseline hazard

@@ -11,6 +11,9 @@
 
 \item{...}{Ignored}
 }
+\value{
+No return value, called to print the summary for penalized regression.
+}
 \description{
 Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMMpen}.
 The first column is the tuning parameter sequence, the second column is the degree of freedom and the third column is the BIC.

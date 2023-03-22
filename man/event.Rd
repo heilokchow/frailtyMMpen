@@ -9,6 +9,9 @@ event(x)
 \arguments{
 \item{x}{name from original dataframe which specifies the event id.}
 }
+\value{
+No return value, called to construct \code{formula}.
+}
 \description{
 {Specify event id for multi-event data in the input \code{formula}.}
 }

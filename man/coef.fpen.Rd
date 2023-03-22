@@ -11,6 +11,9 @@
 
 \item{...}{Ignored}
 }
+\value{
+A vector of estimated parameters.
+}
 \description{
 retrieve the coefficients under given tuning parameter
 }

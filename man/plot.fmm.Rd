@@ -16,7 +16,7 @@
 \item{object}{Object with class "fmm"}
 }
 \description{
-Both the cumulative hazard and the survival curves can be ploted.
+Both the cumulative hazard and the survival curves can be plotted.
 }
 \details{
 If parameter \code{newdata} is given, the plot is based on the predicted hazard while if it is not given,
@@ -25,7 +25,7 @@ function \code{predict.fmm} and the following example.
 }
 \examples{
 
-\dontrun{
+\donttest{
 gam_re = frailtyMM(Surv(tstart, tstop, status) ~  sex + treat + cluster(id), cgd, frailty = "Gamma")
 
 # Plot the survival curve based on baseline hazard

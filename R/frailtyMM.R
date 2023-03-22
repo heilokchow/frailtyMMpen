@@ -53,7 +53,7 @@
 #' \item{coefname}{name of each coeficient from input.}
 #' \item{id}{id for individuals or clusters, {1,2...,a}. Note that, since the original id may not be the sequence starting from 1, this output
 #' id may not be identical to the original id. Also, the order of id is corresponding to the returned \code{input}.}
-#' \item{N}{total number of observarions.}
+#' \item{N}{total number of observations.}
 #' \item{a}{total number of individuals or clusters.}
 #' \item{datatype}{model used for fitting.}
 #' 
@@ -67,11 +67,11 @@
 #' 
 #' # Kidney data fitted by Clustered Inverse Gaussian Frailty Model
 #' 
-#' \dontrun{
 #' InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
 #'                          kidney, frailty = "InvGauss")
 #' InvG_real_cl
 #' 
+#' \donttest{
 #' # Cgd data fitted by Recurrent Log-Normal Frailty Model
 #' 
 #' logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
@@ -89,7 +89,7 @@
 #' gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                    simdataCL, frailty = "Gamma")
 #' 
-#' \dontrun{
+#' \donttest{
 #' # Clustered Log-Normal Frailty Model
 #' logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                     simdataCL, frailty = "LogN")
@@ -97,11 +97,11 @@
 #' # Clustered Inverse Gaussian Frailty Model
 #' invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                     simdataCL, frailty = "InvGauss")
-#' 
+
 #' # Clustered PVF Frailty Model
 #' pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                    simdataCL, frailty = "PVF", power = 1.5)
-#'
+#'                    
 #' data(simdataME)
 #' 
 #' # Multi-event Gamma Frailty Model
@@ -116,10 +116,6 @@
 #' # Multi-event Inverse Gaussian Frailty Model
 #' invg_me = frailtyMM(Surv(time, status) ~ . + event(id),
 #'                     simdataME, frailty = "InvGauss")
-#' 
-#' # Multi-event PVF Frailty Model
-#' pvf_me = frailtyMM(Surv(time, status) ~ . + event(id), 
-#'                    simdataME, frailty = "PVF", power = 1.5)
 #' 
 #' data(simdataRE)
 #' 

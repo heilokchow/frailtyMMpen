@@ -1,6 +1,6 @@
 Package: frailtyMMpen
 Type: Package
-Title: Efficient High-Dimensional Frailty Model Fitting for Penalized Regression with MM Algorithm
+Title: Efficient Frailty Model Fitting with Penalized Regression
 Version: 1.0.0
 Authors@R: c(person(given = "Xifen",
                     family = "Huang",
@@ -16,10 +16,9 @@ Authors@R: c(person(given = "Xifen",
                     family = "Xu",
                     role = c("ctb")))
 Maintainer: Yunpeng Zhou <u3514104@connect.hku.hk>
-Description: Penalized and non-penalized frailty model fitting with
-    Clustered data, multi-event data and recurrent data.
-    'LASSO', 'MCP' and 'SCAD' penalized regression can be fitted,
-    the model is efficiently fitted using MM algorithm. 
+Description: Penalized and non-penalized frailty model fitting with Clustered data, multi-event data and recurrent data. 'LASSO', 'MCP' and 'SCAD' penalized regression can be fitted, the model is efficiently fitted using 'MM' algorithm. The technique is based on the paper,
+    Huang et al. (2022) <doi:10.3390/math10040538>,
+    Huang et al. (2023) <doi:10.1177/09622802221133554>.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: false

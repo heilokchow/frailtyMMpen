@@ -11,6 +11,9 @@
 
 \item{...}{Ignored}
 }
+\value{
+No return value, called to print the summary for non-penalized regression.
+}
 \description{
 Print the summary of a non-penalized regression fitted by any model with function \code{frailtyMM}
 }

@@ -35,7 +35,7 @@
 #' The formula is same as the input for function \code{frailtyMM}.
 #' 
 #' @return An object of class \code{fmm} that contains the following fields:
-#' \item{coef}{matrix of coeficient estimated from a specific model.}
+#' \item{coef}{matrix of coefficient estimated from a specific model.}
 #' \item{est.tht}{vector of frailty parameter estimated from a specific model.}
 #' \item{lambda}{list of frailty for each observation estimated from a specific model.}
 #' \item{likelihood}{vector of the observed log-likelihood given estimated parameters.}
@@ -43,15 +43,15 @@
 #' \item{tune}{vector of tuning parameters used for penalized regression.}
 #' \item{tune.min}{tuning parameter where minimal of BIC is obtained.}
 #' \item{convergence}{convergence threshold.}
-#' \item{input}{The input data re-orderd by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
+#' \item{input}{The input data re-ordered by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
 #' \item{y}{input stopping time.}
 #' \item{X}{input covariate matrix.}
 #' \item{d}{input censoring indicator.}
 #' \item{formula}{formula applied as input.}
-#' \item{coefname}{name of each coeficient from input.}
+#' \item{coefname}{name of each coefficient from input.}
 #' \item{id}{id for individuals or clusters, {1,2...,a}. Note that, since the original id may not be the sequence starting from 1, this output
 #' id may not be identical to the original id. Also, the order of id is corresponding to the returned \code{input}.}
-#' \item{N}{total number of observarions.}
+#' \item{N}{total number of observations.}
 #' \item{a}{total number of individuals or clusters.}
 #' \item{datatype}{model used for fitting.}
 #' 

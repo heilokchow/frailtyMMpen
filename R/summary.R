@@ -7,7 +7,7 @@
 #' @param ... Ignored
 #' 
 #' @details the summary for the model of frailtyMM.
-#' The standard error and p-value of estimated parameters are based on Fisher Information martix.
+#' The standard error and p-value of estimated parameters are based on Fisher Information matrix.
 #'
 #' @method summary fmm
 #' @export

@@ -40,17 +40,17 @@
 #' \code{Tweedie} function from package mgcv, 1<\code{power}<2.
 #' 
 #' @return An object of class \code{fmm} that contains the following fields:
-#' \item{coef}{coeficient estimated from a specific model.}
+#' \item{coef}{coefficient estimated from a specific model.}
 #' \item{est.tht}{frailty parameter estimated from a specific model.}
 #' \item{lambda}{frailty for each observation estimated from a specific model.}
 #' \item{likelihood}{The observed log-likelihood given estimated parameters.}
-#' \item{input}{The input data re-orderd by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
+#' \item{input}{The input data re-ordered by cluster id. \code{y} is the event time, \code{X} is covariate matrix and \code{d} is the status while 0 indicates censoring.}
 #' \item{frailty}{frailty used for model fitting.}
 #' \item{power}{power used for model fitting is PVF frailty is applied.}
 #' \item{iter}{total number of iterations.}
 #' \item{convergence}{convergence threshold.}
 #' \item{formula}{formula applied as input.}
-#' \item{coefname}{name of each coeficient from input.}
+#' \item{coefname}{name of each coefficient from input.}
 #' \item{id}{id for individuals or clusters, {1,2...,a}. Note that, since the original id may not be the sequence starting from 1, this output
 #' id may not be identical to the original id. Also, the order of id is corresponding to the returned \code{input}.}
 #' \item{N}{total number of observations.}

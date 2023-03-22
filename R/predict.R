@@ -182,7 +182,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
 #' @param object Object with class "fpen"
 #' @param tune The tuning parameter for estimating coefficients
 #' @param coef Instead of providing tuning parameter, you can directly provide the coefficients for prediction
-#' @param newdata The new data for prediction of hazard, catgorical data has to be transformed to 0 and 1
+#' @param newdata The new data for prediction of hazard, categorical data has to be transformed to 0 and 1
 #' @param surv Plot survival curve instead of cumulative hazard, the default is \code{FALSE}
 #' @param ... Further arguments pass to or from other methods
 #' @method predict fpen
@@ -190,7 +190,7 @@ predict.fmm <- function(object, newdata = NULL, surv = FALSE, ...) {
 #' 
 #' @details If parameter \code{newdata} is given, the predicted hazard is calculated based on the given data.
 #' If parameter \code{newdata} is not given, the estimation of baseline hazard will be returned. 
-#' Since the covariance of estimated paramters for penalized regression cannot be obtained from MLE theorem, we
+#' Since the covariance of estimated parameters for penalized regression cannot be obtained from MLE theorem, we
 #' only provide the estimation without confidence band. For the formulation of new data, you may refer to
 #' function \code{predict.fmm} for detailed description.
 #'

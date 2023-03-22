@@ -67,11 +67,11 @@
 #' 
 #' # Kidney data fitted by Clustered Inverse Gaussian Frailty Model
 #' 
+#' \donttest{
 #' InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
 #'                          kidney, frailty = "InvGauss")
 #' InvG_real_cl
 #' 
-#' \donttest{
 #' # Cgd data fitted by Recurrent Log-Normal Frailty Model
 #' 
 #' logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
@@ -97,10 +97,6 @@
 #' # Clustered Inverse Gaussian Frailty Model
 #' invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
 #'                     simdataCL, frailty = "InvGauss")
-
-#' # Clustered PVF Frailty Model
-#' pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-#'                    simdataCL, frailty = "PVF", power = 1.5)
 #'                    
 #' data(simdataME)
 #' 
@@ -130,10 +126,6 @@
 #' # Recurrent event Inverse Gaussian Frailty Model
 #' invg_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id), 
 #'                     simdataRE, frailty = "InvGauss")
-#' 
-#' # Recurrent event PVF Frailty Model
-#' pvf_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
-#'                    simdataRE, frailty = "PVF", power = 1.5)
 #' }
 #' 
 #' # Obtain the summary statistics under fitted model

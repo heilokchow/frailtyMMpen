@@ -111,17 +111,6 @@ plot(gam_cl1)
 # Get the degree of freedom and BIC for the sequence of tuning parameters provided
 print(gam_cl1)
 
-# Clustered Log-Normal Frailty Model
-logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                    simdataCL, frailty = "LogN")
-
-# Clustered Inverse Gaussian Frailty Model
-invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                    simdataCL, frailty = "InvGauss")
-
-# Clustered PVF Frailty Model
-pvf_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                   simdataCL, frailty = "PVF", power = 1.5)
 }
 
 }

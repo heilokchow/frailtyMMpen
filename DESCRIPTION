@@ -1,6 +1,6 @@
 Package: frailtyMMpen
 Type: Package
-Title: Efficient Algorithm for High-dimensional Frailty Model
+Title: Efficient Algorithm for High-Dimensional Frailty Model
 Version: 1.0.0
 Authors@R: c(person(given = "Xifen",
                     family = "Huang",
@@ -14,8 +14,8 @@ Authors@R: c(person(given = "Xifen",
                     role = c("ctb")))
 Maintainer: Yunpeng Zhou <u3514104@connect.hku.hk>
 Description: The penalized 'MM' method and non-penalized 'MM' method for frailty models to fit the clustered data, multi-event data and recurrent data. 'LASSO', 'MCP' and 'SCAD' penalized functions are implemented. All the methods are computationally efficient. These general methods are proposed based on the following papers,
-    Huang et al. (2022) <doi:10.3390/math10040538>,
-    Huang et al. (2023) <doi:10.1177/09622802221133554>.
+    Huang, Xu and Zhou. (2022) <doi:10.3390/math10040538>,
+    Huang, Xu and Zhou. (2023) <doi:10.1177/09622802221133554>.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: false

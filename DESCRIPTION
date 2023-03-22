@@ -1,7 +1,7 @@
 Package: frailtyMMpen
 Type: Package
 Title: Efficient High-Dimensional Frailty Model Fitting for Penalized Regression with MM Algorithm
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(person(given = "Xifen",
                     family = "Huang",
                     role = c("aut")),

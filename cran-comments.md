@@ -28,14 +28,9 @@ This is a resubmission. In this version I have:
       New submission
       
       Possibly misspelled words in DESCRIPTION:
-        al (20:14, 21:14)
-        et (20:11, 21:11)
+      Xu (17:12, 18:12)
+      Zhou (17:19, 18:19)
       
-      Found the following (possibly) invalid DOIs:
-        DOI: 10.1177/09622802221133554
-          From: DESCRIPTION
-          Status: Forbidden
-          Message: 403
       ```
 * R-hub builder (https://builder.r-hub.io)
   - Windows Server 2022 R-devel, 64 bit

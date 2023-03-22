@@ -12,7 +12,7 @@
       ```
 * R-hub builder (https://builder.r-hub.io)
   - Windows Server 2022 R-devel, 64 bit
-    - the following notes are unrelated to my package:
+    - 1 note same as win-builder and other notes are unrelated to my package:
       ```
       * checking CRAN incoming feasibility ... NOTE
       Maintainer: 'Yunpeng Zhou <u3514104@connect.hku.hk>'
@@ -24,7 +24,8 @@
       Found the following files/directories:
         'lastMiKTeXException'
       ```
-
+* Github Actions
+  - Ubuntu-20.04
 
 ## R CMD check results
 

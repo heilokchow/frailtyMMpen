@@ -13,7 +13,7 @@ Authors@R: c(person(given = "Xifen",
                     family = "Xu",
                     role = c("ctb")))
 Maintainer: Yunpeng Zhou <u3514104@connect.hku.hk>
-Description: The penalized 'MM' method and non-penalized 'MM' method for frailty models to fit the clustered data, multi-event data and recurrent data. 'LASSO', 'MCP' and 'SCAD' penalized functions are implemented. All the methods are computationally efficient. These general methods are proposed based on the following papers,
+Description: The penalized and non-penalized Minorize-Maximization (MM) method for frailty models to fit the clustered data, multi-event data and recurrent data. Least absolute shrinkage and selection operator (LASSO), minimax concave penalty (MCP) and smoothly clipped absolute deviation (SCAD) penalized functions are implemented. All the methods are computationally efficient. These general methods are proposed based on the following papers,
     Huang, Xu and Zhou (2022) <doi:10.3390/math10040538>,
     Huang, Xu and Zhou (2023) <doi:10.1177/09622802221133554>.
 License: GPL (>= 2)

@@ -1,4 +1,10 @@
-## Resubmission
+## Resubmission, second time
+
+This is a resubmission. In this version I have:
+
+* Explain all acronyms in the description tex and remove the single quote for these acronym
+
+## Resubmission, first time
 
 This is a resubmission. In this version I have:
 

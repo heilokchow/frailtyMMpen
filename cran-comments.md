@@ -1,24 +1,8 @@
-## Resubmission, second time
+## Resubmission
 
 This is a resubmission. In this version I have:
 
 * Explain all acronyms in the description tex and remove the single quote for these acronym
-
-## Resubmission, first time
-
-This is a resubmission. In this version I have:
-
-* Edit the description file
-* Reduce the length of the title to less than 65 characters.
-* Change MM -> 'MM' in description.
-* Add reference in authors (year) <doi:...> in the description field of DESCRIPTION file.
-* Add \value to the following Rd files which previously miss \value tag:
-      cluster.Rd: \value
-      coef.fpen.Rd: \value
-      event.Rd: \value
-      print.fmm.Rd: \value
-      print.fpen.Rd: \value
-* Replace \dontrun{} by \donttest{}.
 
 ## Test environments
 

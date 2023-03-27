@@ -1,6 +1,9 @@
 ## frailtyMMpen: Package for Penalized Frailty Models
 
 [![R-CMD-check](https://github.com/heilokchow/frailtyMMpen/workflows/R-CMD-check/badge.svg)](https://github.com/heilokchow/frailtyMMpen/actions)
+[![CRAN](http://www.r-pkg.org/badges/version/frailtyMMpen)](https://cran.r-project.org/package=frailtyMMpen)
+[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/frailtyMMpen)](https://cran.r-project.org/package=frailtyMMpen)
+[![Last Commit](https://img.shields.io/github/last-commit/heilokchow/frailtyMMpen)](https://github.com/heilokchow/frailtyMMpen)
 
 This package implements the MM algorithm for a variety types of frailty models which can handle clustered data, multi-event data and recurrent data in addition to the simple frailty model. Besides, this package can obtain the estimation of parameters for penalized regression using LASSO, MCP and SCAD penalties. Currently supported frailty distributions include gamma, log-normal, inverse gaussian and PVF (1<p<2). The estimation procedure is computationally efficient which makes it also capable for handling high-dimensional data. 
 

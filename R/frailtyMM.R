@@ -156,10 +156,11 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
     if (length(cluster_id) == 0 && length(event_id) == 0) {
       
       type = "Cluster"
-      mx1 = mx[, -c(1)]
+      mx1 = mx[, -c(1), drop = FALSE]
       coef_name = colnames(mx1)
       
       N = nrow(mx1)
+      p = ncol(mx1)
       newid = seq(0, N-1, 1)
       
       if (N <= 2) {
@@ -171,7 +172,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       d = m[[1]][, 2]
       a = N
       
-      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 1)
+      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 1, SQS1 = 0)
       
       output = frailtyMMcal(y, X, d, N, a, newid,
                             coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
@@ -202,7 +203,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       pe = unlist(gregexpr('\\)', names(m)[cluster_id])) - 1
       clsname = substr(names(m)[cluster_id], pb, pe)
       remove_cluster_id <- grep(clsname, names(m))
-      mx1 = mx[, -c(1, remove_cluster_id)]
+      mx1 = mx[, -c(1, remove_cluster_id), drop = FALSE]
       mxid = mx[, cluster_id]
       coef_name = colnames(mx1)
       
@@ -223,11 +224,11 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       }
       
       y = m[[1]][nord, 1]
-      X = mx1[nord, ]
+      X = mx1[nord, , drop = FALSE]
       d = m[[1]][nord, 2]
       a = max(newid) + 1
       
-      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 1)
+      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 1, SQS1 = 0)
       
       output = frailtyMMcal(y, X, d, N, a, newid,
                             coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
@@ -259,7 +260,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       pe = unlist(gregexpr('\\)', names(m)[event_id])) - 1
       evsname = substr(names(m)[event_id], pb, pe)
       remove_event_id <- grep(evsname, names(m))
-      mx1 = mx[, -c(1, remove_event_id)]
+      mx1 = mx[, -c(1, remove_event_id), drop = FALSE]
       mxid = mx[, event_id]
       coef_name = colnames(mx1)
       
@@ -274,11 +275,11 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       nord = order(mxid)
       N = length(nord)
       mx1 = mx1[nord, ]
-      X = mx1[nord, ]
+      X = mx1[nord, , drop = FALSE]
       y = m[[1]][nord, 1]
       d = m[[1]][nord, 2]
       
-      initGam = frailtyMMcal(y, X, d, N, b, NULL, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 2)
+      initGam = frailtyMMcal(y, X, d, N, b, NULL, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 2, SQS1 = 0)
       
       output = frailtyMMcal(y, X, d, N, b, NULL,
                             coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
@@ -312,7 +313,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
     pe = unlist(gregexpr('\\)', names(m)[cluster_id])) - 1
     clsname = substr(names(m)[cluster_id], pb, pe)
     remove_cluster_id <- grep(clsname, names(m))
-    mx1 = mx[, -c(1, remove_cluster_id)]
+    mx1 = mx[, -c(1, remove_cluster_id), drop = FALSE]
     mxid = mx[, cluster_id]
     coef_name = colnames(mx1)
     
@@ -336,11 +337,11 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
     }
     
     y = m[[1]][nord, 2]
-    X = mx1[nord, ]
+    X = mx1[nord, , drop = FALSE]
     d = m[[1]][nord, 3]
     a = max(newid) + 1
     
-    initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 3)
+    initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 3, SQS1 = 0)
     
     output = frailtyMMcal(y, X, d, N, a, newid,
                           coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,

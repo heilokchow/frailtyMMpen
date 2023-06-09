@@ -6,9 +6,72 @@
 #' \deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
 #' The multi-event frailty model with different baseline hazard of different event and the hazard rate of \eqn{j^{th}} event for individual \eqn{i^{th}} is 
 #' \deqn{\lambda_{ij}(t|\omega_i) = \lambda_{0j}(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
-#' }
 #' The recurrent event model where the \eqn{j^{th}} event of individual \eqn{i} has observed feature \eqn{\mathbf{X_{ij}}},
 #' \deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
+#' 
+#' For the  clustered type of data, we further assume that cluster \eqn{i} has \eqn{n_i} with \eqn{j=1,...,n_{i}} number 
+#' of objects where they share the common frailty parameter \eqn{\omega_i}, then, the hazard function is as follows,
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig1.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig1.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' 	Given the objective functions above, we take the clustered data as an example to illustrate the application of MM algorithm in optimizing the observed likelihood function,
+#' 	the observed log-likelihood function is, 
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig4.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig4.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' where,
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig5.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig5.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' In order to formulate the iterative algorithm to optimize the observed log likelihood, we further define density function \eqn{g_i(\cdot)} 
+#' based on the estimates of the parameters in \eqn{k^{th}} iteration \eqn{\boldsymbol{\alpha}^{(k)}}
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig6.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig6.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' Then, we construct the surrogate function to minimize the mariginal log-likelihood using the Jensen's inequality,
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig7.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig7.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' which successfully separated \eqn{\boldsymbol{\alpha}} into \eqn{\boldsymbol{\theta}} and \eqn{(\boldsymbol{\beta}, \Lambda_{0})} where,
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig8.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig8.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' and let \figure{fig9.1.PNG}{options: width=2in}, 
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig9PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig9.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' And then we estimate \eqn{\Lambda_{0}} by,
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig10PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig10.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' Then, we have, 
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig11PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig11.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' Further more, we apply hyperplane inequality to construct surrogate function for \eqn{\boldsymbol{\beta}} where we can update the its estimates coordinate wise,
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig12PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig12.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' By applying Jensen's inequality, 
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig13PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig13.PNG}{options: width=5in}}\out{\end{center}}}
+#' 
+#' Finally, 
+#' 
+#' \if{html}{\out{<div style="text-align: center">}\figure{fig14PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+#' \if{latex}{\out{\begin{center}}{\figure{fig14.PNG}{options: width=5in}}\out{\end{center}}}
+#' }
 #' 
 #' @param formula Formula where the left hand side is an object of the type \code{Surv}
 #' and the right hand side contains the variables and additional specifications. 

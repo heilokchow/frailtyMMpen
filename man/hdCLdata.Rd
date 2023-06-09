@@ -12,7 +12,7 @@ data(hdCLdata)
 }
 \description{
 This data include 40 clusters with 2 objects, a total of 80 events are recorded.
-200 temporal covariates can be used for model fitting. The data is generated from a
+200 covariates can be used for model fitting. The data is generated from a
 gamma frailty model with coefficients (4,4,4,4,4,...,0) and frailty variance 1.
 }
 \examples{

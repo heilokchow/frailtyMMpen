@@ -163,12 +163,26 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
           
         }
         
-        if (!backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)) {
+        temp = backtrackerror(model = rs, coef = coef.temp, est.tht = est.tht, lambda = lambda)
+        
+        if (temp == 2) {
+          
+          coef = coef.ini
+          est.tht = est.tht.ini
+          lambda = lambda.ini
+          SQS1 = 0
+          num = 0
+          error_count = error_count + 1
+          break
+          
+        }
+        
+        if (!temp) {
           break
         }
       }
       
-      if (!rs$error) {
+      if (!rs$error && temp != 2) {
         coef = rs$coef
         est.tht = rs$est.tht
         lambda = rs$lambda
@@ -183,7 +197,7 @@ frailtyMMcal <- function(y, X, d, N, a, id, coef.ini = NULL, est.tht.ini = NULL,
     }
     
     num = num + 1
-    cat(error, " ", est.tht, " ", " ", al_be, " ", num, " ", frailty, " ", error_count, '\n')
+    # cat(error, " ", est.tht, " ", " ", al_be, " ", num, " ", sum(abs(coef)), " ", error_count, '\n')
   }
   
   l1 = logLikcal(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power, type)

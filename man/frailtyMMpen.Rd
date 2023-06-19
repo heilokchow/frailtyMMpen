@@ -72,10 +72,26 @@ id may not be identical to the original id. Also, the order of id is correspondi
 {This formula is used to fit the penalized regression. 3 types of the models can be fitted similar to the function
 \code{frailtyMM}. In addition, variable selection can be done by three types of penalty, LASSO, MCP and SCAD with the following
 objective function where \eqn{\lambda} is the tuning parameter and \eqn{q} is the dimension of \eqn{\boldsymbol{\beta}},
- \deqn{l(\boldsymbol{\beta},\Lambda_0|Y_{obs}) + n\sum_{p=1}^{q} p(|\beta_p|, \lambda).}
+ \deqn{l(\boldsymbol{\beta},\Lambda_0|Y_{obs}) - n\sum_{p=1}^{q} p(|\beta_p|, \lambda).}
  The BIC is computed using the following equation,
  \deqn{-2l(\hat{\boldsymbol{\beta}}, \hat{\Lambda}_0) + G_n(\hat{S}+1)\log(n),}
- where \eqn{G_n=\max{1, \log(\log(q+1))}} and \eqn{\hat{S}} is the degree of freedom.
+ where \eqn{G_n=\max\{1, \log(\log(q+1))\}} and \eqn{\hat{S}} is the degree of freedom.
+ 
+ Surrogate function is also derived for penalty part for efficient estimation of penalized regression, similar to the notation used
+ in \code{\link{frailtyMM}}, we let \eqn{\boldsymbol{\alpha}} be the collection of all parameters and baseline hazard function. Given that,
+ 
+ \if{html}{\out{<div style="text-align: center">}\figure{fig15PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+ \if{latex}{\out{\begin{center}}{\figure{fig15.PNG}{options: width=5in}}\out{\end{center}}}
+ 
+ by local quadratic approximation,
+ 
+ \if{html}{\out{<div style="text-align: center">}\figure{fig16PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+ \if{latex}{\out{\begin{center}}{\figure{fig16.PNG}{options: width=5in}}\out{\end{center}}}
+ 
+ And thus, the surrogate function is given by,
+ 
+ \if{html}{\out{<div style="text-align: center">}\figure{fig17PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+ \if{latex}{\out{\begin{center}}{\figure{fig17.PNG}{options: width=5in}}\out{\end{center}}}
 }
 }
 \details{

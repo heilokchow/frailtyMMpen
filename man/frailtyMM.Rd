@@ -64,7 +64,8 @@ The recurrent event model where the \eqn{j^{th}} event of individual \eqn{i} has
 \deqn{\lambda_{ij}(t|\omega_i) = \lambda_0(t) \omega_i \exp(\boldsymbol{\beta}' \mathbf{X_{ij}}).}
 
 For the  clustered type of data, we further assume that cluster \eqn{i} has \eqn{n_i} with \eqn{j=1,...,n_{i}} number 
-of objects where they share the common frailty parameter \eqn{\omega_i}, then, the hazard function is as follows,
+of objects where they share the common frailty parameter \eqn{\omega_i}. For simplicity, we let \eqn{\boldsymbol{\alpha}} 
+be the collection of all parameters and baseline hazard function. Then, the marginal likelihood is as follows,
 
 \if{html}{\out{<div style="text-align: center">}\figure{fig1.PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
 \if{latex}{\out{\begin{center}}{\figure{fig1.PNG}{options: width=5in}}\out{\end{center}}}

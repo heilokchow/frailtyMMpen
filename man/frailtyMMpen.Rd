@@ -80,17 +80,17 @@ objective function where \eqn{\lambda} is the tuning parameter and \eqn{q} is th
  Surrogate function is also derived for penalty part for efficient estimation of penalized regression, similar to the notation used
  in \code{\link{frailtyMM}}, we let \eqn{\boldsymbol{\alpha}} be the collection of all parameters and baseline hazard function. Given that,
  
- \if{html}{\out{<div style="text-align: center">}\figure{fig15.png}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+ \if{html}{\figure{fig15.png}{options: style="width:750px;max-width:75\%;"}}
  \if{latex}{\out{\begin{center}}{\figure{fig15.png}{options: width=5in}}\out{\end{center}}}
  
  by local quadratic approximation,
  
- \if{html}{\out{<div style="text-align: center">}\figure{fig16.png}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+ \if{html}{\figure{fig16.png}{options: style="width:750px;max-width:75\%;"}}
  \if{latex}{\out{\begin{center}}{\figure{fig16.png}{options: width=5in}}\out{\end{center}}}
  
  And thus, the surrogate function given \eqn{k^{th}} iteration result is as follows,
  
- \if{html}{\out{<div style="text-align: center">}\figure{fig17.png}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
+ \if{html}{\figure{fig17.png}{options: style="width:750px;max-width:75\%;"}}
  \if{latex}{\out{\begin{center}}{\figure{fig17.png}{options: width=5in}}\out{\end{center}}}
 }
 }

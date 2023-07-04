@@ -14,7 +14,7 @@ plot.fpen <- function(x, ...) {
 
   n = ncol(yaxis)
   matplot(xaxis, yaxis, lty = 1, xlab = "log(tune)", ylab = "coefficients", type = "l")
-  abline(v = log(x$tune.min), col="red", lwd=3, lty=2)
+  abline(v = log(x$tune.min), col = "red", lwd = 3, lty = 2)
 }
 
 #' Plot the baseline hazard or the predicted hazard based on the new data

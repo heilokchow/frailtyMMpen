@@ -214,8 +214,8 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
   
   if (ncol(m[[1]]) == 2) {
     
-    cluster_id <- grep("cluster", names(m))
-    event_id <- grep("event", names(m))
+    cluster_id <- grep("^cluster\\(", colnames(mx))
+    event_id <- grep("^event\\(", colnames(mx))
     
     if (length(cluster_id) == 0 && length(event_id) == 0) {
       
@@ -263,10 +263,10 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
     if (length(cluster_id) == 1) {
       
       type = "Cluster"
-      pb = unlist(gregexpr('\\(', names(m)[cluster_id])) + 1
-      pe = unlist(gregexpr('\\)', names(m)[cluster_id])) - 1
-      clsname = substr(names(m)[cluster_id], pb, pe)
-      remove_cluster_id <- grep(clsname, names(m))
+      pb = unlist(gregexpr('\\(', names(mx)[cluster_id])) + 1
+      pe = unlist(gregexpr('\\)', names(mx)[cluster_id])) - 1
+      clsname = substr(names(mx)[cluster_id], pb, pe)
+      remove_cluster_id = c(which(names(mx) == clsname), cluster_id)
       mx1 = mx[, -c(1, remove_cluster_id), drop = FALSE]
       mxid = mx[, cluster_id]
       coef_name = colnames(mx1)
@@ -320,10 +320,10 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
     if (length(event_id) == 1) {
       
       type = "Multiple"
-      pb = unlist(gregexpr('\\(', names(m)[event_id])) + 1
-      pe = unlist(gregexpr('\\)', names(m)[event_id])) - 1
-      evsname = substr(names(m)[event_id], pb, pe)
-      remove_event_id <- grep(evsname, names(m))
+      pb = unlist(gregexpr('\\(', names(mx)[event_id])) + 1
+      pe = unlist(gregexpr('\\)', names(mx)[event_id])) - 1
+      evsname = substr(names(mx)[event_id], pb, pe)
+      remove_event_id = c(which(names(mx) == evsname), event_id)
       mx1 = mx[, -c(1, remove_event_id), drop = FALSE]
       mxid = mx[, event_id]
       coef_name = colnames(mx1)
@@ -372,11 +372,11 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
   if (ncol(m[[1]]) == 3) {
     
     type = "Recurrent"
-    cluster_id <- grep("cluster", names(m))
-    pb = unlist(gregexpr('\\(', names(m)[cluster_id])) + 1
-    pe = unlist(gregexpr('\\)', names(m)[cluster_id])) - 1
-    clsname = substr(names(m)[cluster_id], pb, pe)
-    remove_cluster_id <- grep(clsname, names(m))
+    cluster_id <- grep("^cluster\\(", colnames(mx))
+    pb = unlist(gregexpr('\\(', names(mx)[cluster_id])) + 1
+    pe = unlist(gregexpr('\\)', names(mx)[cluster_id])) - 1
+    clsname = substr(names(mx)[cluster_id], pb, pe)
+    remove_cluster_id = c(which(names(mx) == clsname), cluster_id)
     mx1 = mx[, -c(1, remove_cluster_id), drop = FALSE]
     mxid = mx[, cluster_id]
     coef_name = colnames(mx1)

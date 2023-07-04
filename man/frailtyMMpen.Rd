@@ -88,7 +88,7 @@ objective function where \eqn{\lambda} is the tuning parameter and \eqn{q} is th
  \if{html}{\out{<div style="text-align: center">}\figure{fig16PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
  \if{latex}{\out{\begin{center}}{\figure{fig16.PNG}{options: width=5in}}\out{\end{center}}}
  
- And thus, the surrogate function is given by,
+ And thus, the surrogate function given \eqn{k^{th}} iteration result is as follows,
  
  \if{html}{\out{<div style="text-align: center">}\figure{fig17PNG}{options: style="width:750px;max-width:75\%;"}\out{</div>}}
  \if{latex}{\out{\begin{center}}{\figure{fig17.PNG}{options: width=5in}}\out{\end{center}}}

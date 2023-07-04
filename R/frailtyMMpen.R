@@ -155,10 +155,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     if (length(cluster_id) == 1) {
       
       type = "Cluster"
-      pb = unlist(gregexpr('\\(', names(mx)[cluster_id])) + 1
-      pe = unlist(gregexpr('\\)', names(mx)[cluster_id])) - 1
-      clsname = substr(names(mx)[cluster_id], pb, pe)
-      remove_cluster_id = c(which(names(mx) == clsname), cluster_id)
+      pb = unlist(gregexpr('\\(', colnames(mx)[cluster_id])) + 1
+      pe = unlist(gregexpr('\\)', colnames(mx)[cluster_id])) - 1
+      clsname = substr(colnames(mx)[cluster_id], pb, pe)
+      remove_cluster_id = c(which(colnames(mx) == clsname), cluster_id)
       mx1 = mx[, -c(1, remove_cluster_id), drop = FALSE]
       mxid = mx[, cluster_id]
       
@@ -190,10 +190,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     if (length(event_id) == 1) {
       
       type = "Multiple"
-      pb = unlist(gregexpr('\\(', names(mx)[event_id])) + 1
-      pe = unlist(gregexpr('\\)', names(mx)[event_id])) - 1
-      evsname = substr(names(mx)[event_id], pb, pe)
-      remove_event_id = c(which(names(mx) == evsname), event_id)
+      pb = unlist(gregexpr('\\(', colnames(mx)[event_id])) + 1
+      pe = unlist(gregexpr('\\)', colnames(mx)[event_id])) - 1
+      evsname = substr(colnames(mx)[event_id], pb, pe)
+      remove_event_id = c(which(colnames(mx) == evsname), event_id)
       mx1 = mx[, -c(1, remove_event_id), drop = FALSE]
       mxid = mx[, event_id]
       
@@ -220,10 +220,10 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
     
     type = "Recurrent"
     cluster_id <- grep("^cluster\\(", colnames(mx))
-    pb = unlist(gregexpr('\\(', names(mx)[cluster_id])) + 1
-    pe = unlist(gregexpr('\\)', names(mx)[cluster_id])) - 1
-    clsname = substr(names(mx)[cluster_id], pb, pe)
-    remove_cluster_id = c(which(names(mx) == clsname), cluster_id)
+    pb = unlist(gregexpr('\\(', colnames(mx)[cluster_id])) + 1
+    pe = unlist(gregexpr('\\)', colnames(mx)[cluster_id])) - 1
+    clsname = substr(colnames(mx)[cluster_id], pb, pe)
+    remove_cluster_id = c(which(colnames(mx) == clsname), cluster_id)
     mx1 = mx[, -c(1, remove_cluster_id), drop = FALSE]
     mxid = mx[, cluster_id]
     

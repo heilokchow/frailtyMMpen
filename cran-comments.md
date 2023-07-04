@@ -1,10 +1,18 @@
+This is an update for this package
+
+## R CMD check results
+
+0 errors | 0 warnings | 0 note
+
+* This is a new release.
+
+## Previous cran-comments
+
 ## Resubmission
 
 This is a resubmission. In this version I have:
 
 * Explain all acronyms in the description tex and remove the single quote for these acronym
-
-## Previous cran-comments
 
 ## Resubmission
 

@@ -48,11 +48,11 @@ The default value of \eqn{\gamma} for MCP is 3 and SCAD is 3.7.}
 }
 \value{
 An object of class \code{fmm} that contains the following fields:
-\item{coef}{matrix of coefficient estimated from a specific model.}
-\item{est.tht}{vector of frailty parameter estimated from a specific model.}
-\item{lambda}{list of frailty for each observation estimated from a specific model.}
-\item{likelihood}{vector of the observed log-likelihood given estimated parameters.}
-\item{BIC}{vector of the BIC given estimated parameters.}
+\item{coef}{matrix of coefficient estimated from a specific model where each column correponds to an input tuning parameter.}
+\item{est.tht}{vector of frailty parameters estimated from a specific model with respect to each tuning parameter.}
+\item{lambda}{list of frailty for each observation estimated from a specific model with respect to each tuning parameter.}
+\item{likelihood}{vector of the observed log-likelihood given estimated parameters with respect to each tuning parameter.}
+\item{BIC}{vector of the BIC given estimated parameters with respect to each tuning parameter.}
 \item{tune}{vector of tuning parameters used for penalized regression.}
 \item{tune.min}{tuning parameter where minimal of BIC is obtained.}
 \item{convergence}{convergence threshold.}

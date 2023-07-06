@@ -1,12 +1,15 @@
+## Resubmission
+
+I rename fig9.1.png to fig91.png with no extra dot and no underscore. 
+The checking on winbuilder returns Status: OK.
+
+## Previous cran-comments
+
 This is an update for this package
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 note
-
-* This is a new release.
-
-## Previous cran-comments
 
 ## Resubmission
 

@@ -97,7 +97,7 @@ which successfully separated \eqn{\boldsymbol{\alpha}} into \eqn{\boldsymbol{\th
 \if{html}{\figure{fig8.png}{options: style="width:750px;max-width:75\%;"}}
 \if{latex}{\out{\begin{center}}{\figure{fig8.png}{options: width=5in}}\out{\end{center}}}
 
-and let \if{latex}{\figure{fig9.1.png}{options: width=2in}}\if{html}{\figure{fig9.1.png}{options: width=200}}, 
+and let \if{latex}{\figure{fig91.png}{options: width=2in}}\if{html}{\figure{fig91.png}{options: width=200}}, 
 
 \if{html}{\figure{fig9.png}{options: style="width:750px;max-width:75\%;"}}
 \if{latex}{\out{\begin{center}}{\figure{fig9.png}{options: width=5in}}\out{\end{center}}}

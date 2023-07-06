@@ -32,7 +32,7 @@ data(simdataCL)
 We first run the non-penalized regression with Gamma frailty and obtain the summary statistics and the plot of conditional baseline hazard.
 
 ```r
-gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), simdataCL, frailty = "Gamma")
+gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), simdataCL, frailty = "gamma")
 
 summary(gam_cl)
 
@@ -43,7 +43,7 @@ plot(gam_cl)
 Then, we perform the penalized regression with Gamma frailty and LASSO penalty and obtain BIC, degree of freedom under a sequence of tuning parameters and the plot of regularization path.
 
 ```r
-gam_cl_pen = frailtyMMpen(Surv(time, status) ~ . + cluster(id), simdataCL, frailty = "Gamma")
+gam_cl_pen = frailtyMMpen(Surv(time, status) ~ . + cluster(id), simdataCL, frailty = "gamma")
 
 print(gam_cl_pen)
 

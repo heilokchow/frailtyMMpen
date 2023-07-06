@@ -7,7 +7,7 @@
 frailtyMMpen(
   formula,
   data,
-  frailty = "LogN",
+  frailty = "gamma",
   power = NULL,
   penalty = "LASSO",
   gam = NULL,
@@ -25,8 +25,8 @@ and the right hand side contains the variables and additional specifications.
 
 \item{data}{The \code{data.frame} where the formula argument can be evaluated.}
 
-\item{frailty}{The frailty used for model fitting. The default is "LogN", other choices are
-"InvGauss", "Gamma" and "PVF". (Note that the computation time for PVF family will be slow 
+\item{frailty}{The frailty used for model fitting. The default is "lognormal", other choices are
+"invgauss", "gamma" and "pvf". (Note that the computation time for PVF family will be slow 
 due to the non-explicit expression of likelihood function)}
 
 \item{power}{The power used if PVF frailty is applied.}
@@ -108,12 +108,12 @@ data(simdataCL)
 
 # Using default tuning parameter sequence
 gam_cl1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
-                       simdataCL, frailty = "Gamma")
+                       simdataCL, frailty = "gamma")
 
 \donttest{
 # Using given tuning parameter sequence
 gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), 
-                       simdataCL, frailty = "Gamma", tune = 0.1)
+                       simdataCL, frailty = "gamma", tune = 0.1)
 
 # Obtain the coefficient where minimum BIC is obtained
 coef(gam_cl1)

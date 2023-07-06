@@ -7,7 +7,7 @@
 frailtyMM(
   formula,
   data,
-  frailty = "LogN",
+  frailty = "gamma",
   power = NULL,
   tol = 1e-05,
   maxit = 200,
@@ -22,8 +22,8 @@ and the right hand side contains the variables and additional specifications.
 
 \item{data}{The \code{data.frame} where the formula argument can be evaluated.}
 
-\item{frailty}{The frailty used for model fitting. The default is "LogN", other choices are
-"InvGauss", "Gamma" and "PVF". (Note that the computation time for PVF family will be slow 
+\item{frailty}{The frailty used for model fitting. The default is "lognormal", other choices are
+"invgauss", "gamma" and "pvf". (Note that the computation time for PVF family will be slow 
 due to the non-explicit expression of likelihood function)}
 
 \item{power}{The power used if PVF frailty is applied.}
@@ -147,13 +147,13 @@ the parameter \code{power} is only used when \code{frailty}=PVF and since the li
 
 \donttest{
 InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
-                         kidney, frailty = "InvGauss")
+                         kidney, frailty = "invgauss")
 InvG_real_cl
 
 # Cgd data fitted by Recurrent Log-Normal Frailty Model
 
 logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
-                         cgd, frailty = "Gamma")
+                         cgd, frailty = "gamma")
 logN_real_re
 }
 
@@ -165,45 +165,45 @@ data(simdataCL)
 
 # Clustered Gamma Frailty Model
 gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                   simdataCL, frailty = "Gamma")
+                   simdataCL, frailty = "gamma")
 
 \donttest{
 # Clustered Log-Normal Frailty Model
 logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                    simdataCL, frailty = "LogN")
+                    simdataCL, frailty = "lognormal")
 
 # Clustered Inverse Gaussian Frailty Model
 invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                    simdataCL, frailty = "InvGauss")
+                    simdataCL, frailty = "invgauss")
                    
 data(simdataME)
 
 # Multi-event Gamma Frailty Model
 gam_me = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-                   simdataCL, frailty = "Gamma")
+                   simdataCL, frailty = "gamma")
 
 
 # Multi-event Log-Normal Frailty Model
 logn_me = frailtyMM(Surv(time, status) ~ . + event(id), 
-                    simdataME, frailty = "LogN")
+                    simdataME, frailty = "lognormal")
 
 # Multi-event Inverse Gaussian Frailty Model
 invg_me = frailtyMM(Surv(time, status) ~ . + event(id),
-                    simdataME, frailty = "InvGauss")
+                    simdataME, frailty = "invgauss")
 
 data(simdataRE)
 
 # Recurrent event Gamma Frailty Model
 gam_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
-                   simdataRE, frailty = "Gamma")
+                   simdataRE, frailty = "gamma")
 
 # Recurrent event Log-Normal Frailty Model
 logn_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
-                   simdataRE, frailty = "LogN")
+                   simdataRE, frailty = "lognormal")
 
 # Recurrent event Inverse Gaussian Frailty Model
 invg_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id), 
-                    simdataRE, frailty = "InvGauss")
+                    simdataRE, frailty = "invgauss")
 }
 
 # Obtain the summary statistics under fitted model

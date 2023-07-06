@@ -30,8 +30,8 @@
 #' \code{+cluster()} function specify the group id for clustered data or individual id for recurrent data.
 #' \code{+event()} function specify the event id for multi-event data (only two events are allowed).
 #' @param data The \code{data.frame} where the formula argument can be evaluated.
-#' @param frailty The frailty used for model fitting. The default is "LogN", other choices are
-#' "InvGauss", "Gamma" and "PVF". (Note that the computation time for PVF family will be slow 
+#' @param frailty The frailty used for model fitting. The default is "lognormal", other choices are
+#' "invgauss", "gamma" and "pvf". (Note that the computation time for PVF family will be slow 
 #' due to the non-explicit expression of likelihood function)
 #' @param power The power used if PVF frailty is applied.
 #' @param penalty The penalty used for regularization, the default is "LASSO", other choices are "MCP" and "SCAD".
@@ -89,12 +89,12 @@
 #' 
 #' # Using default tuning parameter sequence
 #' gam_cl1 = frailtyMMpen(Surv(time, status) ~ . + cluster(id),
-#'                        simdataCL, frailty = "Gamma")
+#'                        simdataCL, frailty = "gamma")
 #' 
 #' \donttest{
 #' # Using given tuning parameter sequence
 #' gam_cl2 = frailtyMMpen(Surv(time, status) ~ . + cluster(id), 
-#'                        simdataCL, frailty = "Gamma", tune = 0.1)
+#'                        simdataCL, frailty = "gamma", tune = 0.1)
 #' 
 #' # Obtain the coefficient where minimum BIC is obtained
 #' coef(gam_cl1)
@@ -110,7 +110,7 @@
 #' 
 #' }
 #' 
-frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty = "LASSO", gam = NULL, tune = NULL, tol = 1e-5, maxit = 200, ...) {
+frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty = "LASSO", gam = NULL, tune = NULL, tol = 1e-5, maxit = 200, ...) {
   
   Call <- match.call()
   
@@ -124,6 +124,13 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
   
   m <- model.frame(formula, data)
   mx <- model.matrix(formula, data)
+  
+  lower_frailty = tolower(frailty)
+  
+  frailty = switch(lower_frailty, "gamma" = "Gamma", "lognormal" = "LogN", "invgauss" = "InvGauss", "pvf" = "PVF",
+                   stop("Invalid frailty specified, please check the frailty input"))
+  
+  out_frailty = switch(frailty, "Gamma" = "Gamma", "LogN" = "Log-Normal", "InvGauss" = "Inverse Gaussian", "PVF" = "PVF")
   
   if (ncol(m[[1]]) == 2) {
     
@@ -493,7 +500,6 @@ frailtyMMpen <- function(formula, data, frailty = "LogN", power = NULL, penalty 
   } 
   
  
-  
   attr(output, "call") <-  Call
   class(output) = "fpen"
   output

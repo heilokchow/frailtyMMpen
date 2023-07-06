@@ -79,8 +79,8 @@
 #' \code{+cluster()} function specify the group id for clustered data or individual id for recurrent data.
 #' \code{+event()} function specify the event id for multi-event data (only two events are allowed).
 #' @param data The \code{data.frame} where the formula argument can be evaluated.
-#' @param frailty The frailty used for model fitting. The default is "LogN", other choices are
-#' "InvGauss", "Gamma" and "PVF". (Note that the computation time for PVF family will be slow 
+#' @param frailty The frailty used for model fitting. The default is "lognormal", other choices are
+#' "invgauss", "gamma" and "pvf". (Note that the computation time for PVF family will be slow 
 #' due to the non-explicit expression of likelihood function)
 #' @param power The power used if PVF frailty is applied.
 #' @param tol The tolerance level for convergence.
@@ -133,13 +133,13 @@
 #' 
 #' \donttest{
 #' InvG_real_cl = frailtyMM(Surv(time, status) ~ age + sex + cluster(id),
-#'                          kidney, frailty = "InvGauss")
+#'                          kidney, frailty = "invgauss")
 #' InvG_real_cl
 #' 
 #' # Cgd data fitted by Recurrent Log-Normal Frailty Model
 #' 
 #' logN_real_re = frailtyMM(Surv(tstart, tstop, status) ~ sex + treat + cluster(id),
-#'                          cgd, frailty = "Gamma")
+#'                          cgd, frailty = "gamma")
 #' logN_real_re
 #' }
 #' 
@@ -151,45 +151,45 @@
 #' 
 #' # Clustered Gamma Frailty Model
 #' gam_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-#'                    simdataCL, frailty = "Gamma")
+#'                    simdataCL, frailty = "gamma")
 #' 
 #' \donttest{
 #' # Clustered Log-Normal Frailty Model
 #' logn_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-#'                     simdataCL, frailty = "LogN")
+#'                     simdataCL, frailty = "lognormal")
 #' 
 #' # Clustered Inverse Gaussian Frailty Model
 #' invg_cl = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-#'                     simdataCL, frailty = "InvGauss")
+#'                     simdataCL, frailty = "invgauss")
 #'                    
 #' data(simdataME)
 #' 
 #' # Multi-event Gamma Frailty Model
 #' gam_me = frailtyMM(Surv(time, status) ~ . + cluster(id), 
-#'                    simdataCL, frailty = "Gamma")
+#'                    simdataCL, frailty = "gamma")
 #' 
 #' 
 #' # Multi-event Log-Normal Frailty Model
 #' logn_me = frailtyMM(Surv(time, status) ~ . + event(id), 
-#'                     simdataME, frailty = "LogN")
+#'                     simdataME, frailty = "lognormal")
 #' 
 #' # Multi-event Inverse Gaussian Frailty Model
 #' invg_me = frailtyMM(Surv(time, status) ~ . + event(id),
-#'                     simdataME, frailty = "InvGauss")
+#'                     simdataME, frailty = "invgauss")
 #' 
 #' data(simdataRE)
 #' 
 #' # Recurrent event Gamma Frailty Model
 #' gam_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
-#'                    simdataRE, frailty = "Gamma")
+#'                    simdataRE, frailty = "gamma")
 #' 
 #' # Recurrent event Log-Normal Frailty Model
 #' logn_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id),
-#'                    simdataRE, frailty = "LogN")
+#'                    simdataRE, frailty = "lognormal")
 #' 
 #' # Recurrent event Inverse Gaussian Frailty Model
 #' invg_re = frailtyMM(Surv(start, end, status) ~ . + cluster(id), 
-#'                     simdataRE, frailty = "InvGauss")
+#'                     simdataRE, frailty = "invgauss")
 #' }
 #' 
 #' # Obtain the summary statistics under fitted model
@@ -197,7 +197,7 @@
 #' coef(gam_cl)
 #' summary(gam_cl)
 #' 
-frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5, maxit = 200, ...) {
+frailtyMM <- function(formula, data, frailty = "gamma", power = NULL, tol = 1e-5, maxit = 200, ...) {
   
   Call <- match.call()
   
@@ -211,6 +211,13 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
   
   m <- model.frame(formula, data)
   mx <- model.matrix(formula, data)
+  
+  lower_frailty = tolower(frailty)
+  
+  frailty = switch(lower_frailty, "gamma" = "Gamma", "lognormal" = "LogN", "invgauss" = "InvGauss", "pvf" = "PVF",
+                   stop("Invalid frailty specified, please check the frailty input"))
+  
+  out_frailty = switch(frailty, "Gamma" = "Gamma", "LogN" = "Log-Normal", "InvGauss" = "Inverse Gaussian", "PVF" = "PVF")
   
   if (ncol(m[[1]]) == 2) {
     
@@ -248,7 +255,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
                  likelihood = output$likelihood,
                  Ar = output$Ar,
                  input = output$input,
-                 frailty = frailty,
+                 frailty = out_frailty,
                  power = power,
                  iter = output$iter,
                  convergence = output$convergence,
@@ -290,6 +297,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
       y = m[[1]][nord, 1]
       X = mx1[nord, , drop = FALSE]
       d = m[[1]][nord, 2]
+      p = ncol(mx1)
       a = max(newid) + 1
       
       initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = maxit, threshold = tol, type = 1, SQS1 = 0)
@@ -304,7 +312,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
                  likelihood = output$likelihood,
                  Ar = output$Ar,
                  input = output$input,
-                 frailty = frailty,
+                 frailty = out_frailty,
                  power = power,
                  iter = output$iter,
                  convergence = output$convergence,
@@ -355,7 +363,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
                  likelihood = output$likelihood,
                  Ar = output$Ar,
                  input = output$input,
-                 frailty = frailty,
+                 frailty = out_frailty,
                  power = power,
                  iter = output$iter,
                  convergence = output$convergence,
@@ -417,7 +425,7 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
                likelihood = output$likelihood,
                Ar = output$Ar,
                input = output$input,
-               frailty = frailty,
+               frailty = out_frailty,
                power = power,
                iter = output$iter,
                convergence = output$convergence,
@@ -428,6 +436,10 @@ frailtyMM <- function(formula, data, frailty = "LogN", power = NULL, tol = 1e-5,
                a = a,
                datatype = "Recurrent")
     
+  }
+  
+  if (ret$convergence/(tol*p) > 100) {
+    warning("Algorithm may not converge, you may try to increase the maximum number of iterations (maxit)")
   }
   
   attr(ret, "call") <-  Call

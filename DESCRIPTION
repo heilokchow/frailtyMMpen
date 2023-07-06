@@ -1,7 +1,7 @@
 Package: frailtyMMpen
 Type: Package
 Title: Efficient Algorithm for High-Dimensional Frailty Model
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(person(given = "Xifen",
                     family = "Huang",
                     role = c("aut")),

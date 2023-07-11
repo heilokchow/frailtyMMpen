@@ -1,3 +1,4 @@
+#' @export
 MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, id, N, a, p, power, type) {
   
   TEST = NULL
@@ -11,7 +12,8 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, i
   }
   
   if (type == 3) {
-    TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, id, N, a, p, power)
+    # TEST = MMRE(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, id, N, a, p, power)
+    TEST = MMRELS(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, id, N, a, p, power)
   }
   
   return(TEST)

@@ -941,9 +941,7 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
   double tht = tht0;
   
   NumericVector La(N);
-  
-  NumericVector XM(a*p*N, 0.0);
-  NumericVector XMexp(a*N, 0.0);
+
   NumericVector YpreExp(N, 0.0);
   NumericVector Yend(a, 0.0);
   intParams kint;
@@ -959,13 +957,8 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
   NumericVector int2(a, 0.0);
   NumericVector int3(a, 0.0);
   
-  NumericVector SUM0(N, 0.0);
   NumericVector SUM00(N, 0.0);
-  
-  NumericVector AVEX(a*N, 0.0);
   NumericVector AVEXX(N, 0.0);
-  NumericVector SUM1(N, 0.0);
-  NumericVector SUM2(N, 0.0);
   
   NumericVector SUM11(N*p, 0.0);
   NumericVector SUM22(N*p, 0.0);
@@ -988,33 +981,6 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
   }
   
   YpreExp = exp(YpreExp);
-  
-  for (int i = N - 1; i >= 0; i--) {
-    tempID = id[i];
-    double ct = y[i];
-    if (i == N - 1 || tempID < id[i+1]) {
-      for (int j = 0; j < N; j++) {
-        for (int z = 0; z < p; z++) {
-          XM[j*a*p + z*a + tempID] = X[z*N + i];
-        }
-      }
-    } else {
-      for (int j = 0; j < N; j++) {
-        if (ct >= y[j]) {
-          for (int z = 0; z < p; z++) {
-            XM[j*a*p + z*a + tempID] = X[z*N + i];
-          }
-        }
-      }
-    }
-  }
-  
-  for (int i = 0; i < N; i++) {
-    for (int z = 0; z < p; z++) {
-      XMexp[Range(i*a, (i+1)*a-1)] += XM[Range(i*a*p+z*a, i*a*p+(z+1)*a-1)] * coef[z];
-    }
-  }
-  XMexp = exp(XMexp);
   
   double L0 = 0;
   for (int i = 0; i < N; i++) {
@@ -1189,16 +1155,6 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
     
   }
   
-  // Update lambda Variables
-  
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < a; j++) {
-      SUM0[i] += (Yend[j] >= y[i]) * int2[j] * XMexp[i*a+j];
-    }
-  }
-  
-  lambda = d / SUM0;
-  
   for (int i = 0; i < p; i++) {
     AVEXX += abs(X[Range(i*N, (i+1)*N-1)]);
   } 
@@ -1256,37 +1212,20 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
 
     }
   }
-
+  
+  // Update lambda Variables
+  
+  lambda = d / SUM00;
   
   // Update coefficients
   
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < a; j++) {
-      for (int z = 0; z < p; z++) {
-        AVEX[i*a + j] += std::abs(XM[i*a*p + z*a + j]);
-      } 
-    }
-  }
-  
   for (int i = 0; i < p; i++) {
-    
-    for (int z = 0; z < N; z++) {
-      SUM1[z] = 0;
-      SUM2[z] = 0;
-    }
-    
-    for (int z = 0; z < N; z++) {
-      for (int j = 0; j < a; j++) {
-        SUM1[z] += (Yend[j] >= y[z]) * int2[j] * XMexp[z*a+j] * XM[z*a*p+i*a+j];
-        SUM2[z] += (Yend[j] >= y[z]) * int2[j] * XMexp[z*a+j] * std::abs(XM[z*a*p+i*a+j]) * AVEX[z*a+j];
-      }
-    }
     
     D1 = 0;
     D2 = 0;
     for (int z = 0; z < N; z++) {
-      D1 += d[z] * X[i*N + z] - d[z] * SUM1[z] / SUM0[z];
-      D2 -= d[z] * SUM2[z] / SUM0[z];
+      D1 += d[z] * X[i*N + z] - d[z] * SUM11[z*p + i] / SUM00[z];
+      D2 -= d[z] * SUM22[z*p + i] / SUM00[z];
     }
     
     if (penalty != 0) {
@@ -1311,10 +1250,11 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
     
   }
   
-  List Ar = List::create(_["SUM0"] = SUM0, _["SUM00"] = SUM00, _["SUM1"] = SUM1, _["SUM11"] = SUM11, _["SUM2"] = SUM2, _["SUM22"] = SUM22);
-  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = Ar);
+  List Ar = List::create(_["SUM00"] = SUM00, _["SUM11"] = SUM11, _["SUM22"] = SUM22);
+  List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
   return ret;
 }
+
 
 // [[Rcpp::export]]
 double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,

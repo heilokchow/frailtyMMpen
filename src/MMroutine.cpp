@@ -97,7 +97,12 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   int tempID(0);
   double D1(0.0), D2(0.0);
   
-  computeLAM(La, lambda, y, N, 0);
+  // computeLAM(La, lambda, y, N, 0);
+  
+  La[N - 1] = lambda[N - 1];
+  for (int i = N - 2; i >= 0; i--) {
+    La[i] = La[i + 1] + lambda[i];
+  }
   
   for (int i = 0; i < p; i++) {
     YpreExp += X[Range(i*N, (i+1)*N-1)] * coef[i];
@@ -280,7 +285,12 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
   }
   
   E0 = ME * YpreExp;
-  computeLAM(SUM0, E0, y, N, 1);
+  // computeLAM(SUM0, E0, y, N, 1);
+  
+  SUM0[0] = E0[0];
+  for (int i = 1; i < N; i++) {
+    SUM0[i] = SUM0[i - 1] + E0[i];
+  }
   lambda = d / SUM0;
   
   // Update coefficients
@@ -294,8 +304,15 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     E1 = ME * X[Range(i*N, (i+1)*N-1)] * YpreExp;
     E2 = ME * AVEX *X[Range(i*N, (i+1)*N-1)] * YpreExp;
     
-    computeLAM(SUM1, E1, y, N, 1);
-    computeLAM(SUM2, E2, y, N, 1);
+    // computeLAM(SUM1, E1, y, N, 1);
+    // computeLAM(SUM2, E2, y, N, 1);
+    // 
+    SUM1[0] = E1[0];
+    SUM2[0] = E2[0];
+    for (int i = 1; i < N; i++) {
+      SUM1[i] = SUM1[i - 1] + E1[i];
+      SUM2[i] = SUM2[i - 1] + E2[i];
+    }
     
     D11 = d * X[Range(i*N, (i+1)*N-1)] - d * SUM1 / SUM0;
     D22 = - d * SUM2 / SUM0;

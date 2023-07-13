@@ -157,6 +157,14 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       d = m[[1]][, 2]
       a = N
       
+      neworder = order(y, decreasing = TRUE)
+      newrank = seq(1, N, 1)[order(neworder)]
+      
+      y = y[neworder]
+      X = X[neworder, ]
+      d = d[neworder]
+      newid = newid[neworder]
+      
     }
     
     if (length(cluster_id) == 1) {
@@ -190,6 +198,14 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       X = mx1[nord, , drop = FALSE]
       d = m[[1]][nord, 2]
       a = max(newid) + 1
+      
+      neworder = order(y, decreasing = TRUE)
+      newrank = seq(1, N, 1)[order(neworder)]
+      
+      y = y[neworder]
+      X = X[neworder, ]
+      d = d[neworder]
+      newid = newid[neworder]
       
     }
     

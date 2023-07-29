@@ -1,4 +1,3 @@
-#' @export
 MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, id, N, a, p, power, type) {
   
   TEST = NULL

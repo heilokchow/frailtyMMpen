@@ -286,11 +286,11 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
     
     initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", maxit = 10, threshold = threshold, type = 1)
     
-    # ini = frailtyMMcal(y, X, d, N, a, newid,
-    #                    coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
-    #                    frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 1)
+    if (sum(abs(initGam$coef) > 1e-6) == 0) {
+      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = frailty, maxit = 10, threshold = threshold, type = 1)
+    }
+
     ini = initGam
-    
     coef0 = ini$coef
     est.tht0 = ini$est.tht
     lambda0 = ini$lambda
@@ -301,6 +301,9 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
     lambda_all = list()
     likelihood_all = list()
     BIC_all = list()
+    
+    width <- options()$width/2
+    len_tune = length(tuneseq)
     
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMMcal(y, X, d, N, a, newid,
@@ -320,9 +323,12 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       likelihood_all[[z]] = likelihood0
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > threshold) + 1)*log(N)
       
+      progress_width = floor(z/len_tune*width)
+      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(i/len_tune*100),'%\r')
       
       if (sum(abs(coef0)) < threshold) {
-        cat(sum(abs(coef0)), "????\n")
+        progress_width = width
+        cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(100),'%\r')
         break
       }
       
@@ -331,8 +337,6 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
         est.tht0 = ini$est.tht
         lambda0 = ini$lambda
       } 
-      
-      cat(z, "---------\n")
     }
     
     
@@ -365,12 +369,11 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
     
     initGam = frailtyMMcal(y, X, d, N, b, NULL, frailty = "Gamma", power = NULL, penalty = NULL, maxit = 10, threshold = tol, type = 2)
     
-    # ini =  frailtyMMcal(y, X, d, N, b, NULL,
-    #                     coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
-    #                     frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 2)
+    if (sum(abs(initGam$coef) > 1e-6) == 0) {
+      initGam = frailtyMMcal(y, X, d, N, b, NULL, frailty = frailty, power = NULL, penalty = NULL, maxit = 10, threshold = tol, type = 2)
+    }
     
     ini = initGam
-    
     coef0 = ini$coef
     est.tht0 = ini$est.tht
     lambda0 = ini$lambda
@@ -381,6 +384,9 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
     lambda_all = list()
     likelihood_all = list()
     BIC_all = list()
+    
+    width <- options()$width/2
+    len_tune = length(tuneseq)
     
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMMcal(y, X, d, N, b, NULL,
@@ -398,6 +404,9 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       likelihood_all[[z]] = likelihood0
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(b)
       
+      progress_width = floor(z/len_tune*width)
+      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(i/len_tune*100),'%\r')
+      
       if (p > N) {
         coef0 = ini$coef
         est.tht0 = ini$est.tht
@@ -405,11 +414,10 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       } 
       
       if (sum(abs(coef0)) < 1e-6) {
-        cat(sum(abs(coef0)), "????\n")
+        progress_width = width
+        cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(100),'%\r')
         break
       }
-      
-      cat(z, "---------\n")
     }
     
     
@@ -443,11 +451,11 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
     
     initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = "Gamma", power = NULL, penalty = NULL, maxit = 10, threshold = threshold, type = 3)
     
-    # ini = frailtyMMcal(y, X, d, N, a, newid,
-    #                    coef.ini = initGam$coef, est.tht.ini = initGam$est.tht, lambda.ini = initGam$lambda,
-    #                    frailty = frailty, power = power, penalty = NULL, maxit = maxit, threshold = tol, type = 3)
-    ini = initGam
+    if (sum(abs(initGam$coef) > 1e-6) == 0) {
+      initGam = frailtyMMcal(y, X, d, N, a, newid, frailty = frailty, power = NULL, penalty = NULL, maxit = 10, threshold = threshold, type = 3)
+    }
     
+    ini = initGam
     coef0 = ini$coef
     est.tht0 = ini$est.tht
     lambda0 = ini$lambda
@@ -458,6 +466,9 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
     lambda_all = list()
     likelihood_all = list()
     BIC_all = list()
+    
+    width <- options()$width/2
+    len_tune = length(tuneseq)
     
     for (z in seq_len(length(tuneseq))) {
       cur = frailtyMMcal(y, X, d, N, a, newid,
@@ -475,6 +486,9 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       likelihood_all[[z]] = likelihood0
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(a)
       
+      progress_width = floor(z/len_tune*width)
+      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(i/len_tune*100),'%\r')
+      
       if (p > N) {
         coef0 = ini$coef
         est.tht0 = ini$est.tht
@@ -482,11 +496,10 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       } 
       
       if (sum(abs(coef0)) < 1e-6) {
-        cat(sum(abs(coef0)), "????\n")
+        progress_width = width
+        cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(100),'%\r')
         break
       }
-      
-      cat(z, "---------\n")
     }
     
     

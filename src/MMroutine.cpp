@@ -159,7 +159,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       if (status) {
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
         
       }
       
@@ -169,7 +169,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
       
@@ -224,7 +224,7 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
       
@@ -342,6 +342,11 @@ List MMCL(const NumericVector& y, NumericVector X, const NumericVector& d, const
     
   }
   
+  if (max(abs(coef)) > 1000 || tht > 1000 || max(abs(lambda)) > 1000) {
+    return(List::create(_["error"] = 1));
+  }
+  
+  
   List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
   return ret;
 }
@@ -440,7 +445,7 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
       if (status) {
 
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
 
       }
 
@@ -450,7 +455,7 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
 
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
 
@@ -505,7 +510,7 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
 
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
 
@@ -622,6 +627,10 @@ List MMME(const NumericVector& y, NumericVector X, const NumericVector& d, const
 
     coef[i] -= D1/D2;
 
+  }
+  
+  if (max(abs(coef)) > 1000 || tht > 1000 || max(abs(lambda)) > 1000) {
+    return(List::create(_["error"] = 1));
   }
   
   List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
@@ -763,7 +772,7 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
       if (status) {
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
         
       }
       
@@ -773,7 +782,7 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
       
@@ -828,7 +837,7 @@ List MMRE(const NumericVector& y, NumericVector X, const NumericVector& d, const
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
       
@@ -1054,7 +1063,7 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
       if (status) {
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
         
       }
       
@@ -1064,7 +1073,7 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
       
@@ -1119,7 +1128,7 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
       status = gsl_integration_qagiu (&F2, 0, 0, 1e-7, 1000, w, &result, &error);
       
       if (status) {
-        Rcout << "F2: 0\n";
+        // Rcout << "F2: 0\n";
         return(List::create(_["error"] = 1));
       }
       
@@ -1267,6 +1276,10 @@ List MMRELS(const NumericVector& y, NumericVector X, const NumericVector& d, con
     
   }
   
+  if (max(abs(coef)) > 1000 || tht > 1000 || max(abs(lambda)) > 1000) {
+    return(List::create(_["error"] = 1));
+  }
+  
   List Ar = List::create(_["SUM00"] = SUM00, _["SUM11"] = SUM11, _["SUM22"] = SUM22);
   List ret = List::create(_["coef"] = coef, _["est.tht"] = tht, _["lambda"] = lambda, _["error"] = 0, _["Ar"] = int2);
   return ret;
@@ -1357,7 +1370,7 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
       if (status) {
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
         
       }
       
@@ -1481,7 +1494,7 @@ double LogLikME(const NumericVector& y, NumericVector X, const NumericVector& d,
       if (status) {
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
         
       }
       
@@ -1606,7 +1619,7 @@ double LogLikRE(const NumericVector& y, NumericVector X, const NumericVector& d,
       if (status) {
         
         status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
-        Rcout << "F1: Approximated by Interval\n";
+        // Rcout << "F1: Approximated by Interval\n";
         
       }
       

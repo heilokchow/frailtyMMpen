@@ -324,7 +324,7 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > threshold) + 1)*log(N)
       
       progress_width = floor(z/len_tune*width)
-      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(i/len_tune*100),'%\r')
+      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(z/len_tune*100),'%\r')
       
       if (sum(abs(coef0)) < threshold) {
         progress_width = width
@@ -405,7 +405,7 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(b)
       
       progress_width = floor(z/len_tune*width)
-      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(i/len_tune*100),'%\r')
+      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(z/len_tune*100),'%\r')
       
       if (p > N) {
         coef0 = ini$coef
@@ -487,7 +487,7 @@ frailtyMMpen <- function(formula, data, frailty = "gamma", power = NULL, penalty
       BIC_all[[z]] = -2*likelihood0 + max(1, log(log(p + 1)))*(sum(abs(coef0) > 1e-6) + 1)*log(a)
       
       progress_width = floor(z/len_tune*width)
-      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(i/len_tune*100),'%\r')
+      cat('[', paste0(c(rep('=', progress_width), '>', rep('-', width - progress_width)),  collapse=''), ']', round(z/len_tune*100),'%\r')
       
       if (p > N) {
         coef0 = ini$coef

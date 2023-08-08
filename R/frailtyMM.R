@@ -87,6 +87,7 @@
 #' @param maxit Maximum iterations for MM algorithm.
 #' @param ... additional arguments pass to the function.
 #' @import mgcv survival
+#' @importFrom utils packageVersion
 #' @importFrom graphics abline lines matplot
 #' @importFrom stats model.frame model.matrix pnorm predict printCoefmat
 #' @export

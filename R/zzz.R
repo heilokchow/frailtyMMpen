@@ -10,16 +10,15 @@ startMessage <- function() {
                             _ / /   
                            \\___/ 
   Package version: ", packageVersion("frailtyMMpen")))
+  
+  return(msg)
 }
 
 .onAttach <- function(lib, pkg)
 {
-  unlockBinding(".frailtyMMpen", asNamespace("frailtyMMpen")) 
   msg <- startMessage()
   if(!interactive())
     msg[1] <- paste0("Package frailtyMMpen version: ", packageVersion("frailtyMMpen"))
   packageStartupMessage(msg)      
   invisible()
 }
-
-packageStartupMessage(msg)    

@@ -1375,6 +1375,7 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
       }
       
       int1[i] = result;
+      Rcout << int1[i] << " " << kint.a << " " << kint.b << " " << kint.d << "\n";
       
     }
     
@@ -1405,6 +1406,184 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
   return 0.0;
 }
 
+// [[Rcpp::export]]
+NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,
+                       const double& tht0, int frailty, const NumericVector& id, int N, int a, int p, double power) {
+  
+  NumericVector coef = clone(coef0);
+  NumericVector lambda = clone(lambda0);
+  double tht = tht0;
+  
+  NumericVector La(N);
+  
+  NumericVector Ypre(N, 0.0);
+  NumericVector YpreExp(N, 0.0);
+  intParams kint;
+  
+  NumericVector AA(N);
+  NumericVector BB(N);
+  
+  NumericVector A(a, 0.0);
+  NumericVector B(a, 1.0);
+  NumericVector D(a, 0.0);
+  
+  NumericVector AT(a, 0.0);
+  NumericVector DT(a, 0.0);
+  
+  NumericVector int1(a, 0.0);
+  NumericVector int2(a, 0.0);
+  NumericVector int3(a, 0.0);
+  
+  NumericMatrix H(p+1);
+  
+  int tempID(0);
+  
+  computeLAM(La, lambda, y, N, 0);
+  
+  for (int i = 0; i < p; i++) {
+    Ypre += X[Range(i*N, (i+1)*N-1)] * coef[i];
+  }
+  
+  YpreExp = exp(Ypre);
+  
+  AA = La * YpreExp;
+  BB = lambda * YpreExp;
+  
+  for (int j = 0; j < N; j++) {
+    tempID = id[j];
+    A[tempID] += AA[j];
+    if (d[j] == 1) {
+      B[tempID] *= BB[j];
+      D[tempID]++;
+    }
+  }
+  
+  if (frailty == 1 || frailty == 2) {
+    
+    gsl_set_error_handler_off();
+    int status;
+    
+    gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+    gsl_function F1;
+    double result(0.0), error;
+    
+    if (frailty == 1) {
+      F1.function = &logN1int;
+    }
+    
+    if (frailty == 2) {
+      F1.function = &InvG1int;
+    }
+    
+    if (frailty == 3) {
+      F1.function = &PVF1int;
+      kint.mpvf = power;
+    }
+    
+    F1.params = &kint;
+    kint.s = tht;
+    
+    int count = 0;
+    
+    for (int i = 0; i < a; i++) {
+      kint.a = A[i];
+      kint.b = B[i];
+      kint.d = D[i];
+      
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      if (status) {
+        
+        status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
+        
+      }
+      
+      int1[i] = result;
+      Rcout << int1[i] << " " << kint.a << " " << kint.b << " " << kint.d << "\n";
+      
+      kint.d += 1;
+
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+
+      if (status) {
+
+        status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
+
+      }
+
+      int2[i] = result;
+
+
+      kint.d += 1;
+
+      status = gsl_integration_qagiu (&F1, 0, 0, 1e-7, 1000, w, &result, &error);
+
+      if (status) {
+
+        status = gsl_integration_qags (&F1, 0.001, 10, 0, 1e-7, 1000, w, &result, &error);
+
+      }
+
+      int3[i] = result;
+      
+      NumericMatrix Htemp(p+1);
+      NumericVector A1(p, 0.0);
+      NumericVector B1(p, 0.0);
+      
+      while (id[count] == i) {
+        for (int z1 = 0; z1 < p; z1++) {
+          for (int z2 = z1; z2 < p; z2++) {
+            Htemp(z1 + 1, z2 + 1) = Htemp(z1 + 1, z2 + 1) - AA[count] * int2[i] * X[count+z1*N] * X[count+z2*N];
+          }
+          if (d[count] == 1) {
+            A1[z1] = A1[z1] + X[z1*N + count];
+          }
+          B1[z1] = B1[z1] - AA[count]*X[z1*N + count];
+        }
+        count++;
+      }
+      
+      for (int z1 = 0; z1 < p; z1++) {
+        for (int z2 = z1; z2 < p; z2++) {
+          Htemp(z1 + 1, z2 + 1) = Htemp(z1 + 1, z2 + 1) + A1[z1] * A1[z2] * int1[i] +
+            A1[z1] * B1[z2] * int2[i] + B1[z1] * A1[z2] * int2[i] + B1[z1] * B1[z2] * int3[i];
+        }
+      }
+      
+      H += Htemp / int1[i];
+      
+      // H += Htemp;
+      
+    }
+    
+    gsl_integration_workspace_free (w);
+    
+    return(H);
+    
+  
+  }
+  
+  if (frailty == 0) {
+    AT = 1/tht + A;
+    DT = 1/tht + D;
+    
+    double l(0.0);
+    l -= a*(lgamma(1/tht) + std::log(tht)/tht);
+    l += sum(lgamma(DT)) - sum(DT*log(AT));
+    l += sum(d * Ypre);
+    
+    for (int i = 0; i < N; i++) {
+      if (lambda[i] > 0) {
+        l += std::log(lambda[i]);
+      }
+    }
+    
+    return 0;
+    
+  } 
+  
+  return 0;
+}
 
 // [[Rcpp::export]]
 double LogLikME(const NumericVector& y, NumericVector X, const NumericVector& d, const NumericVector& coef0, const NumericVector& lambda0,

@@ -18,6 +18,21 @@ MMroutine <- function(y, X, d, coef, lambda, tht, frailty, penalty, gam, tune, i
   return(TEST)
 }
 
+#'@export
+LogHessianCL <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power) {
+  
+  neworder = order(id, decreasing = FALSE)
+  
+  y = y[neworder]
+  X = X[neworder, ]
+  d = d[neworder]
+  newid = id[neworder]
+  lambda = lambda[neworder]
+  
+  return(LogLikHessianCL(y, X, d, coef, lambda, est.tht, frailtyc, newid - 1, N, a, p, power))
+  
+}
+
 logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, power, type) {
   
   s = 0
@@ -38,6 +53,7 @@ logLikcal <- function(y, X, d, coef, lambda, est.tht, frailtyc, id, N, a, p, pow
   
 }
 
+#'@export
 logLik <- function(x1, data, lambda, frailtyc, id, N, a, p, power, type) {
   
   est.tht = x1[1]

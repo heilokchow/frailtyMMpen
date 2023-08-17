@@ -21,6 +21,10 @@ LogLikCL <- function(y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power)
     .Call(`_frailtyMMpen_LogLikCL`, y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power)
 }
 
+LogLikHessianCL <- function(y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power) {
+    .Call(`_frailtyMMpen_LogLikHessianCL`, y, X, d, coef0, lambda0, tht0, frailty, id, N, a, p, power)
+}
+
 LogLikME <- function(y, X, d, coef0, lambda0, tht0, frailty, N, n, p, power) {
     .Call(`_frailtyMMpen_LogLikME`, y, X, d, coef0, lambda0, tht0, frailty, N, n, p, power)
 }

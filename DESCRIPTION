@@ -19,7 +19,7 @@ Description: The penalized and non-penalized Minorize-Maximization (MM) method f
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: false
-Depends: R (>= 3.5.0), survival, numDeriv, mgcv
-Imports: Rcpp (>= 1.0.8), utils, graphics, stats
+Depends: R (>= 3.5.0), survival
+Imports: Rcpp (>= 1.0.8), numDeriv, mgcv, utils, graphics, stats
 LinkingTo: Rcpp, RcppGSL
 RoxygenNote: 7.2.3

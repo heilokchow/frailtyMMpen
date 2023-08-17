@@ -50,15 +50,15 @@ logLik <- function(x1, data, lambda, frailtyc, id, N, a, p, power, type) {
   
 }
 
-#' cluster function
-#' 
-#' @param x name from original dataframe which specifies the cluster or object id.
-#' @description {Specify cluster id for clustered data or object id for recurrent data in the input \code{formula}.}
-#' @return No return value, called to construct \code{formula}.
-#' @export
-cluster <- function(x) {
-  x
-}
+#' #' cluster function
+#' #'
+#' #' @param x name from original dataframe which specifies the cluster or object id.
+#' #' @description {Specify cluster id for clustered data or object id for recurrent data in the input \code{formula}.}
+#' #' @return No return value, called to construct \code{formula}.
+#' #' @export
+#' cluster <- function(x) {
+#'   x
+#' }
 
 #' event function
 #' 

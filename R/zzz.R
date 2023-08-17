@@ -16,6 +16,7 @@ startMessage <- function() {
 
 .onAttach <- function(lib, pkg)
 {
+  # suppressPackageStartupMessages(library(survival))
   msg <- startMessage()
   if(!interactive())
     msg[1] <- paste0("Package frailtyMMpen version: ", packageVersion("frailtyMMpen"))

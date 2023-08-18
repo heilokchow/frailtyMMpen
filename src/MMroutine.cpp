@@ -1375,7 +1375,7 @@ double LogLikCL(const NumericVector& y, NumericVector X, const NumericVector& d,
       }
       
       int1[i] = result;
-      Rcout << int1[i] << " " << kint.a << " " << kint.b << " " << kint.d << "\n";
+      // Rcout << int1[i] << " " << kint.a << " " << kint.b << " " << kint.d << "\n";
       
     }
     
@@ -1433,6 +1433,8 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
   NumericVector int1(a, 0.0);
   NumericVector int2(a, 0.0);
   NumericVector int3(a, 0.0);
+  NumericVector int4(a, 0.0);
+  NumericVector int5(a, 0.0);
   
   NumericMatrix H(p+1);
   
@@ -1458,19 +1460,25 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
     }
   }
   
-  if (frailty == 1 || frailty == 2) {
+  if (frailty == 0 || frailty == 1 || frailty == 2 || frailty == 3) {
     
     gsl_set_error_handler_off();
     int status;
     
     gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
-    gsl_function F1;
+    gsl_function F1, F4, F5;
     double result(0.0), error;
+    
+    if (frailty == 0) {
+      F1.function = &Gamma1int;
+    }
     
     if (frailty == 1) {
       F1.function = &logN1int;
+      F4.function = &logN3int;
+      F5.function = &logN4int;
     }
-    
+     
     if (frailty == 2) {
       F1.function = &InvG1int;
     }
@@ -1481,7 +1489,10 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
     }
     
     F1.params = &kint;
+    F4.params = &kint;
+    F5.params = &kint;
     kint.s = tht;
+    kint.por = 1.0;
     
     int count = 0;
     
@@ -1499,7 +1510,17 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
       }
       
       int1[i] = result;
-      Rcout << int1[i] << " " << kint.a << " " << kint.b << " " << kint.d << "\n";
+      
+      status = gsl_integration_qagiu (&F4, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      int4[i] = result;
+      
+      
+      status = gsl_integration_qagiu (&F5, 0, 0, 1e-7, 1000, w, &result, &error);
+      
+      int5[i] = result;
+      
+      Rcout << int4[i] << " " << int5[i] << " " << kint.a << " " << kint.b << " " << kint.d << "\n";
       
       kint.d += 1;
 
@@ -1526,14 +1547,17 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
 
       int3[i] = result;
       
-      NumericMatrix Htemp(p+1);
+      NumericMatrix Htemp2(p+1);
+      NumericMatrix Htemp1(p+1);
       NumericVector A1(p, 0.0);
       NumericVector B1(p, 0.0);
+      NumericVector C1(p, 0.0);
+      double th1(0.0), th2(0.0);
       
-      while (id[count] == i) {
+      while (count < N && id[count] == i) {
         for (int z1 = 0; z1 < p; z1++) {
           for (int z2 = z1; z2 < p; z2++) {
-            Htemp(z1 + 1, z2 + 1) = Htemp(z1 + 1, z2 + 1) - AA[count] * int2[i] * X[count+z1*N] * X[count+z2*N];
+            Htemp2(z1 + 1, z2 + 1) = Htemp2(z1 + 1, z2 + 1) - AA[count] * int2[i] * X[count+z1*N] * X[count+z2*N];
           }
           if (d[count] == 1) {
             A1[z1] = A1[z1] + X[z1*N + count];
@@ -1544,13 +1568,27 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
       }
       
       for (int z1 = 0; z1 < p; z1++) {
+        C1[z1] = C1[z1] + A1[z1] * int1[i] + B1[z1] * int2[i];
+      }
+      
+      for (int z1 = 0; z1 < p; z1++) {
         for (int z2 = z1; z2 < p; z2++) {
-          Htemp(z1 + 1, z2 + 1) = Htemp(z1 + 1, z2 + 1) + A1[z1] * A1[z2] * int1[i] +
+          Htemp2(z1 + 1, z2 + 1) = Htemp2(z1 + 1, z2 + 1) + A1[z1] * A1[z2] * int1[i] +
             A1[z1] * B1[z2] * int2[i] + B1[z1] * A1[z2] * int2[i] + B1[z1] * B1[z2] * int3[i];
+          Htemp1(z1 + 1, z2 + 1) = Htemp1(z1 + 1, z2 + 1) + C1[z1] * C1[z2];
         }
       }
       
-      H += Htemp / int1[i];
+      H += (Htemp2 / int1[i] - Htemp1 / (int1[i] * int1[i]));
+      
+      if (frailty == 1) {
+        
+        th1 = -1/2*std::pow(tht, -1.0) * int1[i] + 1/2*std::pow(tht, -2.0)*int4[i];
+        th2 = 3/4*std::pow(tht, -2.0) * int1[i] - 3/2*std::pow(tht, -3.0)*int4[i] + 1/4*std::pow(tht, -4.0)*int5[i];
+        
+        H(0, 0) = H(0, 0) + th2 / int1[i] - th1 * th1 / (int1[i] * int1[i]);
+      }
+      
       
       // H += Htemp;
       
@@ -1563,26 +1601,7 @@ NumericMatrix LogLikHessianCL(const NumericVector& y, NumericVector X, const Num
   
   }
   
-  if (frailty == 0) {
-    AT = 1/tht + A;
-    DT = 1/tht + D;
-    
-    double l(0.0);
-    l -= a*(lgamma(1/tht) + std::log(tht)/tht);
-    l += sum(lgamma(DT)) - sum(DT*log(AT));
-    l += sum(d * Ypre);
-    
-    for (int i = 0; i < N; i++) {
-      if (lambda[i] > 0) {
-        l += std::log(lambda[i]);
-      }
-    }
-    
-    return 0;
-    
-  } 
-  
-  return 0;
+  return H;
 }
 
 // [[Rcpp::export]]

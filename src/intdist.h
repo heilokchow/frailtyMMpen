@@ -2,6 +2,7 @@
 #define _INTDIST_H
 
 #include <Rcpp.h>
+#include <cmath>
 
 using namespace Rcpp;
 
@@ -23,6 +24,16 @@ struct intParams {
 Environment twd = Environment::namespace_env("mgcv");
 Function TW = twd["ldTweedie"];
 
+
+double Gamma1int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = 1/std::tgamma(1/k.s)/std::pow(k.s, 1/k.s)*std::pow(x, 1/k.s-1)*std::exp(-x/k.s)*std::pow(x, k.d)*k.b*std::exp(-k.a*x);
+  return ret;
+  
+}
+
+
 double logN1int(double x, void * params) {
   
   intParams k = *(intParams *) params;
@@ -43,6 +54,14 @@ double logN3int(double x, void * params) {
   
   intParams k = *(intParams *) params;
   double ret = std::pow(std::log(x), 2.0)/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
+  return ret;
+  
+}
+
+double logN4int(double x, void * params) {
+  
+  intParams k = *(intParams *) params;
+  double ret = std::pow(std::log(x), 4.0)/(x*std::sqrt(2*M_PI*k.s))*std::exp(-std::pow(std::log(x), 2.0)/(2*k.s))*std::pow(x, k.d)*k.b*std::exp(-k.a*x)/k.por;
   return ret;
   
 }
